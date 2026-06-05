@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import WeeklySchedule from '../../components/WeeklySchedule.jsx'
-import pricing from '../../../../data/pricing.json'
+import pricing from '../../data/pricing.json'
 
 const CHARS = 'ABCDEFGHIJKLMNOPRSTUVZX0123456789#@!%&'
 

@@ -1,0 +1,214 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-09-01",
+    "currency": "EUR",
+    "vatIncluded": true,
+    "note": "Single source of truth za vse Odbito cene. Spremembe naredi SAMO tukaj."
+  },
+
+  "openJump": {
+    "label": "Prosto skakanje — Open Jump",
+    "schedule": {
+      "friday": "15:00–22:00",
+      "saturday": "09:00–22:00",
+      "sunday": "09:00–22:00"
+    },
+    "capacity": 50,
+    "maxSalesPerHour": 60,
+    "packages": [
+      { "id": "oj_60",  "label": "60 minut",             "duration": 60,  "price": 14.00 },
+      { "id": "oj_90",  "label": "90 minut",             "duration": 90,  "price": 19.50, "popular": true },
+      { "id": "oj_120", "label": "120 minut",            "duration": 120, "price": 24.00 },
+      { "id": "oj_180", "label": "180 minut",            "duration": 180, "price": 30.00 },
+      { "id": "oj_ext", "label": "Podaljšanje (30 min)", "duration": 30,  "price": 6.00  }
+    ],
+    "groupDiscount": {
+      "minPersons": 5,
+      "packages": [
+        { "id": "oj_60_group",  "refPackage": "oj_60",  "price": 12.50 },
+        { "id": "oj_90_group",  "refPackage": "oj_90",  "price": 17.00 },
+        { "id": "oj_120_group", "refPackage": "oj_120", "price": 21.00 }
+      ]
+    },
+    "specialOffers": [
+      {
+        "id": "early_morning",
+        "label": "Zgodnje jutro",
+        "days": ["saturday", "sunday"],
+        "hours": "09:00–11:00",
+        "duration": 60,
+        "price": 11.00
+      },
+      {
+        "id": "friday_night",
+        "label": "Friday Night (60 = 90 min)",
+        "days": ["friday"],
+        "hours": "19:00–22:00",
+        "duration": 90,
+        "price": 14.00,
+        "note": "Plačaš 60 min, dobiš 90 min"
+      },
+      {
+        "id": "family_sunday",
+        "label": "Družinski popust (ned)",
+        "days": ["sunday"],
+        "discountPercent": 15,
+        "condition": "1 odrasel + 1 otrok v isti rezervaciji"
+      }
+    ],
+    "socks": {
+      "label": "Odbito nogavice (obvezne)",
+      "price": 3.00,
+      "note": "Lastništvo — ni najem"
+    }
+  },
+
+  "academy": {
+    "label": "Vodene vadbe — Odbito Akademija",
+    "schedule": {
+      "days": ["monday", "tuesday", "wednesday", "thursday"],
+      "hours": "15:00–22:00"
+    },
+    "ageGroups": [
+      { "id": "group_5_9",   "label": "5–9 let" },
+      { "id": "group_9_14",  "label": "9–14 let" },
+      { "id": "group_14_up", "label": "14+ let" },
+      { "id": "group_adult", "label": "Odrasli" }
+    ],
+    "groupSize": 15,
+    "season": {
+      "start": "september",
+      "end": "junij",
+      "months": 10
+    },
+    "subscriptions": [
+      {
+        "id": "sub_1x_monthly",
+        "label": "1× na teden",
+        "sessionsPerWeek": 1,
+        "sessionsPerMonth": 4,
+        "monthly": 49.00,
+        "seasonal": 129.00,
+        "annual": 399.00
+      },
+      {
+        "id": "sub_2x_monthly",
+        "label": "2× na teden",
+        "sessionsPerWeek": 2,
+        "sessionsPerMonth": 8,
+        "monthly": 79.00,
+        "seasonal": 209.00,
+        "annual": 649.00,
+        "popular": true
+      },
+      {
+        "id": "sub_3x_monthly",
+        "label": "3× na teden",
+        "sessionsPerWeek": 3,
+        "sessionsPerMonth": 12,
+        "monthly": 109.00,
+        "seasonal": 289.00,
+        "annual": 899.00
+      }
+    ],
+    "subscriptionTypes": {
+      "monthly": { "label": "Mesečna naročnina", "months": 1 },
+      "seasonal": { "label": "Sezonska naročnina", "months": 3 },
+      "annual": { "label": "Letna naročnina (šolsko leto)", "months": 10 }
+    }
+  },
+
+  "birthdayParties": {
+    "label": "Rojstnodnevni paketi",
+    "note": "Rezervacija v ločeni party sobi — neodvisno od kapacitete Open Jumpa",
+    "packages": [
+      {
+        "id": "bd_basic",
+        "label": "Basic",
+        "basePrice": 179.00,
+        "maxChildren": 10,
+        "extraChildPrice": 16.00,
+        "jumping": 90,
+        "partyRoom": 60,
+        "animation": false,
+        "drinks": false,
+        "catering": false,
+        "decoration": false,
+        "cake": "prinesete sami"
+      },
+      {
+        "id": "bd_standard",
+        "label": "Standard",
+        "basePrice": 229.00,
+        "maxChildren": 10,
+        "extraChildPrice": 18.00,
+        "jumping": 120,
+        "partyRoom": 90,
+        "animation": "45 min",
+        "drinks": true,
+        "catering": false,
+        "decoration": false,
+        "cake": "prinesete sami",
+        "popular": true
+      },
+      {
+        "id": "bd_premium",
+        "label": "Premium",
+        "basePrice": 319.00,
+        "maxChildren": 12,
+        "extraChildPrice": 20.00,
+        "jumping": 150,
+        "partyRoom": 120,
+        "animation": "60 min + akrobatski show",
+        "drinks": true,
+        "catering": true,
+        "decoration": true,
+        "cake": "po dogovoru"
+      }
+    ],
+    "note_parents": "Spremljevalci (starši) med zabavo ne plačajo vstopnine."
+  },
+
+  "giftCards": {
+    "label": "Darilne kartice",
+    "options": [
+      { "id": "gift_25",  "value": 25.00  },
+      { "id": "gift_50",  "value": 50.00  },
+      { "id": "gift_100", "value": 100.00 }
+    ],
+    "note": "Pošlje se na email prejemnika z osebnim sporočilom."
+  },
+
+  "loyalty": {
+    "label": "Program zvestobe",
+    "visitsRequired": 10,
+    "reward": {
+      "label": "1 ura prosto skakanja",
+      "value": 14.00
+    },
+    "birthdayDiscount": {
+      "discountPercent": 10,
+      "validDays": 30,
+      "note": "Avtomatski, poslan po e-pošti ob rojstnem dnevu"
+    }
+  },
+
+  "groups": {
+    "label": "Šole in organizirane skupine",
+    "minPersons": 15,
+    "discountPercent": 20,
+    "note": "Dogovor vnaprej obvezen"
+  },
+
+  "summerCamp": {
+    "label": "Poletni tabor",
+    "schedule": {
+      "months": ["julij", "avgust"],
+      "weeks": 6,
+      "days": ["monday", "tuesday", "wednesday", "thursday", "friday"]
+    },
+    "pricePerChildPerWeek": 199.00,
+    "capacityPerWeek": 40
+  }
+}

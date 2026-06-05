@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import pricing from '../../../../data/pricing.json'
+import pricing from '../../data/pricing.json'
 
 const OJ_PACKAGES = pricing.openJump.packages
   .filter(p => p.duration >= 60)

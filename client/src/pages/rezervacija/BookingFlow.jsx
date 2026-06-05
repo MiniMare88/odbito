@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import api from '../../services/api.js'
-import pricing from '../../../../data/pricing.json'
+import pricing from '../../data/pricing.json'
 
 // ── Config (iz data/pricing.json) ────────────────────────────────────────────
 
