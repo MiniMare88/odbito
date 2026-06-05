@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: odbito
+      POSTGRES_USER: odbito_user
+      POSTGRES_PASSWORD: odbito_pass
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: ./server
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://odbito_user:odbito_pass@db:5432/odbito
+    ports:
+      - '3001:3001'
+    env_file:
+      - .env
+
+volumes:
+  pgdata:

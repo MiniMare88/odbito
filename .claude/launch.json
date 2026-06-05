@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "client",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/MiniMare/CLAUDE FOLDER/Dvorana ODBITO/Booking system/odbito/client",
+      "port": 5176
+    }
+  ]
+}
