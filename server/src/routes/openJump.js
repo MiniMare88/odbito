@@ -4,7 +4,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js'
 import { getSlots, createBooking, myBookings, getPackages, getBookingQr, getBookingIcs } from '../controllers/openJumpController.js'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
-const pricing = require('../../../data/pricing.json')
+const pricing = require('../../data/pricing.json')
 const VALID_PACKAGE_KEYS = pricing.openJump.packages.map(p => p.id)
 
 const router = Router()

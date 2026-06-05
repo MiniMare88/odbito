@@ -8,7 +8,7 @@ import { generateQR } from '../services/qrService.js'
 import { generateBookingIcs } from '../services/calendarService.js'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
-const pricing = require('../../../data/pricing.json')
+const pricing = require('../../data/pricing.json')
 import { getEffectiveSchedule } from './parkScheduleController.js'
 
 const MAX_CAPACITY  = pricing.openJump.capacity      // 50 — prikaz razpoložljivosti

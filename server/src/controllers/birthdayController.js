@@ -1,7 +1,7 @@
 import { Op } from 'sequelize'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
-const pricing = require('../../../data/pricing.json')
+const pricing = require('../../data/pricing.json')
 
 import BirthdayBooking from '../models/BirthdayBooking.js'
 import User from '../models/User.js'
