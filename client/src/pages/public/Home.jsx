@@ -530,8 +530,7 @@ function OpenJumpSection() {
           <div className="w-full lg:w-[45%] flex-shrink-0">
             <div className="rounded-2xl overflow-hidden h-full"
               style={{ background: '#c4c4c0', minHeight: 420, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.10)' }}>
-              <img src="/odbito_izven_okvirjev_3.webp" alt="Open Jump" className="w-full h-full object-cover" style={{ objectPosition: '85% center' }}
-                style={{ position: 'absolute', inset: 0 }}
+              <img src="/odbito_izven_okvirjev_3.webp" alt="Open Jump" className="w-full h-full object-cover" style={{ objectPosition: '85% center', position: 'absolute', inset: 0 }}
                 onError={e => { e.currentTarget.style.display = 'none' }} />
             </div>
           </div>
