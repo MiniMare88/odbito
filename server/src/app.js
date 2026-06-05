@@ -17,17 +17,22 @@ const app = express()
 
 app.use(helmet())
 app.use(cors({
-  origin: [
-    process.env.CLIENT_URL || 'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5173',
-    'http://127.0.0.1:5174',
-    'http://localhost:5174',
-    'http://127.0.0.1:5175',
-    'http://localhost:5175',
-    'http://127.0.0.1:5176',
-    'http://localhost:5176',
-  ],
+  origin: (origin, callback) => {
+    const allowed = [
+      process.env.CLIENT_URL,
+      'https://odbito-client-production.up.railway.app',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      'http://localhost:5176',
+    ].filter(Boolean)
+    if (!origin || allowed.includes(origin) || origin.endsWith('.railway.app')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
 }))
 
