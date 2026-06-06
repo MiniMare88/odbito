@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx'
 import Navbar from './components/layout/Navbar.jsx'
 import Footer from './components/layout/Footer.jsx'
+import PasswordGate from './components/layout/PasswordGate.jsx'
 
 // Public pages
 import Home from './pages/public/Home.jsx'
@@ -47,6 +48,7 @@ function AppLayout({ children }) {
 
 export default function App() {
   return (
+    <PasswordGate>
     <BrowserRouter>
       <AuthProvider>
         <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-black text-accent font-display text-4xl">ODBITO</div>}>
@@ -110,5 +112,6 @@ export default function App() {
         </Suspense>
       </AuthProvider>
     </BrowserRouter>
+    </PasswordGate>
   )
 }
