@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 const LEGAL_LINKS = [
+  { to: '/izjava',        label: 'Izjava o odgovornosti' },
   { to: '/zasebnost',     label: 'Politika zasebnosti' },
   { to: '/piskotki',      label: 'Politika piškotkov' },
   { to: '/nagradne-igre', label: 'Pogoji nagradnih iger' },
