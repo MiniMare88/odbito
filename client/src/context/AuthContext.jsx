@@ -11,13 +11,7 @@ export function AuthProvider({ children }) {
   const boot = useCallback(async () => {
     try {
       // Try refresh first (uses httpOnly cookie)
-      const { data } = await import('axios').then(m =>
-        m.default.post(
-          (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL + '/api' : '') + '/api/auth/refresh',
-          {},
-          { withCredentials: true }
-        )
-      )
+      const { data } = await api.post('/auth/refresh', {})
       setAccessToken(data.access_token)
       // Now fetch user
       const me = await api.get('/auth/me')
