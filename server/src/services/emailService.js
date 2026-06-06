@@ -1,6 +1,10 @@
 import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import { generateQRSvg } from './qrService.js'
 import { generateBookingIcs, generateSubscriptionIcs } from './calendarService.js'
+
+// Resend client (za transakcijske emaile — verifikacija, reset gesla)
+const resendClient = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 function createTransport() {
   // In dev without real SMTP: use Ethereal (auto-catch) or log
@@ -279,41 +283,45 @@ export async function sendBookingConfirmation(booking, user) {
 }
 
 export async function sendVerificationEmail(user, rawToken) {
-  const transport = createTransport()
   const verificationUrl = `${FRONTEND_URL}/potrdi-email?token=${rawToken}`
   const lang = user.preferred_language || 'sl'
   const isSl = lang === 'sl'
 
-  const info = await transport.sendMail({
-    from: FROM,
-    to: user.email,
-    subject: isSl ? 'Potrdite vaš email naslov — Odbito' : 'Verify your email address — Odbito',
-    html: verificationHtml({ user, verificationUrl }),
-  })
-
-  if (transport.options?.jsonTransport) {
-    console.log(`[EMAIL DEV] Verification email → ${user.email} | URL: ${verificationUrl}`)
+  if (resendClient) {
+    const { data, error } = await resendClient.emails.send({
+      from: 'Odbito 360 <info@odbito.si>',
+      to: user.email,
+      subject: isSl ? 'Potrdite vaš email naslov — Odbito' : 'Verify your email address — Odbito',
+      html: verificationHtml({ user, verificationUrl }),
+    })
+    if (error) throw new Error(error.message)
+    console.log(`[EMAIL] Verification sent via Resend → ${user.email} | id: ${data?.id}`)
+    return data
   }
-  return info
+
+  // Fallback: log only
+  console.log(`[EMAIL DEV] Verification email → ${user.email} | URL: ${verificationUrl}`)
 }
 
 export async function sendPasswordResetEmail(user, rawToken) {
-  const transport = createTransport()
   const resetUrl = `${FRONTEND_URL}/novo-geslo?token=${rawToken}`
   const lang = user.preferred_language || 'sl'
   const isSl = lang === 'sl'
 
-  const info = await transport.sendMail({
-    from: FROM,
-    to: user.email,
-    subject: isSl ? 'Ponastavitev gesla — Odbito' : 'Password reset — Odbito',
-    html: passwordResetHtml({ user, resetUrl }),
-  })
-
-  if (transport.options?.jsonTransport) {
-    console.log(`[EMAIL DEV] Password reset email → ${user.email} | URL: ${resetUrl}`)
+  if (resendClient) {
+    const { data, error } = await resendClient.emails.send({
+      from: 'Odbito 360 <info@odbito.si>',
+      to: user.email,
+      subject: isSl ? 'Ponastavitev gesla — Odbito' : 'Password reset — Odbito',
+      html: passwordResetHtml({ user, resetUrl }),
+    })
+    if (error) throw new Error(error.message)
+    console.log(`[EMAIL] Password reset sent via Resend → ${user.email} | id: ${data?.id}`)
+    return data
   }
-  return info
+
+  // Fallback: log only
+  console.log(`[EMAIL DEV] Password reset email → ${user.email} | URL: ${resetUrl}`)
 }
 
 export async function sendSubscriptionConfirmation(subscription, classType, user, schedules = []) {
