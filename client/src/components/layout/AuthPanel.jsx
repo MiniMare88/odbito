@@ -279,7 +279,7 @@ function RegisterForm({ onClose, onSuccess }) {
             className="mt-0.5 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '14px', height: '14px' }} />
           <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
             Sprejemam splošne pogoje ODBITO, ki so navedeni v{' '}
-            <Link to="/izjava" target="_blank" onClick={onClose} style={{ color: 'var(--accent)' }}>izjavi o odgovornosti</Link>
+            <Link to="/izjava" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>izjavi o odgovornosti</Link>
             {' '}in potrjujem, da imam več kot 15 let. <span style={{ color: '#FF3D00' }}>*</span>
           </span>
         </label>
@@ -290,7 +290,7 @@ function RegisterForm({ onClose, onSuccess }) {
             className="mt-0.5 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '14px', height: '14px' }} />
           <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
             Strinjam se s{' '}
-            <Link to="/zasebnost" target="_blank" onClick={onClose} style={{ color: 'var(--accent)' }}>Politiko varovanja zasebnosti</Link>
+            <Link to="/zasebnost" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>Politiko varovanja zasebnosti</Link>
             {' '}ODBITO 360 d.o.o. <span style={{ color: '#FF3D00' }}>*</span>
           </span>
         </label>
