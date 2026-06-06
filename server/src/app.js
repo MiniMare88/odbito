@@ -21,6 +21,8 @@ app.use(cors({
     const allowed = [
       process.env.CLIENT_URL,
       'https://odbito-client-production.up.railway.app',
+      'https://www.odbito.fun',
+      'https://odbito.fun',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
       'http://localhost:5174',

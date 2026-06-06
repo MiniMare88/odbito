@@ -44,7 +44,7 @@ function setRefreshCookie(res, token) {
   res.cookie('refresh_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/api/auth/refresh',
   })
@@ -193,7 +193,11 @@ export async function logout(req, res) {
       // token already invalid, still clear cookie
     }
   }
-  res.clearCookie('refresh_token', { path: '/api/auth/refresh' })
+  res.clearCookie('refresh_token', {
+    path: '/api/auth/refresh',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    secure: process.env.NODE_ENV === 'production',
+  })
   res.json({ message: 'Logged out' })
 }
 
