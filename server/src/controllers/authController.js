@@ -86,7 +86,7 @@ function checkResetRateLimit(email) {
 
 // POST /api/auth/register
 export async function register(req, res) {
-  const { email, password, first_name, last_name, phone, date_of_birth, preferred_language } = req.body
+  const { email, password, first_name, last_name, phone, date_of_birth, preferred_language, marketing_consent } = req.body
 
   const existing = await User.findOne({ where: { email } })
   if (existing) return res.status(409).json({ error: 'Email že obstaja' })
@@ -103,6 +103,7 @@ export async function register(req, res) {
     preferred_language: preferred_language || 'sl',
     role: 'customer',
     status: 'unverified',
+    marketing_consent: marketing_consent === true || marketing_consent === 'true',
   })
 
   // Send verification email

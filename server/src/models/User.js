@@ -17,6 +17,7 @@ const User = sequelize.define('User', {
   refresh_token_hash: { type: DataTypes.STRING, allowNull: true },
   is_blocked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   status: { type: DataTypes.ENUM('unverified', 'verified', 'suspended'), allowNull: false, defaultValue: 'unverified' },
+  marketing_consent: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 }, {
   tableName: 'users',
   underscored: true,

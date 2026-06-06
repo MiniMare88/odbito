@@ -25,10 +25,11 @@ export default function Register() {
     password: '', confirmPassword: '', date_of_birth: '',
     phoneNumber: '',
   })
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]) // Slovenija
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0])
   const [showCountryDropdown, setShowCountryDropdown] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [checks, setChecks] = useState({ terms: false, privacy: false, noMarketing: false })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -48,6 +49,14 @@ export default function Register() {
       setError('Geslo mora imeti vsaj 8 znakov')
       return
     }
+    if (!checks.terms) {
+      setError('Sprejetje splošnih pogojev in izjave je obvezno')
+      return
+    }
+    if (!checks.privacy) {
+      setError('Strinjanje s politiko zasebnosti je obvezno')
+      return
+    }
 
     const fullPhone = selectedCountry.dial + form.phoneNumber.replace(/[\s\-]/g, '')
 
@@ -61,6 +70,7 @@ export default function Register() {
         phone: fullPhone,
         date_of_birth: form.date_of_birth,
         preferred_language: 'sl',
+        marketing_consent: !checks.noMarketing,
       })
       setRegisteredEmail(form.email)
       setSuccess(true)
@@ -295,6 +305,50 @@ export default function Register() {
               onBlur={e => e.target.style.borderColor = 'var(--border)'} />
           </div>
 
+          {/* Checkboxes */}
+          <div className="flex flex-col gap-3 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+            {/* Splošni pogoji + izjava */}
+            <label className="flex gap-3 cursor-pointer items-start">
+              <input type="checkbox" checked={checks.terms}
+                onChange={e => setChecks(c => ({ ...c, terms: e.target.checked }))}
+                className="mt-1 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '16px', height: '16px' }} />
+              <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+                Sprejemam splošne pogoje ODBITO, ki so navedeni v{' '}
+                <Link to="/izjava" target="_blank" style={{ color: 'var(--accent)' }}>izjavi o odgovornosti obiskovalcev</Link>
+                {' '}in potrjujem, da imam več kot 15 let. <span style={{ color: '#FF3D00' }}>*</span>
+              </span>
+            </label>
+
+            {/* Politika zasebnosti */}
+            <label className="flex gap-3 cursor-pointer items-start">
+              <input type="checkbox" checked={checks.privacy}
+                onChange={e => setChecks(c => ({ ...c, privacy: e.target.checked }))}
+                className="mt-1 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '16px', height: '16px' }} />
+              <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+                Strinjam se s{' '}
+                <Link to="/zasebnost" target="_blank" style={{ color: 'var(--accent)' }}>Politiko varovanja zasebnosti</Link>
+                {' '}družbe ODBITO 360 d.o.o. <span style={{ color: '#FF3D00' }}>*</span>
+              </span>
+            </label>
+
+            {/* Marketing info tekst */}
+            <p className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6, paddingLeft: '28px' }}>
+              Ker želimo naše stranke obveščati o storitvah, ki jih nudi družba ODBITO 360 d.o.o., bomo na vaš
+              elektronski naslov občasno pošiljali odbite ponudbe in obvestila o drugih cenovnih ugodnostih.
+              V kolikor ne želite prejemati tovrstne komunikacije, to s kljukico označite v okence spodaj.
+            </p>
+
+            {/* Opt-out trženje */}
+            <label className="flex gap-3 cursor-pointer items-start">
+              <input type="checkbox" checked={checks.noMarketing}
+                onChange={e => setChecks(c => ({ ...c, noMarketing: e.target.checked }))}
+                className="mt-1 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '16px', height: '16px' }} />
+              <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+                Ne dovolim neposrednega trženja na e-mail.
+              </span>
+            </label>
+          </div>
+
           {error && (
             <div className="px-4 py-3 rounded-lg text-sm font-condensed font-bold tracking-wide"
               style={{ background: 'rgba(255,61,0,0.12)', border: '1px solid rgba(255,61,0,0.3)', color: '#FF3D00' }}>
@@ -306,10 +360,6 @@ export default function Register() {
             style={{ opacity: loading ? 0.6 : 1 }}>
             {loading ? 'USTVARJAM RAČUN...' : 'USTVARI RAČUN'}
           </button>
-
-          <p className="text-center text-xs" style={{ color: 'var(--gray)' }}>
-            Z registracijo se strinjaš s pogoji uporabe Odbito.
-          </p>
         </form>
       </div>
     </div>

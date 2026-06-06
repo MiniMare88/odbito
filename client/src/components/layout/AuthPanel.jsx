@@ -128,6 +128,7 @@ function RegisterForm({ onClose, onSuccess }) {
   const [showCountryDD, setShowCountryDD] = useState(false)
   const [showPw, setShowPw] = useState(false)
   const [showPw2, setShowPw2] = useState(false)
+  const [checks, setChecks] = useState({ terms: false, privacy: false, noMarketing: false })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -137,6 +138,8 @@ function RegisterForm({ onClose, onSuccess }) {
     e.preventDefault()
     if (form.password !== form.confirmPassword) return setError('Gesli se ne ujemata')
     if (form.password.length < 8) return setError('Geslo mora imeti vsaj 8 znakov')
+    if (!checks.terms) return setError('Sprejetje splošnih pogojev in izjave je obvezno')
+    if (!checks.privacy) return setError('Strinjanje s politiko zasebnosti je obvezno')
     setError('')
     setLoading(true)
     try {
@@ -145,6 +148,7 @@ function RegisterForm({ onClose, onSuccess }) {
         email: form.email, password: form.password,
         phone: selectedCountry.dial + form.phoneNumber.replace(/[\s\-]/g, ''),
         date_of_birth: form.date_of_birth, preferred_language: 'sl',
+        marketing_consent: !checks.noMarketing,
       })
       onSuccess(form.email)
     } catch (err) {
@@ -267,6 +271,45 @@ function RegisterForm({ onClose, onSuccess }) {
           onBlur={e => e.target.style.borderColor = 'var(--border)'} />
       </div>
 
+      {/* Checkboxes */}
+      <div className="flex flex-col gap-3 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+        <label className="flex gap-2 cursor-pointer items-start">
+          <input type="checkbox" checked={checks.terms}
+            onChange={e => setChecks(c => ({ ...c, terms: e.target.checked }))}
+            className="mt-0.5 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '14px', height: '14px' }} />
+          <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+            Sprejemam splošne pogoje ODBITO, ki so navedeni v{' '}
+            <Link to="/izjava" target="_blank" onClick={onClose} style={{ color: 'var(--accent)' }}>izjavi o odgovornosti</Link>
+            {' '}in potrjujem, da imam več kot 15 let. <span style={{ color: '#FF3D00' }}>*</span>
+          </span>
+        </label>
+
+        <label className="flex gap-2 cursor-pointer items-start">
+          <input type="checkbox" checked={checks.privacy}
+            onChange={e => setChecks(c => ({ ...c, privacy: e.target.checked }))}
+            className="mt-0.5 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '14px', height: '14px' }} />
+          <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+            Strinjam se s{' '}
+            <Link to="/zasebnost" target="_blank" onClick={onClose} style={{ color: 'var(--accent)' }}>Politiko varovanja zasebnosti</Link>
+            {' '}ODBITO 360 d.o.o. <span style={{ color: '#FF3D00' }}>*</span>
+          </span>
+        </label>
+
+        <p className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6, paddingLeft: '20px' }}>
+          Ker želimo naše stranke obveščati o storitvah ODBITO 360 d.o.o., bomo na vaš e-naslov
+          občasno pošiljali odbite ponudbe in obvestila. V kolikor tega ne želite, označite spodaj.
+        </p>
+
+        <label className="flex gap-2 cursor-pointer items-start">
+          <input type="checkbox" checked={checks.noMarketing}
+            onChange={e => setChecks(c => ({ ...c, noMarketing: e.target.checked }))}
+            className="mt-0.5 flex-shrink-0" style={{ accentColor: 'var(--accent)', width: '14px', height: '14px' }} />
+          <span className="text-xs" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>
+            Ne dovolim neposrednega trženja na e-mail.
+          </span>
+        </label>
+      </div>
+
       {error && (
         <div className="px-3 py-2 rounded-lg text-xs font-bold" style={{ background: 'rgba(255,61,0,0.12)', border: '1px solid rgba(255,61,0,0.3)', color: '#FF3D00' }}>
           {error}
@@ -276,7 +319,6 @@ function RegisterForm({ onClose, onSuccess }) {
       <button type="submit" disabled={loading} className="btn-primary w-full mt-1" style={{ opacity: loading ? 0.6 : 1 }}>
         {loading ? 'USTVARJAM RAČUN...' : 'USTVARI RAČUN'}
       </button>
-      <p className="text-center text-xs" style={{ color: 'var(--gray)' }}>Z registracijo se strinjaš s pogoji uporabe Odbito.</p>
     </form>
   )
 }
