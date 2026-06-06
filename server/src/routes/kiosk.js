@@ -1,9 +1,14 @@
 import { Router } from 'express'
-import { body } from 'express-validator'
-import { validate } from '../middleware/validate.js'
+import { body, validationResult } from 'express-validator'
 import { kioskRegister, kioskWaiver } from '../controllers/kioskController.js'
 
 const router = Router()
+
+function validate(req, res, next) {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() })
+  next()
+}
 
 // Public: get current waiver text for display
 router.get('/waiver', kioskWaiver)
