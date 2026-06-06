@@ -9,6 +9,7 @@ import ParkClosure from '../models/ParkClosure.js'
 import WaiverVersion from '../models/WaiverVersion.js'
 import StaffMember from '../models/StaffMember.js'
 import BirthdayBooking from '../models/BirthdayBooking.js'
+import UserNote from '../models/UserNote.js'
 
 // GET /api/admin/stats
 export async function getStats(req, res) {
@@ -213,6 +214,39 @@ export async function unblockUser(req, res) {
   user.is_blocked = false
   await user.save()
   res.json({ id: user.id, is_blocked: false })
+}
+
+// GET /api/admin/users/:id/notes
+export async function getUserNotes(req, res) {
+  const notes = await UserNote.findAll({
+    where: { user_id: req.params.id },
+    include: [{ model: User, as: 'author', attributes: ['id', 'first_name', 'last_name'] }],
+    order: [['createdAt', 'DESC']],
+  })
+  res.json(notes)
+}
+
+// POST /api/admin/users/:id/notes
+export async function addUserNote(req, res) {
+  const { content } = req.body
+  if (!content?.trim()) return res.status(400).json({ error: 'Vsebina note je obvezna' })
+  const note = await UserNote.create({
+    user_id: req.params.id,
+    content: content.trim(),
+    created_by: req.user.id,
+  })
+  const full = await UserNote.findByPk(note.id, {
+    include: [{ model: User, as: 'author', attributes: ['id', 'first_name', 'last_name'] }],
+  })
+  res.status(201).json(full)
+}
+
+// DELETE /api/admin/users/:id/notes/:noteId
+export async function deleteUserNote(req, res) {
+  const note = await UserNote.findOne({ where: { id: req.params.noteId, user_id: req.params.id } })
+  if (!note) return res.status(404).json({ error: 'Nota ne obstaja' })
+  await note.destroy()
+  res.json({ message: 'Nota izbrisana' })
 }
 
 // GET /api/admin/closures

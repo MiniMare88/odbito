@@ -26,6 +26,7 @@ import StaffNotification from './StaffNotification.js'
 import BirthdayBooking from './BirthdayBooking.js'
 import ParkSchedule from './ParkSchedule.js'
 import ParkScheduleOverride from './ParkScheduleOverride.js'
+import UserNote from './UserNote.js'
 
 // ── Associations ─────────────────────────────────────────────
 
@@ -103,6 +104,11 @@ ClassAttendance.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
 User.hasMany(ParkClosure, { foreignKey: 'created_by', as: 'parkClosures' })
 ParkClosure.belongsTo(User, { foreignKey: 'created_by', as: 'creator' })
 
+// UserNote
+User.hasMany(UserNote, { foreignKey: 'user_id', as: 'notes' })
+UserNote.belongsTo(User, { foreignKey: 'user_id', as: 'targetUser' })
+UserNote.belongsTo(User, { foreignKey: 'created_by', as: 'author' })
+
 // BirthdayBooking
 User.hasMany(BirthdayBooking, { foreignKey: 'user_id', as: 'birthdayBookings' })
 BirthdayBooking.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
@@ -157,6 +163,7 @@ export {
   BirthdayBooking,
   ParkSchedule,
   ParkScheduleOverride,
+  UserNote,
 }
 
 export default sequelize

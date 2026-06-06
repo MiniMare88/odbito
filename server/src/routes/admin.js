@@ -3,6 +3,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js'
 import {
   getStats, getBookings, getUsers, updateUserRole,
   getUser, updateUser, deleteUser, blockUser, unblockUser,
+  getUserNotes, addUserNote, deleteUserNote,
   getClosures, createClosure, deleteClosure,
   getDiscountCodes, createDiscountCode, toggleDiscountCode,
   getWaivers, createWaiver, activateWaiver,
@@ -26,6 +27,9 @@ router.delete('/users/:id', deleteUser)
 router.patch('/users/:id/role', updateUserRole)
 router.patch('/users/:id/block', blockUser)
 router.patch('/users/:id/unblock', unblockUser)
+router.get('/users/:id/notes', getUserNotes)
+router.post('/users/:id/notes', addUserNote)
+router.delete('/users/:id/notes/:noteId', deleteUserNote)
 
 router.get('/closures', getClosures)
 router.post('/closures', createClosure)
