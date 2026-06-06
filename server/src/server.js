@@ -10,10 +10,8 @@ async function start() {
   try {
     await sequelize.authenticate()
     console.log('Database connected.')
-    if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true })
-      console.log('Database synced.')
-    }
+    await sequelize.sync({ alter: true })
+    console.log('Database synced.')
     await ensureDefaultStatuses()
     await seedDefaultSchedule()
     app.listen(PORT, () => {
