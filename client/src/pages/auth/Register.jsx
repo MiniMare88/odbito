@@ -2,12 +2,33 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 
+const COUNTRIES = [
+  { code: 'SI', flag: '🇸🇮', dial: '+386', name: 'Slovenija' },
+  { code: 'HR', flag: '🇭🇷', dial: '+385', name: 'Hrvaška' },
+  { code: 'AT', flag: '🇦🇹', dial: '+43',  name: 'Avstrija' },
+  { code: 'IT', flag: '🇮🇹', dial: '+39',  name: 'Italija' },
+  { code: 'HU', flag: '🇭🇺', dial: '+36',  name: 'Madžarska' },
+  { code: 'DE', flag: '🇩🇪', dial: '+49',  name: 'Nemčija' },
+  { code: 'CH', flag: '🇨🇭', dial: '+41',  name: 'Švica' },
+  { code: 'RS', flag: '🇷🇸', dial: '+381', name: 'Srbija' },
+  { code: 'BA', flag: '🇧🇦', dial: '+387', name: 'BiH' },
+  { code: 'MK', flag: '🇲🇰', dial: '+389', name: 'Severna Makedonija' },
+  { code: 'GB', flag: '🇬🇧', dial: '+44',  name: 'Velika Britanija' },
+  { code: 'US', flag: '🇺🇸', dial: '+1',   name: 'ZDA' },
+]
+
 export default function Register() {
   const { register } = useAuth()
+
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '',
-    password: '', phone: '', date_of_birth: '',
+    password: '', confirmPassword: '', date_of_birth: '',
+    phoneNumber: '',
   })
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]) // Slovenija
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -18,9 +39,29 @@ export default function Register() {
   const handleSubmit = async e => {
     e.preventDefault()
     setError('')
+
+    if (form.password !== form.confirmPassword) {
+      setError('Gesli se ne ujemata')
+      return
+    }
+    if (form.password.length < 8) {
+      setError('Geslo mora imeti vsaj 8 znakov')
+      return
+    }
+
+    const fullPhone = selectedCountry.dial + form.phoneNumber.replace(/[\s\-]/g, '')
+
     setLoading(true)
     try {
-      await register({ ...form, preferred_language: 'sl' })
+      await register({
+        first_name: form.first_name,
+        last_name: form.last_name,
+        email: form.email,
+        password: form.password,
+        phone: fullPhone,
+        date_of_birth: form.date_of_birth,
+        preferred_language: 'sl',
+      })
       setRegisteredEmail(form.email)
       setSuccess(true)
     } catch (err) {
@@ -30,7 +71,14 @@ export default function Register() {
     }
   }
 
-  const inputStyle = { background: 'var(--dark2)', border: '1px solid var(--border)', color: 'var(--white)' }
+  const inputStyle = {
+    background: 'var(--dark2)',
+    border: '1px solid var(--border)',
+    color: 'var(--white)',
+  }
+
+  const passwordMatch = form.confirmPassword && form.password === form.confirmPassword
+  const passwordMismatch = form.confirmPassword && form.password !== form.confirmPassword
 
   if (success) {
     return (
@@ -71,6 +119,8 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
+          {/* Ime + Priimek */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>Ime</label>
@@ -90,6 +140,7 @@ export default function Register() {
             </div>
           </div>
 
+          {/* Email */}
           <div>
             <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>E-mail</label>
             <input type="email" name="email" value={form.email} onChange={handleChange} required
@@ -99,24 +150,142 @@ export default function Register() {
               onBlur={e => e.target.style.borderColor = 'var(--border)'} />
           </div>
 
+          {/* Geslo */}
           <div>
-            <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>Geslo <span style={{ fontWeight: 400 }}>(min. 8 znakov)</span></label>
-            <input type="password" name="password" value={form.password} onChange={handleChange} required minLength={8}
-              className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all" style={inputStyle}
-              placeholder="••••••••"
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>
+              Geslo <span style={{ fontWeight: 400 }}>(min. 8 znakov)</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all pr-12"
+                style={inputStyle}
+                placeholder="••••••••"
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: 1, color: 'var(--gray)' }}>
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
+          {/* Potrdi geslo */}
+          <div>
+            <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>
+              Potrdi geslo
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+                autoComplete="new-password"
+                className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all pr-12"
+                style={{
+                  ...inputStyle,
+                  borderColor: passwordMatch ? '#22c55e' : passwordMismatch ? '#ef4444' : 'var(--border)',
+                }}
+                placeholder="••••••••"
+                onFocus={e => e.target.style.borderColor = passwordMismatch ? '#ef4444' : passwordMatch ? '#22c55e' : 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = passwordMatch ? '#22c55e' : passwordMismatch ? '#ef4444' : 'var(--border)'}
+              />
+              <button type="button" onClick={() => setShowConfirm(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: 1, color: 'var(--gray)' }}>
+                {showConfirm ? '🙈' : '👁️'}
+              </button>
+            </div>
+            {passwordMatch && (
+              <p className="text-xs mt-1" style={{ color: '#22c55e' }}>✓ Gesli se ujemata</p>
+            )}
+            {passwordMismatch && (
+              <p className="text-xs mt-1" style={{ color: '#ef4444' }}>✗ Gesli se ne ujemata</p>
+            )}
+          </div>
+
+          {/* Telefon z izbiro države */}
           <div>
             <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>Telefon</label>
-            <input type="tel" name="phone" value={form.phone} onChange={handleChange} required
-              className="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all" style={inputStyle}
-              placeholder="+386 40 000 000"
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            <div className="flex gap-2 relative">
+              {/* Country selector */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCountryDropdown(v => !v)}
+                  className="flex items-center gap-2 px-3 py-3 rounded-lg text-sm outline-none transition-all h-full"
+                  style={{
+                    ...inputStyle,
+                    whiteSpace: 'nowrap',
+                    minWidth: '100px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ fontSize: '20px' }}>{selectedCountry.flag}</span>
+                  <span style={{ color: 'var(--white)', fontSize: '13px' }}>{selectedCountry.dial}</span>
+                  <span style={{ color: 'var(--gray)', fontSize: '11px' }}>▾</span>
+                </button>
+
+                {showCountryDropdown && (
+                  <div className="absolute top-full left-0 mt-1 rounded-lg overflow-y-auto z-50"
+                    style={{
+                      background: '#1a2030',
+                      border: '1px solid var(--border)',
+                      minWidth: '220px',
+                      maxHeight: '260px',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                    }}>
+                    {COUNTRIES.map(c => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => { setSelectedCountry(c); setShowCountryDropdown(false) }}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-left transition-all"
+                        style={{
+                          background: selectedCountry.code === c.code ? 'rgba(250,177,32,0.12)' : 'transparent',
+                          color: 'var(--white)',
+                          cursor: 'pointer',
+                          border: 'none',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                        onMouseLeave={e => e.currentTarget.style.background = selectedCountry.code === c.code ? 'rgba(250,177,32,0.12)' : 'transparent'}
+                      >
+                        <span style={{ fontSize: '20px' }}>{c.flag}</span>
+                        <span style={{ flex: 1 }}>{c.name}</span>
+                        <span style={{ color: 'var(--gray)', fontSize: '12px' }}>{c.dial}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Številka */}
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                required
+                className="flex-1 px-4 py-3 rounded-lg text-sm outline-none transition-all"
+                style={inputStyle}
+                placeholder="040-123-456"
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+            </div>
           </div>
 
+          {/* Datum rojstva */}
           <div>
             <label className="font-condensed text-xs font-bold tracking-widest uppercase mb-2 block" style={{ color: 'var(--gray)' }}>Datum rojstva</label>
             <input type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} required
