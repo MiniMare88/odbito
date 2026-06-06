@@ -335,10 +335,10 @@ export default function UserDrawer({ userId, onClose, onUpdate, currentUserId })
                         style={{ background: 'var(--dark3)', border: '1px solid var(--border)' }}>
                         <div>
                           <div className="font-condensed font-black text-sm" style={{ color: 'var(--white)' }}>
-                            {fmtDate(b.party_date)} · {b.party_time?.slice(0, 5)}
+                            {fmtDate(b.event_date)} · {b.event_time?.slice(0, 5)}
                           </div>
                           <div className="font-condensed text-xs" style={{ color: 'var(--gray)' }}>
-                            {b.package_key} · {b.children_count} otrok · {b.booking_code}
+                            {b.package_label || b.package_id} · {b.children_count} otrok · {b.booking_code}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

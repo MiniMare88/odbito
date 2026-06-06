@@ -152,9 +152,9 @@ export async function getUser(req, res) {
     }),
     BirthdayBooking.findAll({
       where: { user_id: user.id },
-      order: [['party_date', 'DESC']],
+      order: [['event_date', 'DESC']],
       limit: 20,
-      attributes: ['id', 'booking_code', 'party_date', 'party_time', 'package_key', 'children_count', 'total_price', 'status', 'createdAt'],
+      attributes: ['id', 'booking_code', 'event_date', 'event_time', 'package_id', 'package_label', 'children_count', 'total_price', 'status', 'createdAt'],
     }),
   ])
 
