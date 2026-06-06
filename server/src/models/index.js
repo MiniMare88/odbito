@@ -3,6 +3,8 @@ import { sequelize } from './db.js'
 
 // Import models
 import User from './User.js'
+import EmailVerificationToken from './EmailVerificationToken.js'
+import PasswordResetToken from './PasswordResetToken.js'
 import WaiverVersion from './WaiverVersion.js'
 import ClassType from './ClassType.js'
 import ClassSchedule from './ClassSchedule.js'
@@ -26,6 +28,14 @@ import ParkSchedule from './ParkSchedule.js'
 import ParkScheduleOverride from './ParkScheduleOverride.js'
 
 // ── Associations ─────────────────────────────────────────────
+
+// User → EmailVerificationToken
+User.hasMany(EmailVerificationToken, { foreignKey: 'user_id', as: 'verificationTokens' })
+EmailVerificationToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+
+// User → PasswordResetToken
+User.hasMany(PasswordResetToken, { foreignKey: 'user_id', as: 'resetTokens' })
+PasswordResetToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
 
 // User → OpenJumpBooking
 User.hasMany(OpenJumpBooking, { foreignKey: 'user_id', as: 'bookings' })
@@ -124,6 +134,8 @@ StaffNotification.belongsTo(WorkBlockProposal, { foreignKey: 'block_proposal_id'
 
 export {
   User,
+  EmailVerificationToken,
+  PasswordResetToken,
   WaiverVersion,
   ClassType,
   ClassSchedule,

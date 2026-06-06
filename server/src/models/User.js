@@ -16,6 +16,7 @@ const User = sequelize.define('User', {
   waiver_version: { type: DataTypes.STRING, allowNull: true },
   refresh_token_hash: { type: DataTypes.STRING, allowNull: true },
   is_blocked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  status: { type: DataTypes.ENUM('unverified', 'verified', 'suspended'), allowNull: false, defaultValue: 'unverified' },
 }, {
   tableName: 'users',
   underscored: true,

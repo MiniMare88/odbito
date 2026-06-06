@@ -142,6 +142,109 @@ function subscriptionHtml({ subscription, classType, user }) {
 </html>`
 }
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://odbito.si'
+
+function verificationHtml({ user, verificationUrl }) {
+  const lang = user.preferred_language || 'sl'
+  const isSl = lang === 'sl'
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#080A0E;font-family:'Helvetica Neue',Arial,sans-serif;color:#F5F5F0;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:Georgia,serif;font-size:36px;letter-spacing:0.1em;color:#F5F5F0;">
+        ODBITO <span style="color:#fab120;">360</span>
+      </div>
+    </div>
+    <div style="background:#141820;border-radius:16px;padding:32px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#fab120;margin-bottom:8px;">
+        ${isSl ? 'Potrditev emaila' : 'Email verification'}
+      </div>
+      <h1 style="margin:0 0 16px;font-size:28px;letter-spacing:0.02em;color:#F5F5F0;">
+        ${isSl ? `Pozdravljeni, ${user.first_name}!` : `Hello, ${user.first_name}!`}
+      </h1>
+      <p style="color:#7A8499;font-size:15px;line-height:1.6;margin:0 0 24px;">
+        ${isSl
+          ? 'Za dokončanje registracije potrdite vaš email naslov s klikom na spodnji gumb. Povezava velja 24 ur.'
+          : 'To complete your registration, please verify your email address by clicking the button below. The link is valid for 24 hours.'}
+      </p>
+      <div style="text-align:center;">
+        <a href="${verificationUrl}" style="display:inline-block;background:#fab120;color:#080A0E;font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;padding:14px 32px;border-radius:8px;text-decoration:none;">
+          ${isSl ? 'Potrdi email naslov' : 'Verify email address'}
+        </a>
+      </div>
+    </div>
+    <div style="background:rgba(250,177,32,0.08);border:1px solid rgba(250,177,32,0.2);border-radius:12px;padding:16px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:#F5F5F0;line-height:1.6;">
+        ${isSl
+          ? '⚠️ Če gumb ne deluje, kopirajte to povezavo v brskalnik:'
+          : '⚠️ If the button doesn\'t work, copy this link into your browser:'}
+        <br><span style="color:#fab120;word-break:break-all;font-size:12px;">${verificationUrl}</span>
+      </p>
+    </div>
+    <div style="text-align:center;color:#7A8499;font-size:12px;">
+      <p>${isSl ? 'Če niste ustvarili računa, ignorirajte ta email.' : 'If you did not create an account, you can safely ignore this email.'}</p>
+      <p>Odbito 360 d.o.o. · Dolgi most, Ljubljana</p>
+      <p>info@odbito.si · odbito.si</p>
+      <p style="margin-top:16px;color:#1C2230;">© 2026 Odbito 360 d.o.o. — Powered by Dunking Devils</p>
+    </div>
+  </div>
+</body>
+</html>`
+}
+
+function passwordResetHtml({ user, resetUrl }) {
+  const lang = user.preferred_language || 'sl'
+  const isSl = lang === 'sl'
+
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#080A0E;font-family:'Helvetica Neue',Arial,sans-serif;color:#F5F5F0;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:Georgia,serif;font-size:36px;letter-spacing:0.1em;color:#F5F5F0;">
+        ODBITO <span style="color:#fab120;">360</span>
+      </div>
+    </div>
+    <div style="background:#141820;border-radius:16px;padding:32px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#fab120;margin-bottom:8px;">
+        ${isSl ? 'Ponastavitev gesla' : 'Password reset'}
+      </div>
+      <h1 style="margin:0 0 16px;font-size:28px;letter-spacing:0.02em;color:#F5F5F0;">
+        ${isSl ? `Pozdravljeni, ${user.first_name}!` : `Hello, ${user.first_name}!`}
+      </h1>
+      <p style="color:#7A8499;font-size:15px;line-height:1.6;margin:0 0 24px;">
+        ${isSl
+          ? 'Prejeli smo zahtevo za ponastavitev gesla za vaš račun. Kliknite spodnji gumb za nastavitev novega gesla. Povezava velja 1 uro.'
+          : 'We received a request to reset the password for your account. Click the button below to set a new password. The link is valid for 1 hour.'}
+      </p>
+      <div style="text-align:center;">
+        <a href="${resetUrl}" style="display:inline-block;background:#fab120;color:#080A0E;font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;padding:14px 32px;border-radius:8px;text-decoration:none;">
+          ${isSl ? 'Ponastavi geslo' : 'Reset password'}
+        </a>
+      </div>
+    </div>
+    <div style="background:rgba(250,177,32,0.08);border:1px solid rgba(250,177,32,0.2);border-radius:12px;padding:16px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:#F5F5F0;line-height:1.6;">
+        ${isSl
+          ? '⚠️ Če gumb ne deluje, kopirajte to povezavo v brskalnik:<br><span style="color:#fab120;word-break:break-all;font-size:12px;">' + resetUrl + '</span>'
+          : '⚠️ If the button doesn\'t work, copy this link into your browser:<br><span style="color:#fab120;word-break:break-all;font-size:12px;">' + resetUrl + '</span>'}
+      </p>
+    </div>
+    <div style="text-align:center;color:#7A8499;font-size:12px;">
+      <p>${isSl ? 'Če niste zahtevali ponastavitve gesla, ignorirajte ta email — vaše geslo ostane nespremenjeno.' : 'If you did not request a password reset, you can safely ignore this email — your password will remain unchanged.'}</p>
+      <p>Odbito 360 d.o.o. · Dolgi most, Ljubljana</p>
+      <p>info@odbito.si · odbito.si</p>
+      <p style="margin-top:16px;color:#1C2230;">© 2026 Odbito 360 d.o.o. — Powered by Dunking Devils</p>
+    </div>
+  </div>
+</body>
+</html>`
+}
+
 // ── PUBLIC API ────────────────────────────────────────────
 
 export async function sendBookingConfirmation(booking, user) {
@@ -172,6 +275,44 @@ export async function sendBookingConfirmation(booking, user) {
     }
   }
 
+  return info
+}
+
+export async function sendVerificationEmail(user, rawToken) {
+  const transport = createTransport()
+  const verificationUrl = `${FRONTEND_URL}/potrdi-email?token=${rawToken}`
+  const lang = user.preferred_language || 'sl'
+  const isSl = lang === 'sl'
+
+  const info = await transport.sendMail({
+    from: FROM,
+    to: user.email,
+    subject: isSl ? 'Potrdite vaš email naslov — Odbito' : 'Verify your email address — Odbito',
+    html: verificationHtml({ user, verificationUrl }),
+  })
+
+  if (transport.options?.jsonTransport) {
+    console.log(`[EMAIL DEV] Verification email → ${user.email} | URL: ${verificationUrl}`)
+  }
+  return info
+}
+
+export async function sendPasswordResetEmail(user, rawToken) {
+  const transport = createTransport()
+  const resetUrl = `${FRONTEND_URL}/novo-geslo?token=${rawToken}`
+  const lang = user.preferred_language || 'sl'
+  const isSl = lang === 'sl'
+
+  const info = await transport.sendMail({
+    from: FROM,
+    to: user.email,
+    subject: isSl ? 'Ponastavitev gesla — Odbito' : 'Password reset — Odbito',
+    html: passwordResetHtml({ user, resetUrl }),
+  })
+
+  if (transport.options?.jsonTransport) {
+    console.log(`[EMAIL DEV] Password reset email → ${user.email} | URL: ${resetUrl}`)
+  }
   return info
 }
 

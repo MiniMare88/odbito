@@ -11,6 +11,10 @@ import {
   getWaiver,
   me,
   updateMe,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js'
 
 const router = Router()
@@ -44,5 +48,14 @@ router.post('/accept-waiver', requireAuth, acceptWaiver)
 
 router.get('/me', requireAuth, me)
 router.patch('/me', requireAuth, updateMe)
+
+router.post('/verify-email', [body('token').notEmpty()], validate, verifyEmail)
+router.post('/resend-verification', [body('email').isEmail()], validate, resendVerification)
+router.post('/forgot-password', [body('email').isEmail()], validate, forgotPassword)
+router.post('/reset-password', [
+  body('token').notEmpty(),
+  body('newPassword').isLength({ min: 8 }),
+  body('confirmPassword').notEmpty(),
+], validate, resetPassword)
 
 export default router

@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 
 export default function Register() {
   const { register } = useAuth()
-  const navigate = useNavigate()
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '',
     password: '', phone: '', date_of_birth: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
@@ -20,7 +21,8 @@ export default function Register() {
     setLoading(true)
     try {
       await register({ ...form, preferred_language: 'sl' })
-      navigate('/izjava', { replace: true })
+      setRegisteredEmail(form.email)
+      setSuccess(true)
     } catch (err) {
       setError(err.response?.data?.error || 'Napaka pri registraciji')
     } finally {
@@ -29,6 +31,33 @@ export default function Register() {
   }
 
   const inputStyle = { background: 'var(--dark2)', border: '1px solid var(--border)', color: 'var(--white)' }
+
+  if (success) {
+    return (
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-16" style={{ background: 'var(--black)' }}>
+        <div className="w-full max-w-md text-center">
+          <div style={{ fontSize: '64px', marginBottom: '24px' }}>✉️</div>
+          <div className="section-label mb-4">Registracija uspešna</div>
+          <h1 className="font-display mb-4" style={{ fontSize: '42px', color: 'var(--white)' }}>
+            PREVERITE<br /><span style={{ color: 'var(--accent)' }}>EMAIL.</span>
+          </h1>
+          <p style={{ color: 'var(--gray)', lineHeight: 1.7, marginBottom: '32px' }}>
+            Poslali smo potrditveni email na <strong style={{ color: 'var(--white)' }}>{registeredEmail}</strong>.
+            Kliknite na povezavo v emailu, da aktivirate vaš račun.
+          </p>
+          <div className="px-4 py-3 rounded-lg text-sm" style={{ background: 'rgba(250,177,32,0.08)', border: '1px solid rgba(250,177,32,0.2)', color: 'var(--gray)', marginBottom: '24px' }}>
+            Povezava velja 24 ur. Preverite tudi mapo z neželeno pošto.
+          </div>
+          <p style={{ color: 'var(--gray)', fontSize: '14px' }}>
+            Niste prejeli emaila?{' '}
+            <Link to="/prijava" className="font-bold" style={{ color: 'var(--accent)' }}>
+              Pošljite ga znova →
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-16" style={{ background: 'var(--black)' }}>

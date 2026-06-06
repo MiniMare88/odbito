@@ -42,8 +42,7 @@ export function AuthProvider({ children }) {
 
   const register = async (payload) => {
     const { data } = await api.post('/auth/register', payload)
-    setAccessToken(data.access_token)
-    setUser(data.user)
+    // Registration now returns { message: 'CHECK_EMAIL' } — no token issued
     return data
   }
 

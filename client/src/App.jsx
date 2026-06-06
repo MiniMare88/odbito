@@ -25,6 +25,7 @@ import Register from './pages/auth/Register.jsx'
 import Login from './pages/auth/Login.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
 import ResetPassword from './pages/auth/ResetPassword.jsx'
+import VerifyEmail from './pages/auth/VerifyEmail.jsx'
 
 // Protected pages (lazy)
 const CustomerDashboard = React.lazy(() => import('./pages/dashboard/CustomerDashboard.jsx'))
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="/prijava" element={<AppLayout><Login /></AppLayout>} />
             <Route path="/pozabljeno-geslo" element={<AppLayout><ForgotPassword /></AppLayout>} />
             <Route path="/novo-geslo" element={<AppLayout><ResetPassword /></AppLayout>} />
+            <Route path="/potrdi-email" element={<AppLayout><VerifyEmail /></AppLayout>} />
 
             {/* Customer protected */}
             <Route path="/dashboard/*" element={

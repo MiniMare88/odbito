@@ -1,10 +1,28 @@
+import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { Op } from 'sequelize'
 import { OAuth2Client } from 'google-auth-library'
 import User from '../models/User.js'
 import WaiverVersion from '../models/WaiverVersion.js'
+import EmailVerificationToken from '../models/EmailVerificationToken.js'
+import PasswordResetToken from '../models/PasswordResetToken.js'
+import {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+} from '../services/emailService.js'
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+// ── Helpers ───────────────────────────────────────────────────
+
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex')
+}
 
 function signAccess(user) {
   return jwt.sign(
@@ -44,12 +62,27 @@ function safeUser(user) {
     preferred_language: user.preferred_language,
     waiver_accepted_at: user.waiver_accepted_at,
     waiver_version: user.waiver_version,
+    status: user.status,
   }
 }
 
 async function getCurrentWaiver() {
   return WaiverVersion.findOne({ where: { is_current: true } })
 }
+
+// In-memory rate limit for forgot-password (3 req/hour/email)
+const resetRateMap = new Map()
+function checkResetRateLimit(email) {
+  const now = Date.now()
+  const hourAgo = now - 60 * 60 * 1000
+  const timestamps = (resetRateMap.get(email) || []).filter(t => t > hourAgo)
+  if (timestamps.length >= 3) return false
+  timestamps.push(now)
+  resetRateMap.set(email, timestamps)
+  return true
+}
+
+// ── Auth endpoints ────────────────────────────────────────────
 
 // POST /api/auth/register
 export async function register(req, res) {
@@ -69,15 +102,24 @@ export async function register(req, res) {
     date_of_birth,
     preferred_language: preferred_language || 'sl',
     role: 'customer',
+    status: 'unverified',
   })
 
-  const access = signAccess(user)
-  const refresh = signRefresh(user)
-  user.refresh_token_hash = await bcrypt.hash(refresh, 10)
-  await user.save()
+  // Send verification email
+  const rawToken = generateToken()
+  const tokenHash = hashToken(rawToken)
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-  setRefreshCookie(res, refresh)
-  res.status(201).json({ access_token: access, user: safeUser(user) })
+  await EmailVerificationToken.create({ user_id: user.id, token_hash: tokenHash, expires_at: expiresAt })
+
+  try {
+    await sendVerificationEmail(user, rawToken)
+    console.log(`[AUTH] Verification email sent → ${user.email}`)
+  } catch (err) {
+    console.error(`[AUTH] Failed to send verification email → ${user.email}:`, err.message)
+  }
+
+  res.status(201).json({ message: 'CHECK_EMAIL' })
 }
 
 // POST /api/auth/login
@@ -92,12 +134,15 @@ export async function login(req, res) {
 
   if (user.is_blocked) return res.status(403).json({ error: 'Vaš račun je bil blokiran. Kontaktirajte nas na info@odbito.si' })
 
+  if (user.status === 'unverified') {
+    return res.status(403).json({ error: 'EMAIL_UNVERIFIED' })
+  }
+
   const access = signAccess(user)
   const refresh = signRefresh(user)
   user.refresh_token_hash = await bcrypt.hash(refresh, 10)
   await user.save()
 
-  // Check if waiver needs re-acceptance
   const currentWaiver = await getCurrentWaiver()
   const waiverRequired = currentWaiver && user.waiver_version !== currentWaiver.version
 
@@ -181,9 +226,11 @@ export async function googleAuth(req, res) {
       date_of_birth: '2000-01-01',
       role: 'customer',
       preferred_language: 'sl',
+      status: 'verified', // Google accounts are pre-verified
     })
   } else if (!user.google_id) {
     user.google_id = google_id
+    if (user.status === 'unverified') user.status = 'verified'
     await user.save()
   }
 
@@ -195,7 +242,6 @@ export async function googleAuth(req, res) {
   const currentWaiver = await getCurrentWaiver()
   const waiverRequired = currentWaiver && user.waiver_version !== currentWaiver.version
 
-  // Check if profile is incomplete (Google users may have empty phone/dob)
   const profileIncomplete = !user.phone || user.phone === '' || user.date_of_birth === '2000-01-01'
 
   setRefreshCookie(res, refresh)
@@ -242,4 +288,126 @@ export async function updateMe(req, res) {
 
   await user.save()
   res.json(safeUser(user))
+}
+
+// POST /api/auth/verify-email
+export async function verifyEmail(req, res) {
+  const { token } = req.body
+  if (!token) return res.status(400).json({ error: 'Manjka žeton' })
+
+  const tokenHash = hashToken(token)
+  const record = await EmailVerificationToken.findOne({ where: { token_hash: tokenHash } })
+
+  if (!record) return res.status(400).json({ error: 'INVALID_TOKEN' })
+
+  if (new Date() > record.expires_at) {
+    await record.destroy()
+    return res.status(400).json({ error: 'EXPIRED_TOKEN' })
+  }
+
+  const user = await User.findByPk(record.user_id)
+  if (!user) return res.status(400).json({ error: 'INVALID_TOKEN' })
+
+  user.status = 'verified'
+  await user.save()
+  await record.destroy()
+
+  console.log(`[AUTH] Email verified → ${user.email}`)
+  res.json({ message: 'EMAIL_VERIFIED' })
+}
+
+// POST /api/auth/resend-verification
+export async function resendVerification(req, res) {
+  const { email } = req.body
+  if (!email) return res.status(400).json({ error: 'Manjka email' })
+
+  // Always return success to avoid user enumeration
+  const user = await User.findOne({ where: { email } })
+  if (!user || user.status !== 'unverified') {
+    return res.json({ message: 'CHECK_EMAIL' })
+  }
+
+  // Delete old tokens for this user
+  await EmailVerificationToken.destroy({ where: { user_id: user.id } })
+
+  const rawToken = generateToken()
+  const tokenHash = hashToken(rawToken)
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+  await EmailVerificationToken.create({ user_id: user.id, token_hash: tokenHash, expires_at: expiresAt })
+
+  try {
+    await sendVerificationEmail(user, rawToken)
+    console.log(`[AUTH] Resent verification email → ${user.email}`)
+  } catch (err) {
+    console.error(`[AUTH] Failed to resend verification email → ${user.email}:`, err.message)
+  }
+
+  res.json({ message: 'CHECK_EMAIL' })
+}
+
+// POST /api/auth/forgot-password
+export async function forgotPassword(req, res) {
+  const { email } = req.body
+  if (!email) return res.status(400).json({ error: 'Manjka email' })
+
+  // Always return the same message for security
+  const respond = () => res.json({ message: 'Če račun obstaja, boste prejeli email z navodili.' })
+
+  if (!checkResetRateLimit(email)) {
+    return respond() // silently rate-limited
+  }
+
+  const user = await User.findOne({ where: { email } })
+  if (!user || user.status === 'suspended') return respond()
+
+  // Delete old reset tokens for this user
+  await PasswordResetToken.destroy({ where: { user_id: user.id } })
+
+  const rawToken = generateToken()
+  const tokenHash = hashToken(rawToken)
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+  await PasswordResetToken.create({ user_id: user.id, token_hash: tokenHash, expires_at: expiresAt })
+
+  try {
+    await sendPasswordResetEmail(user, rawToken)
+    console.log(`[AUTH] Password reset email sent → ${user.email}`)
+  } catch (err) {
+    console.error(`[AUTH] Failed to send password reset email → ${user.email}:`, err.message)
+  }
+
+  respond()
+}
+
+// POST /api/auth/reset-password
+export async function resetPassword(req, res) {
+  const { token, newPassword, confirmPassword } = req.body
+
+  if (!token) return res.status(400).json({ error: 'Manjka žeton' })
+  if (!newPassword || newPassword.length < 8) return res.status(400).json({ error: 'Geslo mora imeti vsaj 8 znakov' })
+  if (newPassword !== confirmPassword) return res.status(400).json({ error: 'Gesli se ne ujemata' })
+
+  const tokenHash = hashToken(token)
+  const record = await PasswordResetToken.findOne({ where: { token_hash: tokenHash } })
+
+  if (!record) return res.status(400).json({ error: 'INVALID_TOKEN' })
+
+  if (new Date() > record.expires_at) {
+    await record.destroy()
+    return res.status(400).json({ error: 'EXPIRED_TOKEN' })
+  }
+
+  const user = await User.findByPk(record.user_id)
+  if (!user) return res.status(400).json({ error: 'INVALID_TOKEN' })
+
+  user.password_hash = await bcrypt.hash(newPassword, 12)
+  // Ensure account is verified when resetting password
+  if (user.status === 'unverified') user.status = 'verified'
+  user.refresh_token_hash = null // invalidate all sessions
+  await user.save()
+  await record.destroy()
+
+  console.log(`[AUTH] Password reset completed → ${user.email}`)
+  res.json({ message: 'PASSWORD_RESET' })
 }
