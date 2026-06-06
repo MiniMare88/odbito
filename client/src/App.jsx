@@ -14,6 +14,9 @@ import Classes from './pages/public/Classes.jsx'
 import Contact from './pages/public/Contact.jsx'
 import Waiver from './pages/public/Waiver.jsx'
 
+// Kiosk
+import KioskRegister from './pages/kiosk/KioskRegister.jsx'
+
 // Legal pages
 import VarovanjeZasebnosti from './pages/legal/VarovanjeZasebnosti.jsx'
 import PogojiUporabe from './pages/legal/PogojiUporabe.jsx'
@@ -106,6 +109,9 @@ export default function App() {
             <Route path="/piskotki" element={<PolitikaPiskotkov />} />
             <Route path="/videonadzor" element={<ObvestiloVideonadzor />} />
             <Route path="/nagradne-igre" element={<PogojiNagradnihIger />} />
+
+            {/* Kiosk — hidden, no navbar/footer */}
+            <Route path="/kiosk/register" element={<KioskRegister />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

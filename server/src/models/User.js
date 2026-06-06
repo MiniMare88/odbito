@@ -18,6 +18,7 @@ const User = sequelize.define('User', {
   is_blocked: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   status: { type: DataTypes.ENUM('unverified', 'verified', 'suspended'), allowNull: false, defaultValue: 'unverified' },
   marketing_consent: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  registration_source: { type: DataTypes.ENUM('web', 'kiosk'), allowNull: false, defaultValue: 'web' },
 }, {
   tableName: 'users',
   underscored: true,

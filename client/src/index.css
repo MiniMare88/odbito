@@ -167,8 +167,6 @@ p {
   .ticker-wrap {
     overflow: hidden;
     background: #fab120;
-    border-top: 6px solid #fff;
-    border-bottom: 6px solid #fff;
     padding: 10px 0;
   }
   .ticker-track {
