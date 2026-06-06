@@ -142,7 +142,7 @@ export default function Navbar() {
               </button>
               {user ? (
                 <>
-                  <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-sm text-white/70">
+                  <Link to={user.role === 'admin' ? '/admin' : user.role === 'staff' ? '/osobje' : '/dashboard'} onClick={() => setMenuOpen(false)} className="text-sm text-white/70">
                     {t('nav.dashboard')}
                   </Link>
                   <button onClick={handleLogout} className="text-sm text-white/50">
