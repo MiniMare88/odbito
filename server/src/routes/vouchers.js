@@ -7,6 +7,7 @@ import {
   getMyVouchers,
   createPurchaseIntent,
   confirmPurchase,
+  validateVoucherCode,
   adminGenerateVouchers,
   adminListVouchers,
   adminVoucherStats,
@@ -16,6 +17,7 @@ import {
 const router = express.Router()
 
 // ── Customer routes (authenticated) ──────────────────────────────────────────
+router.post('/validate-code', requireAuth, validateVoucherCode)
 router.post('/redeem', requireAuth, redeemVoucher)
 router.get('/balance', requireAuth, getBalance)
 router.get('/my', requireAuth, getMyVouchers)

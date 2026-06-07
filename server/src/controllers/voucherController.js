@@ -28,6 +28,38 @@ async function getOrCreateBalance(userId, t) {
   return bal
 }
 
+// ── PUBLIC: validate voucher code (without redeeming) ────────────────────────
+
+// POST /api/vouchers/validate-code
+export async function validateVoucherCode(req, res) {
+  const { code } = req.body
+  if (!code) return res.status(400).json({ error: 'Koda je obvezna' })
+
+  const cleanCode = String(code).trim().toUpperCase()
+  const voucher = await Voucher.findOne({ where: { code: cleanCode } })
+
+  if (!voucher) return res.status(404).json({ error: 'Darilni bon ni najden' })
+  if (voucher.status === 'used') return res.status(400).json({ error: 'Darilni bon je že porabljen' })
+  if (voucher.status === 'expired' || new Date(voucher.expires_at) < new Date()) {
+    return res.status(400).json({ error: 'Darilni bon je potekel' })
+  }
+
+  const remaining = voucher.remaining_amount !== null
+    ? parseFloat(voucher.remaining_amount)
+    : parseFloat(voucher.denomination)
+
+  if (remaining <= 0) return res.status(400).json({ error: 'Darilni bon je brez vrednosti' })
+
+  res.json({
+    valid: true,
+    code: voucher.code,
+    denomination: parseFloat(voucher.denomination),
+    remaining,
+    type: voucher.type,
+    expires_at: voucher.expires_at,
+  })
+}
+
 // ── PUBLIC: redeem voucher ────────────────────────────────────────────────────
 
 // POST /api/vouchers/redeem

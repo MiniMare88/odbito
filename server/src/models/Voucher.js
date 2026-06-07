@@ -15,6 +15,7 @@ const Voucher = sequelize.define('Voucher', {
   booking_id: { type: DataTypes.INTEGER, allowNull: true }, // for refund vouchers
   booking_type: { type: DataTypes.ENUM('open_jump', 'birthday'), allowNull: true },
   stripe_payment_intent_id: { type: DataTypes.STRING, allowNull: true },
+  remaining_amount: { type: DataTypes.DECIMAL(10, 2), allowNull: true }, // null = denomination (backwards compat)
 }, {
   tableName: 'vouchers',
   underscored: true,

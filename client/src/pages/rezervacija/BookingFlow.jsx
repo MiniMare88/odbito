@@ -416,10 +416,6 @@ function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
   const [kids, setKids]           = useState(0)
   const [youngKids, setYoungKids] = useState(0)
   const [ticketQty, setTicketQty] = useState({})
-  const [darilniBon, setDarilniBon] = useState('')
-  const [popustKoda, setPopustKoda] = useState('')
-  const [showBon, setShowBon]       = useState(false)
-  const [showPopust, setShowPopust] = useState(false)
 
   const totalVisitors = adults + kids + youngKids
   const totalT = totalTickets(ticketQty)
@@ -430,8 +426,8 @@ function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
   }
 
   useEffect(() => {
-    liveUpdate({ adults, kids, youngKids, ticketQty, darilniBon, popustKoda })
-  }, [adults, kids, youngKids, ticketQty, darilniBon, popustKoda])
+    liveUpdate({ adults, kids, youngKids, ticketQty })
+  }, [adults, kids, youngKids, ticketQty])
 
   return (
     <div>
@@ -518,52 +514,11 @@ function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
             })}
           </div>
 
-          {/* Darilni bon inline */}
-          <div className="rounded-xl overflow-hidden mb-3"
-            style={{ border: `1px solid ${showBon && darilniBon ? 'rgba(250,177,32,0.3)' : 'var(--border)'}`, background: 'var(--dark2)' }}>
-            <div className="flex items-center">
-              <button onClick={() => setShowBon(v => !v)}
-                className="font-condensed font-bold text-sm tracking-wide flex items-center gap-2 px-5 py-3 flex-shrink-0"
-                style={{ color: showBon ? 'var(--accent)' : 'var(--gray)', cursor: 'pointer', background: 'none', border: 'none', whiteSpace: 'nowrap' }}>
-                {showBon ? '▾' : '▸'} Imam darilni bon
-              </button>
-              {showBon && (
-                <>
-                  <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
-                  <input autoFocus type="text" value={darilniBon} onChange={e => setDarilniBon(e.target.value)}
-                    placeholder="Vnesi kodo..."
-                    className="font-condensed font-bold text-sm flex-1 px-4 py-3"
-                    style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--white)', letterSpacing: '0.05em', minWidth: 0 }} />
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Popust koda inline */}
-          <div className="rounded-xl overflow-hidden mb-8"
-            style={{ border: `1px solid ${showPopust && popustKoda ? 'rgba(250,177,32,0.3)' : 'var(--border)'}`, background: 'var(--dark2)' }}>
-            <div className="flex items-center">
-              <button onClick={() => setShowPopust(v => !v)}
-                className="font-condensed font-bold text-sm tracking-wide flex items-center gap-2 px-5 py-3 flex-shrink-0"
-                style={{ color: showPopust ? 'var(--accent)' : 'var(--gray)', cursor: 'pointer', background: 'none', border: 'none', whiteSpace: 'nowrap' }}>
-                {showPopust ? '▾' : '▸'} Imam kodo za popust
-              </button>
-              {showPopust && (
-                <>
-                  <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
-                  <input autoFocus type="text" value={popustKoda} onChange={e => setPopustKoda(e.target.value)}
-                    placeholder="Vnesi kodo..."
-                    className="font-condensed font-bold text-sm flex-1 px-4 py-3"
-                    style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--white)', letterSpacing: '0.05em', minWidth: 0 }} />
-                </>
-              )}
-            </div>
-          </div>
         </>
       )}
 
       <button disabled={!canContinue}
-        onClick={() => onNext({ adults, kids, youngKids, ticketQty, darilniBon, popustKoda })}
+        onClick={() => onNext({ adults, kids, youngKids, ticketQty })}
         className="w-full font-condensed font-black uppercase tracking-widest rounded-xl py-4 transition-all"
         style={{
           background: canContinue ? 'var(--accent)' : 'var(--dark2)',
@@ -874,10 +829,23 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
   const [done, setDone] = useState(false)
   const [bookingCode, setBookingCode] = useState('')
   const [bookError, setBookError] = useState('')
+
+  // Discount code (popust)
+  const [popustKoda, setPopustKoda] = useState('')
+  const [discountInfo, setDiscountInfo] = useState(null) // { valid, percent, fixed }
+  const [checkingDiscount, setCheckingDiscount] = useState(false)
+  const [showPopust, setShowPopust] = useState(false)
+
+  // Voucher (darilni bon)
+  const [voucherCode, setVoucherCode] = useState('')
+  const [voucherInfo, setVoucherInfo] = useState(null) // { valid, remaining, denomination }
+  const [checkingVoucher, setCheckingVoucher] = useState(false)
+  const [showVoucher, setShowVoucher] = useState(false)
+
+  // Balance
   const [balance, setBalance] = useState(0)
   const [useBalance, setUseBalance] = useState(false)
-  const [discountInfo, setDiscountInfo] = useState(null) // { valid, percent, amount }
-  const [checkingDiscount, setCheckingDiscount] = useState(false)
+
   const info = getOccupancyInfo(slot.booked)
 
   const totalPersons = visitors.adults + visitors.kids + visitors.youngKids
@@ -886,13 +854,19 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
   const extrasTotal = calcExtrasTotal(extras)
   const baseTotal = ticketsTotal + extrasTotal
 
-  // Discount
-  const discountAmount = discountInfo?.valid ? Math.round(baseTotal * (discountInfo.percent / 100) * 100) / 100 : 0
-  const afterDiscount = baseTotal - discountAmount
+  // Price calculations
+  let discountAmount = 0
+  if (discountInfo?.valid) {
+    if (discountInfo.percent) discountAmount = +(baseTotal * discountInfo.percent / 100).toFixed(2)
+    else if (discountInfo.fixed) discountAmount = +Math.min(discountInfo.fixed, baseTotal).toFixed(2)
+  }
+  const afterDiscount = +(baseTotal - discountAmount).toFixed(2)
 
-  // Balance
-  const balanceUsed = useBalance ? Math.min(balance, afterDiscount) : 0
-  const totalPrice = Math.max(0, afterDiscount - balanceUsed)
+  const voucherUsed = voucherInfo?.valid ? +Math.min(voucherInfo.remaining, afterDiscount).toFixed(2) : 0
+  const afterVoucher = +(afterDiscount - voucherUsed).toFixed(2)
+
+  const balanceUsed = useBalance ? +Math.min(balance, afterVoucher).toFixed(2) : 0
+  const totalPrice = +Math.max(0, afterVoucher - balanceUsed).toFixed(2)
 
   useEffect(() => {
     if (user) {
@@ -900,21 +874,39 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
     }
   }, [user])
 
+  // Auto-validate discount code with debounce
   useEffect(() => {
-    const code = visitors.popustKoda?.trim()
+    const code = popustKoda.trim()
     if (!code) { setDiscountInfo(null); return }
     const timer = setTimeout(async () => {
       setCheckingDiscount(true)
       try {
         const { data } = await api.post('/openjump/validate-discount', { code })
-        setDiscountInfo({ valid: true, percent: data.percent, code })
+        setDiscountInfo({ valid: true, percent: data.percent, fixed: data.fixed, code })
       } catch {
         setDiscountInfo({ valid: false, code })
       }
       setCheckingDiscount(false)
     }, 500)
     return () => clearTimeout(timer)
-  }, [visitors.popustKoda])
+  }, [popustKoda])
+
+  // Auto-validate voucher code with debounce
+  useEffect(() => {
+    const code = voucherCode.trim()
+    if (!code) { setVoucherInfo(null); return }
+    const timer = setTimeout(async () => {
+      setCheckingVoucher(true)
+      try {
+        const { data } = await api.post('/vouchers/validate-code', { code })
+        setVoucherInfo({ valid: true, remaining: data.remaining, denomination: data.denomination, code })
+      } catch (err) {
+        setVoucherInfo({ valid: false, code, error: err.response?.data?.error || 'Koda ni veljavna' })
+      }
+      setCheckingVoucher(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [voucherCode])
 
   const handleBook = async () => {
     setSubmitting(true)
@@ -927,7 +919,8 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
         start_time: slot.start,
         package_key: durationToPackageKey(durationMin),
         participants: totalT,
-        discount_code: visitors.popustKoda?.trim() || undefined,
+        discount_code: popustKoda.trim() || undefined,
+        voucher_code: voucherInfo?.valid ? voucherCode.trim() : undefined,
         use_balance: useBalance && balance > 0,
       })
       setBookingCode(data.booking_code)
@@ -994,6 +987,88 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
         POTRDI<span style={{ color: 'var(--accent)' }}>.</span>
       </h3>
 
+      {/* Voucher + Discount code inputs */}
+      <div className="flex flex-col gap-3 mb-6">
+        {/* Darilni bon */}
+        <div className="rounded-xl overflow-hidden"
+          style={{ border: `1px solid ${voucherInfo?.valid ? 'rgba(52,211,153,0.4)' : voucherInfo?.valid === false ? 'rgba(248,113,113,0.4)' : showVoucher && voucherCode ? 'rgba(250,177,32,0.3)' : 'var(--border)'}`, background: 'var(--dark2)', transition: 'border-color 0.2s' }}>
+          <div className="flex items-center">
+            <button onClick={() => setShowVoucher(v => !v)}
+              className="font-condensed font-bold text-sm tracking-wide flex items-center gap-2 px-5 py-3 flex-shrink-0"
+              style={{ color: showVoucher ? 'var(--accent)' : 'var(--gray)', cursor: 'pointer', background: 'none', border: 'none', whiteSpace: 'nowrap' }}>
+              {showVoucher ? '▾' : '▸'} 🎁 Imam darilni bon
+            </button>
+            {showVoucher && (
+              <>
+                <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
+                <input
+                  autoFocus
+                  type="text"
+                  value={voucherCode}
+                  onChange={e => setVoucherCode(e.target.value.toUpperCase())}
+                  placeholder="ODBITO-XXXX-XXXX-XXXX-XXXX"
+                  className="font-condensed font-bold text-sm flex-1 px-4 py-3"
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--white)', letterSpacing: '0.05em', minWidth: 0 }}
+                />
+                {checkingVoucher && <span className="px-4 font-condensed text-xs animate-pulse" style={{ color: 'var(--gray)' }}>…</span>}
+                {!checkingVoucher && voucherInfo?.valid && <span className="px-4 font-condensed text-xs font-bold" style={{ color: '#34d399' }}>✓ €{voucherInfo.remaining.toFixed(2)}</span>}
+                {!checkingVoucher && voucherInfo?.valid === false && <span className="px-4 font-condensed text-xs font-bold" style={{ color: '#f87171' }}>✗</span>}
+              </>
+            )}
+          </div>
+          {showVoucher && voucherInfo?.valid && (
+            <div className="px-5 py-2 font-condensed text-xs" style={{ borderTop: '1px solid rgba(52,211,153,0.2)', background: 'rgba(52,211,153,0.05)', color: '#34d399' }}>
+              Vrednost bona: €{voucherInfo.denomination.toFixed(2)} · Razpoložljivo: €{voucherInfo.remaining.toFixed(2)}
+              {voucherInfo.remaining > afterDiscount && ` · Porabimo €${afterDiscount.toFixed(2)}, ostane €${(voucherInfo.remaining - afterDiscount).toFixed(2)} na bonu`}
+            </div>
+          )}
+          {showVoucher && voucherInfo?.valid === false && (
+            <div className="px-5 py-2 font-condensed text-xs" style={{ borderTop: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.05)', color: '#f87171' }}>
+              {voucherInfo.error || 'Koda ni veljavna'}
+            </div>
+          )}
+        </div>
+
+        {/* Popust koda */}
+        <div className="rounded-xl overflow-hidden"
+          style={{ border: `1px solid ${discountInfo?.valid ? 'rgba(52,211,153,0.4)' : discountInfo?.valid === false ? 'rgba(248,113,113,0.4)' : showPopust && popustKoda ? 'rgba(250,177,32,0.3)' : 'var(--border)'}`, background: 'var(--dark2)', transition: 'border-color 0.2s' }}>
+          <div className="flex items-center">
+            <button onClick={() => setShowPopust(v => !v)}
+              className="font-condensed font-bold text-sm tracking-wide flex items-center gap-2 px-5 py-3 flex-shrink-0"
+              style={{ color: showPopust ? 'var(--accent)' : 'var(--gray)', cursor: 'pointer', background: 'none', border: 'none', whiteSpace: 'nowrap' }}>
+              {showPopust ? '▾' : '▸'} 🏷 Imam kodo za popust
+            </button>
+            {showPopust && (
+              <>
+                <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
+                <input
+                  autoFocus
+                  type="text"
+                  value={popustKoda}
+                  onChange={e => setPopustKoda(e.target.value.toUpperCase())}
+                  placeholder="npr. POLETJE10"
+                  className="font-condensed font-bold text-sm flex-1 px-4 py-3"
+                  style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--white)', letterSpacing: '0.08em', minWidth: 0 }}
+                />
+                {checkingDiscount && <span className="px-4 font-condensed text-xs animate-pulse" style={{ color: 'var(--gray)' }}>…</span>}
+                {!checkingDiscount && discountInfo?.valid && (
+                  <span className="px-4 font-condensed text-xs font-bold" style={{ color: '#34d399' }}>
+                    ✓ {discountInfo.percent ? `-${discountInfo.percent}%` : `-€${discountInfo.fixed}`}
+                  </span>
+                )}
+                {!checkingDiscount && discountInfo?.valid === false && <span className="px-4 font-condensed text-xs font-bold" style={{ color: '#f87171' }}>✗</span>}
+              </>
+            )}
+          </div>
+          {showPopust && discountInfo?.valid === false && (
+            <div className="px-5 py-2 font-condensed text-xs" style={{ borderTop: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.05)', color: '#f87171' }}>
+              Koda ni veljavna ali je potekla
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Order summary table */}
       <div className="rounded-2xl overflow-hidden mb-6" style={{ border: '1px solid var(--border)' }}>
         {[['Datum', fmtDate(day)],['Dan', DAYS_FULL[day.getDay()]],['Čas', `${slot.start} – ${slot.end}`]].map(([k,v]) => (
           <div key={k} className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'var(--dark2)' }}>
@@ -1031,14 +1106,26 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
             <span className="w-2 h-2 rounded-full" style={{ background: info.dot }} />{info.label}
           </span>
         </div>
-        {/* Discount row */}
-        {visitors.popustKoda?.trim() && (
-          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'var(--dark2)' }}>
-            <span className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--gray)' }}>
-              🏷 Popust {checkingDiscount ? '…' : discountInfo?.valid ? `(${discountInfo.percent}%)` : '(neveljavna koda)'}
+        {/* Discount code row */}
+        {discountInfo?.valid && (
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(52,211,153,0.04)' }}>
+            <span className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: '#34d399' }}>
+              🏷 Popust {discountInfo.percent ? `(${discountInfo.percent}%)` : `(–€${discountInfo.fixed})`}
             </span>
-            <span className="font-condensed font-bold text-sm" style={{ color: discountInfo?.valid ? '#34d399' : '#f87171' }}>
-              {discountInfo?.valid ? `-€${discountAmount.toFixed(2).replace('.', ',')}` : '—'}
+            <span className="font-condensed font-bold text-sm" style={{ color: '#34d399' }}>
+              –€{discountAmount.toFixed(2).replace('.', ',')}
+            </span>
+          </div>
+        )}
+        {/* Voucher row */}
+        {voucherInfo?.valid && voucherUsed > 0 && (
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'rgba(52,211,153,0.04)' }}>
+            <span className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: '#34d399' }}>
+              🎁 Darilni bon
+              {voucherInfo.remaining > afterDiscount && <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}> · ostane €{(voucherInfo.remaining - afterDiscount).toFixed(2)}</span>}
+            </span>
+            <span className="font-condensed font-bold text-sm" style={{ color: '#34d399' }}>
+              –€{voucherUsed.toFixed(2).replace('.', ',')}
             </span>
           </div>
         )}
@@ -1053,7 +1140,7 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
               </span>
             </label>
             <span className="font-condensed font-bold text-sm" style={{ color: useBalance ? '#34d399' : '#555' }}>
-              {useBalance ? `-€${balanceUsed.toFixed(2).replace('.', ',')}` : '—'}
+              {useBalance ? `–€${balanceUsed.toFixed(2).replace('.', ',')}` : '—'}
             </span>
           </div>
         )}

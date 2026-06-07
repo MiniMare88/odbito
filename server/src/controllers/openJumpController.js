@@ -6,6 +6,7 @@ import User from '../models/User.js'
 import DiscountCode from '../models/DiscountCode.js'
 import DiscountCodeUse from '../models/DiscountCodeUse.js'
 import CustomerBalance from '../models/CustomerBalance.js'
+import Voucher from '../models/Voucher.js'
 import { sendBookingConfirmation } from '../services/emailService.js'
 import { generateQR } from '../services/qrService.js'
 import { generateBookingIcs } from '../services/calendarService.js'
@@ -113,7 +114,7 @@ export async function getSlots(req, res) {
 
 // POST /api/openjump/book
 export async function createBooking(req, res) {
-  const { date, start_time, package_key, participants = 1, discount_code, use_balance } = req.body
+  const { date, start_time, package_key, participants = 1, discount_code, use_balance, voucher_code } = req.body
   const userId = req.user.id
 
   // Validate
@@ -165,6 +166,23 @@ export async function createBooking(req, res) {
     }
   }
 
+  // Validate voucher code (but don't redeem yet — happens inside transaction)
+  let voucherRecord = null
+  let voucher_amount = 0
+  if (voucher_code) {
+    const cleanCode = String(voucher_code).trim().toUpperCase()
+    const v = await Voucher.findOne({ where: { code: cleanCode } })
+    if (v && v.status !== 'used' && v.status !== 'expired' && new Date(v.expires_at) >= new Date()) {
+      const remaining = v.remaining_amount !== null ? parseFloat(v.remaining_amount) : parseFloat(v.denomination)
+      if (remaining > 0) {
+        voucherRecord = v
+        voucher_amount = +Math.min(remaining, base_price).toFixed(2)
+        base_price = +(base_price - voucher_amount).toFixed(2)
+        discount_amount = +(discount_amount + voucher_amount).toFixed(2)
+      }
+    }
+  }
+
   // Balance
   let balance_used = 0
   if (use_balance) {
@@ -212,6 +230,21 @@ export async function createBooking(req, res) {
         bal.balance_amount = Math.max(0, parseFloat(bal.balance_amount) - balance_used)
         await bal.save({ transaction: t })
       }
+    }
+
+    // Redeem voucher (partial if needed)
+    if (voucherRecord && voucher_amount > 0) {
+      const v = await Voucher.findOne({ where: { id: voucherRecord.id }, transaction: t, lock: t.LOCK.UPDATE })
+      const remaining = v.remaining_amount !== null ? parseFloat(v.remaining_amount) : parseFloat(v.denomination)
+      const actualUsed = +Math.min(remaining, voucher_amount).toFixed(2)
+      const newRemaining = +(remaining - actualUsed).toFixed(2)
+      v.remaining_amount = newRemaining
+      if (newRemaining <= 0) {
+        v.status = 'used'
+        v.redeemed_by = userId
+        v.redeemed_at = new Date()
+      }
+      await v.save({ transaction: t })
     }
 
     // Record discount code use
