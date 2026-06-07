@@ -1,5 +1,6 @@
 import express from 'express'
-import { requireAuth, requireAdmin } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
+const requireAdmin = requireRole('admin')
 import {
   redeemVoucher,
   getBalance,
