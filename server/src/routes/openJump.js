@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { body, query, validationResult } from 'express-validator'
 import { requireAuth, requireRole } from '../middleware/auth.js'
-import { getSlots, createBooking, myBookings, getPackages, getBookingQr, getBookingIcs } from '../controllers/openJumpController.js'
+import { getSlots, createBooking, myBookings, getPackages, getBookingQr, getBookingIcs, validateDiscount } from '../controllers/openJumpController.js'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 const pricing = require('../../data/pricing.json')
@@ -28,6 +28,7 @@ router.post('/book', requireAuth, requireRole('customer', 'admin'), [
   body('participants').optional().isInt({ min: 1, max: 50 }),
 ], validate, createBooking)
 
+router.post('/validate-discount', requireAuth, validateDiscount)
 router.get('/my-bookings', requireAuth, myBookings)
 router.get('/booking/:id/qr', requireAuth, getBookingQr)
 router.get('/booking/:id/ics', requireAuth, getBookingIcs)

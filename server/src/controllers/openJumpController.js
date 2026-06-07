@@ -3,6 +3,9 @@ import { sequelize } from '../models/index.js'
 import OpenJumpBooking from '../models/OpenJumpBooking.js'
 import ParkClosure from '../models/ParkClosure.js'
 import User from '../models/User.js'
+import DiscountCode from '../models/DiscountCode.js'
+import DiscountCodeUse from '../models/DiscountCodeUse.js'
+import CustomerBalance from '../models/CustomerBalance.js'
 import { sendBookingConfirmation } from '../services/emailService.js'
 import { generateQR } from '../services/qrService.js'
 import { generateBookingIcs } from '../services/calendarService.js'
@@ -110,7 +113,7 @@ export async function getSlots(req, res) {
 
 // POST /api/openjump/book
 export async function createBooking(req, res) {
-  const { date, start_time, package_key, participants = 1 } = req.body
+  const { date, start_time, package_key, participants = 1, discount_code, use_balance } = req.body
   const userId = req.user.id
 
   // Validate
@@ -142,8 +145,37 @@ export async function createBooking(req, res) {
   }
 
   const { discounted: pricePerPerson, pct: discountPct } = calcGroupDiscount(pkg.key, pkg.price, participants)
-  const discount_amount = +((pkg.price - pricePerPerson) * participants).toFixed(2)
-  const total_price = (pricePerPerson * participants).toFixed(2)
+  let discount_amount = +((pkg.price - pricePerPerson) * participants).toFixed(2)
+  let base_price = +(pricePerPerson * participants).toFixed(2)
+
+  // Validate discount code
+  let discountCodeRecord = null
+  if (discount_code) {
+    discountCodeRecord = await getValidDiscount(discount_code, userId)
+    if (discountCodeRecord) {
+      if (discountCodeRecord.type === 'percentage') {
+        const extra = +(base_price * parseFloat(discountCodeRecord.value) / 100).toFixed(2)
+        discount_amount = +(discount_amount + extra).toFixed(2)
+        base_price = +(base_price - extra).toFixed(2)
+      } else {
+        const extra = Math.min(parseFloat(discountCodeRecord.value), base_price)
+        discount_amount = +(discount_amount + extra).toFixed(2)
+        base_price = +(base_price - extra).toFixed(2)
+      }
+    }
+  }
+
+  // Balance
+  let balance_used = 0
+  if (use_balance) {
+    const bal = await CustomerBalance.findOne({ where: { user_id: userId } })
+    if (bal && parseFloat(bal.balance_amount) > 0) {
+      balance_used = Math.min(parseFloat(bal.balance_amount), base_price)
+      balance_used = +balance_used.toFixed(2)
+    }
+  }
+
+  const total_price = +(base_price - balance_used).toFixed(2)
 
   const result = await sequelize.transaction(async (t) => {
     // Capacity check — lock rows
@@ -173,6 +205,21 @@ export async function createBooking(req, res) {
       cursor += 30
     }
 
+    // Deduct balance if used
+    if (balance_used > 0) {
+      const bal = await CustomerBalance.findOne({ where: { user_id: userId }, transaction: t, lock: t.LOCK.UPDATE })
+      if (bal) {
+        bal.balance_amount = Math.max(0, parseFloat(bal.balance_amount) - balance_used)
+        await bal.save({ transaction: t })
+      }
+    }
+
+    // Record discount code use
+    if (discountCodeRecord) {
+      await DiscountCodeUse.create({ discount_code_id: discountCodeRecord.id, user_id: userId }, { transaction: t })
+      await discountCodeRecord.increment('uses_count', { transaction: t })
+    }
+
     return OpenJumpBooking.create({
       user_id: userId,
       date,
@@ -183,6 +230,7 @@ export async function createBooking(req, res) {
       price_per_person: pricePerPerson,
       total_price,
       discount_amount,
+      discount_code_id: discountCodeRecord?.id || null,
       payment_status: 'pending',
       status: 'confirmed',
     }, { transaction: t })
@@ -221,6 +269,35 @@ export async function myBookings(req, res) {
 }
 
 // GET /api/openjump/packages
+// Helper: validate and fetch discount code
+async function getValidDiscount(code, userId) {
+  if (!code) return null
+  const dc = await DiscountCode.findOne({ where: { code: code.trim().toUpperCase(), is_active: true } })
+  if (!dc) return null
+  if (dc.expires_at && new Date(dc.expires_at) < new Date()) return null
+  if (dc.max_uses !== null && dc.uses_count >= dc.max_uses) return null
+  if (dc.single_use_per_customer) {
+    const used = await DiscountCodeUse.findOne({ where: { discount_code_id: dc.id, user_id: userId } })
+    if (used) return null
+  }
+  return dc
+}
+
+// POST /api/openjump/validate-discount
+export async function validateDiscount(req, res) {
+  const { code } = req.body
+  if (!code) return res.status(400).json({ error: 'Koda je obvezna' })
+  const dc = await getValidDiscount(code, req.user.id)
+  if (!dc) return res.status(404).json({ error: 'Koda ni veljavna ali je potekla' })
+  res.json({
+    valid: true,
+    code: dc.code,
+    type: dc.type,
+    percent: dc.type === 'percentage' ? parseFloat(dc.value) : null,
+    fixed: dc.type === 'fixed' ? parseFloat(dc.value) : null,
+  })
+}
+
 export async function getPackages(req, res) {
   res.json(PACKAGES)
 }

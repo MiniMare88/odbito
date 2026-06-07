@@ -869,17 +869,52 @@ function AuthGate({ visitors, day, slot, extras, onBack, onContinue }) {
 // ── Confirm ───────────────────────────────────────────────────────────────────
 
 function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
+  const { user } = useAuth()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
   const [bookingCode, setBookingCode] = useState('')
   const [bookError, setBookError] = useState('')
+  const [balance, setBalance] = useState(0)
+  const [useBalance, setUseBalance] = useState(false)
+  const [discountInfo, setDiscountInfo] = useState(null) // { valid, percent, amount }
+  const [checkingDiscount, setCheckingDiscount] = useState(false)
   const info = getOccupancyInfo(slot.booked)
 
   const totalPersons = visitors.adults + visitors.kids + visitors.youngKids
   const totalT = totalTickets(visitors.ticketQty)
   const ticketsTotal = calcTicketsTotal(visitors.ticketQty)
   const extrasTotal = calcExtrasTotal(extras)
-  const totalPrice = ticketsTotal + extrasTotal
+  const baseTotal = ticketsTotal + extrasTotal
+
+  // Discount
+  const discountAmount = discountInfo?.valid ? Math.round(baseTotal * (discountInfo.percent / 100) * 100) / 100 : 0
+  const afterDiscount = baseTotal - discountAmount
+
+  // Balance
+  const balanceUsed = useBalance ? Math.min(balance, afterDiscount) : 0
+  const totalPrice = Math.max(0, afterDiscount - balanceUsed)
+
+  useEffect(() => {
+    if (user) {
+      api.get('/vouchers/balance').then(r => setBalance(r.data.balance || 0)).catch(() => {})
+    }
+  }, [user])
+
+  useEffect(() => {
+    const code = visitors.popustKoda?.trim()
+    if (!code) { setDiscountInfo(null); return }
+    const timer = setTimeout(async () => {
+      setCheckingDiscount(true)
+      try {
+        const { data } = await api.post('/openjump/validate-discount', { code })
+        setDiscountInfo({ valid: true, percent: data.percent, code })
+      } catch {
+        setDiscountInfo({ valid: false, code })
+      }
+      setCheckingDiscount(false)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [visitors.popustKoda])
 
   const handleBook = async () => {
     setSubmitting(true)
@@ -892,6 +927,8 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
         start_time: slot.start,
         package_key: durationToPackageKey(durationMin),
         participants: totalT,
+        discount_code: visitors.popustKoda?.trim() || undefined,
+        use_balance: useBalance && balance > 0,
       })
       setBookingCode(data.booking_code)
       setDone(true)
@@ -994,6 +1031,32 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
             <span className="w-2 h-2 rounded-full" style={{ background: info.dot }} />{info.label}
           </span>
         </div>
+        {/* Discount row */}
+        {visitors.popustKoda?.trim() && (
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'var(--dark2)' }}>
+            <span className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--gray)' }}>
+              🏷 Popust {checkingDiscount ? '…' : discountInfo?.valid ? `(${discountInfo.percent}%)` : '(neveljavna koda)'}
+            </span>
+            <span className="font-condensed font-bold text-sm" style={{ color: discountInfo?.valid ? '#34d399' : '#f87171' }}>
+              {discountInfo?.valid ? `-€${discountAmount.toFixed(2).replace('.', ',')}` : '—'}
+            </span>
+          </div>
+        )}
+        {/* Balance row */}
+        {balance > 0 && (
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)', background: 'var(--dark2)' }}>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={useBalance} onChange={e => setUseBalance(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
+              <span className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--gray)' }}>
+                Uporabi stanje (€{balance.toFixed(2)})
+              </span>
+            </label>
+            <span className="font-condensed font-bold text-sm" style={{ color: useBalance ? '#34d399' : '#555' }}>
+              {useBalance ? `-€${balanceUsed.toFixed(2).replace('.', ',')}` : '—'}
+            </span>
+          </div>
+        )}
         <div className="flex items-center justify-between px-6 py-5" style={{ background: 'rgba(250,177,32,0.06)' }}>
           <span className="font-condensed font-black text-sm tracking-widest uppercase" style={{ color: 'var(--accent)' }}>Skupaj</span>
           <span className="font-display text-4xl" style={{ color: 'var(--accent)' }}>€{totalPrice.toFixed(2).replace('.', ',')}</span>
