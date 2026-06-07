@@ -27,6 +27,9 @@ import BirthdayBooking from './BirthdayBooking.js'
 import ParkSchedule from './ParkSchedule.js'
 import ParkScheduleOverride from './ParkScheduleOverride.js'
 import UserNote from './UserNote.js'
+import Voucher from './Voucher.js'
+import CustomerBalance from './CustomerBalance.js'
+import VoucherRedemption from './VoucherRedemption.js'
 
 // ── Associations ─────────────────────────────────────────────
 
@@ -109,6 +112,22 @@ User.hasMany(UserNote, { foreignKey: 'user_id', as: 'notes' })
 UserNote.belongsTo(User, { foreignKey: 'user_id', as: 'targetUser' })
 UserNote.belongsTo(User, { foreignKey: 'created_by', as: 'author' })
 
+// Voucher
+Voucher.belongsTo(User, { foreignKey: 'redeemed_by', as: 'redeemedByUser' })
+Voucher.belongsTo(User, { foreignKey: 'created_by', as: 'createdByUser' })
+User.hasMany(Voucher, { foreignKey: 'redeemed_by', as: 'redeemedVouchers' })
+User.hasMany(Voucher, { foreignKey: 'created_by', as: 'purchasedVouchers' })
+
+// CustomerBalance
+User.hasOne(CustomerBalance, { foreignKey: 'user_id', as: 'balance' })
+CustomerBalance.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+
+// VoucherRedemption
+VoucherRedemption.belongsTo(Voucher, { foreignKey: 'voucher_id', as: 'voucher' })
+VoucherRedemption.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+Voucher.hasMany(VoucherRedemption, { foreignKey: 'voucher_id', as: 'redemptions' })
+User.hasMany(VoucherRedemption, { foreignKey: 'user_id', as: 'voucherRedemptions' })
+
 // BirthdayBooking
 User.hasMany(BirthdayBooking, { foreignKey: 'user_id', as: 'birthdayBookings' })
 BirthdayBooking.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
@@ -164,6 +183,9 @@ export {
   ParkSchedule,
   ParkScheduleOverride,
   UserNote,
+  Voucher,
+  CustomerBalance,
+  VoucherRedemption,
 }
 
 export default sequelize

@@ -13,31 +13,63 @@ const DAYS = [
   { key: 'ned', label: 'NED', full: 'Nedelja' },
 ]
 
+// ── Barve po programih ────────────────────────────────────────────────
+const C = {
+  motorika:   '#A8C8E8', // svetlo modra  — Osnovna motorika 3–4
+  osnove:     '#6B9FD4', // modra         — Osnove gimnastike 4–6
+  junior:     '#5A8FCA', // temnejša modra — Gimnastika Junior 6–8
+  cicibani:   '#7BBFB8', // teal          — Gimnastika Cicibani 8–10
+  g1113:      '#88C47C', // zelena        — Gimnastika 11–13
+  advance:    '#E8A87B', // lososova      — Gimnastika advance 13–16
+  advanceB:   '#6B9FD4', // modra         — Gimnastika advance 13–16 (B skupina)
+  pro:        '#D47878', // rdeča-losos   — Gimnastika PRO 16+
+  proB:       '#5A8FCA', // modra         — Gimnastika PRO 16+ (B skupina)
+  akr:        '#E07878', // koralna       — AKR
+  zab:        '#C87B7B', // rdeče-rjava   — ZAB
+  wall:       '#909AAA', // siva          — WALL
+  wallB:      '#7EC87E', // zelena        — WALL (B skupina)
+}
+
+const PON_GROUPS = [
+  { name: 'Skupina 0.1', time: '15:00 – 15:30', color: C.motorika,  program: 'Osnovna motorika', age: '3–4 let' },
+  { name: 'Skupina 0.2', time: '15:00 – 15:30', color: C.motorika,  program: 'Osnovna motorika', age: '3–4 let' },
+  { name: 'Skupina 1.1', time: '17:00 – 17:30', color: C.osnove,    program: 'Osnove gimnastike', age: '4–6 let' },
+  { name: 'Skupina 1.2', time: '17:00 – 17:30', color: C.osnove,    program: 'Osnove gimnastike', age: '4–6 let' },
+  { name: 'Skupina 3.1', time: '17:30 – 18:00', color: C.cicibani,  program: 'Gimnastika Cicibani', age: '8–10 let' },
+  { name: 'Skupina 3.2', time: '17:30 – 18:00', color: C.cicibani,  program: 'Gimnastika Cicibani', age: '8–10 let' },
+  { name: 'Skupina 5.1', time: '19:00 – 19:30', color: C.g1113,     program: 'Gimnastika', age: '11–13 let' },
+  { name: 'Skupina 5.2', time: '19:00 – 19:30', color: C.advance,   program: 'Gimnastika advance', age: '13–16 let' },
+  { name: 'Skupina 5.3', time: '19:00 – 19:30', color: C.advanceB,  program: 'Gimnastika advance', age: '13–16 let' },
+  { name: 'Skupina 7.1', time: '20:30 – 21:00', color: C.akr,       program: 'AKR', age: '' },
+  { name: 'Skupina 7.2', time: '20:30 – 21:00', color: C.zab,       program: 'ZAB', age: '' },
+  { name: 'Skupina 7.3', time: '20:30 – 21:00', color: C.wall,      program: 'WALL', age: '' },
+]
+
+const TOR_GROUPS = [
+  { name: 'Skupina 2.1', time: '17:00 – 17:30', color: C.junior,    program: 'Gimnastika Junior', age: '6–8 let' },
+  { name: 'Skupina 2.2', time: '17:00 – 17:30', color: C.junior,    program: 'Gimnastika Junior', age: '6–8 let' },
+  { name: 'Skupina 4.1', time: '17:30 – 18:00', color: C.cicibani,  program: 'Gimnastika Cicibani', age: '8–10 let' },
+  { name: 'Skupina 4.2', time: '17:30 – 18:00', color: C.g1113,     program: 'Gimnastika', age: '11–13 let' },
+  { name: 'Skupina 6.1', time: '19:00 – 19:30', color: C.advance,   program: 'Gimnastika advance', age: '13–16 let' },
+  { name: 'Skupina 6.2', time: '19:00 – 19:30', color: C.pro,       program: 'Gimnastika PRO', age: '16+' },
+  { name: 'Skupina 6.3', time: '19:00 – 19:30', color: C.proB,      program: 'Gimnastika PRO', age: '16+' },
+  { name: 'Skupina 8.1', time: '20:30 – 21:00', color: C.akr,       program: 'AKR', age: '' },
+  { name: 'Skupina 8.2', time: '20:30 – 21:00', color: C.zab,       program: 'ZAB', age: '' },
+  { name: 'Skupina 8.3', time: '20:30 – 21:00', color: C.wallB,     program: 'WALL', age: '' },
+]
+
+const PET_GROUPS = [
+  { name: 'Skupina 6.3', time: '19:00 – 19:30', color: C.proB,   program: 'Gimnastika PRO', age: '16+' },
+  { name: 'Skupina 7.1', time: '20:30 – 21:00', color: C.akr,    program: 'AKR', age: '' },
+  { name: 'Skupina 7.2', time: '20:30 – 21:00', color: C.zab,    program: 'ZAB', age: '' },
+]
+
 const CLASS_GROUPS = {
-  pon: [
-    { name: 'Skupina 1', time: '16:00 – 17:00', color: '#7BB3E8', program: 'Osnove gimnastike',   age: '5–7 let' },
-    { name: 'Skupina 3', time: '17:00 – 18:00', color: '#7EC87E', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 5', time: '18:00 – 19:30', color: '#E8A87B', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 7', time: '19:30 – 21:00', color: '#9B8FE0', program: 'Napredna gimnastika', age: '10–12 let' },
-  ],
-  tor: [
-    { name: 'Skupina 2', time: '16:00 – 17:00', color: '#7BB3E8', program: 'Osnove gimnastike',   age: '5–7 let' },
-    { name: 'Skupina 4', time: '17:00 – 18:00', color: '#7EC87E', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 6', time: '18:00 – 19:30', color: '#E0B84E', program: 'Napredna gimnastika', age: '10–12 let' },
-    { name: 'Skupina 8', time: '19:30 – 21:00', color: '#C87B7B', program: 'Napredna gimnastika', age: '12–15 let' },
-  ],
-  sre: [
-    { name: 'Skupina 1', time: '16:00 – 17:00', color: '#7BB3E8', program: 'Osnove gimnastike',   age: '5–7 let' },
-    { name: 'Skupina 3', time: '17:00 – 18:00', color: '#7EC87E', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 5', time: '18:00 – 19:30', color: '#E8A87B', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 7', time: '19:30 – 21:00', color: '#9B8FE0', program: 'Napredna gimnastika', age: '10–12 let' },
-  ],
-  cet: [
-    { name: 'Skupina 2', time: '16:00 – 17:00', color: '#7BB3E8', program: 'Osnove gimnastike',   age: '5–7 let' },
-    { name: 'Skupina 4', time: '17:00 – 18:00', color: '#7EC87E', program: 'Osnove gimnastike',   age: '8–10 let' },
-    { name: 'Skupina 6', time: '18:00 – 19:30', color: '#E0B84E', program: 'Napredna gimnastika', age: '10–12 let' },
-    { name: 'Skupina 8', time: '19:30 – 21:00', color: '#C87B7B', program: 'Napredna gimnastika', age: '12–15 let' },
-  ],
+  pon: PON_GROUPS,
+  tor: TOR_GROUPS,
+  sre: PON_GROUPS, // enako kot ponedeljek
+  cet: TOR_GROUPS, // enako kot torek
+  pet: PET_GROUPS,
 }
 
 const BLOCKS = [
@@ -48,8 +80,8 @@ const BLOCKS = [
     color: '#fab120',
     textColor: '#080A0E',
     days: ['pon', 'tor', 'sre', 'cet'],
-    startH: 16, startM: 0,
-    endH: 21,   endM: 30,
+    startH: 15, startM: 0,
+    endH: 21,   endM: 0,
     clickable: true,
   },
   {
@@ -60,7 +92,30 @@ const BLOCKS = [
     textColor: '#F5F5F0',
     link: '/rezervacija',
     days: ['pet'],
-    startH: 15, startM: 0,
+    startH: 10, startM: 0,
+    endH: 20,   endM: 0,
+    clickable: false,
+  },
+  {
+    type: 'akademija',
+    label: 'ODBITA AKADEMIJA',
+    sublabel: 'Vodene vadbe',
+    color: '#fab120',
+    textColor: '#080A0E',
+    days: ['pet'],
+    startH: 19, startM: 0,
+    endH: 21,   endM: 0,
+    clickable: true,
+  },
+  {
+    type: 'openjump',
+    label: 'OPEN JUMP',
+    sublabel: 'Prosto skakanje',
+    color: '#2563a8',
+    textColor: '#F5F5F0',
+    link: '/rezervacija',
+    days: ['sob'],
+    startH: 10, startM: 0,
     endH: 21,   endM: 0,
     clickable: false,
   },
@@ -71,15 +126,15 @@ const BLOCKS = [
     color: '#2563a8',
     textColor: '#F5F5F0',
     link: '/rezervacija',
-    days: ['sob', 'ned'],
+    days: ['ned'],
     startH: 10, startM: 0,
-    endH: 21,   endM: 0,
+    endH: 20,   endM: 0,
     clickable: false,
   },
 ]
 
-const DAY_START = 9
-const DAY_END   = 22
+const DAY_START = 10
+const DAY_END   = 21
 const TOTAL_H   = DAY_END - DAY_START
 
 function toPercent(h, m = 0) {
@@ -121,44 +176,63 @@ function DetailPanel({ dayKey, onClose }) {
         </button>
       </div>
 
-      {/* Groups grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 p-5">
-        {groups.map((g, i) => (
-          <div key={i} className="rounded-xl overflow-hidden"
-            style={{ border: `2px solid ${g.color}40` }}>
-            {/* Color strip + name */}
-            <div className="px-4 py-3 flex items-center justify-between"
-              style={{ background: `${g.color}22` }}>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: g.color }} />
-                <span className="font-condensed font-black text-sm uppercase tracking-wider" style={{ color: g.color }}>
-                  {g.name}
-                </span>
+      {/* Groups grid — grouped by time slot */}
+      <div className="p-5">
+        {(() => {
+          // group by time slot
+          const slots = []
+          const seen = {}
+          groups.forEach(g => {
+            if (!seen[g.time]) { seen[g.time] = []; slots.push(g.time) }
+            seen[g.time].push(g)
+          })
+          return slots.map(time => (
+            <div key={time} className="mb-4">
+              <div className="font-condensed font-bold text-xs tracking-widest uppercase mb-2 flex items-center gap-2"
+                style={{ color: 'var(--gray)' }}>
+                <span style={{ color: 'var(--accent)' }}>⏱</span> {time}
               </div>
-              <span className="font-condensed font-bold text-sm" style={{ color: 'var(--white)' }}>
-                {g.time}
-              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {seen[time].map((g, i) => (
+                  <div key={i} className="rounded-xl overflow-hidden"
+                    style={{ border: `1px solid ${g.color}50` }}>
+                    <div className="px-3 py-2 flex items-center gap-2"
+                      style={{ background: `${g.color}25` }}>
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: g.color }} />
+                      <span className="font-condensed font-black text-xs uppercase tracking-wider" style={{ color: g.color }}>
+                        {g.name}
+                      </span>
+                    </div>
+                    <div className="px-3 py-2" style={{ background: 'var(--dark3)' }}>
+                      <div className="font-condensed font-black text-xs uppercase tracking-wide mb-0.5" style={{ color: 'var(--white)' }}>
+                        {g.program}
+                      </div>
+                      {g.age && (
+                        <div className="badge" style={{ '--badge-dot': g.color, fontSize: '11px' }}>
+                          {g.age}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            {/* Program info */}
-            <div className="px-4 py-3" style={{ background: 'var(--dark3)' }}>
-              <div className="font-condensed font-black text-sm uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
-                {g.program}
-              </div>
-              <div className="badge" style={{ '--badge-dot': g.color }}>
-                {g.age}
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        })()}
       </div>
 
       {/* CTA */}
-      <div className="px-5 pb-5">
-        <Link to="/vadbe" onClick={onClose}
-          className="btn-primary w-full text-center block"
+      <div className="px-5 pb-5 flex gap-3">
+        <Link to="/vadbe/prijava"
+          className="btn-primary flex-1 text-center block"
           style={{ textDecoration: 'none' }}>
-          OGLEJ SI CELOTEN URNIK →
+          PRIJAVI SE NA VADBO →
         </Link>
+        <button onClick={onClose}
+          className="btn-secondary px-5"
+          style={{ flexShrink: 0 }}>
+          ZAPRI
+        </button>
       </div>
     </div>
   )
@@ -268,9 +342,10 @@ function DesktopSchedule({ selectedDay, onSelectDay }) {
                     </div>
 
                     {/* Sub-group preview dots when akademija */}
-                    {isClickable && CLASS_GROUPS[day.key] && (
+                    {isClickable && CLASS_GROUPS[day.key]?.length > 0 && (
                       <div className="flex gap-1 mt-1 flex-wrap">
-                        {CLASS_GROUPS[day.key].map((g, gi) => (
+                        {/* show unique colors only */}
+                        {[...new Map(CLASS_GROUPS[day.key].map(g => [g.color, g])).values()].map((g, gi) => (
                           <div key={gi} className="w-1.5 h-1.5 rounded-full" style={{ background: g.color, opacity: 0.9 }} />
                         ))}
                       </div>
@@ -319,11 +394,13 @@ function DesktopSchedule({ selectedDay, onSelectDay }) {
 function MobileSchedule({ selectedDay, onSelectDay }) {
   const MOBILE_ROWS = [
     { days: 'Pon – Čet', keys: ['pon', 'tor', 'sre', 'cet'], type: 'akademija',
-      color: '#fab120', textColor: '#080A0E', time: '16:00 – 21:30', label: 'Odbita Akademija', sub: 'Vodene vadbe' },
-    { days: 'Petek', keys: ['pet'], type: 'openjump',
-      color: '#2563a8', textColor: '#F5F5F0', time: '15:00 – 21:00', label: 'Open Jump', sub: 'Prosto skakanje', link: '/rezervacija' },
-    { days: 'Sob – Ned', keys: ['sob', 'ned'], type: 'openjump',
+      color: '#fab120', textColor: '#080A0E', time: '15:00 – 21:00', label: 'Odbita Akademija', sub: 'Vodene vadbe' },
+    { days: 'Petek', keys: ['pet'], type: 'mixed',
+      color: '#2563a8', textColor: '#F5F5F0', time: '10:00 – 21:00', label: 'Open Jump + Akademija', sub: 'Prosto skakanje & vodene vadbe', link: '/rezervacija' },
+    { days: 'Sobota', keys: ['sob'], type: 'openjump',
       color: '#2563a8', textColor: '#F5F5F0', time: '10:00 – 21:00', label: 'Open Jump', sub: 'Prosto skakanje', link: '/rezervacija' },
+    { days: 'Nedelja', keys: ['ned'], type: 'openjump',
+      color: '#2563a8', textColor: '#F5F5F0', time: '10:00 – 20:00', label: 'Open Jump', sub: 'Prosto skakanje', link: '/rezervacija' },
   ]
 
   return (
@@ -337,11 +414,11 @@ function MobileSchedule({ selectedDay, onSelectDay }) {
             </span>
           </div>
 
-          {row.type === 'akademija' ? (
+          {(row.type === 'akademija' || row.type === 'mixed') ? (
             <button
               className="w-full flex items-center gap-4 px-4 py-4 transition-opacity text-left"
               style={{ background: row.color, border: 'none', cursor: 'pointer' }}
-              onClick={() => onSelectDay(selectedDay === 'pon' ? null : 'pon')}>
+              onClick={() => onSelectDay(selectedDay === row.keys[0] ? null : row.keys[0])}>
               <div className="flex-1">
                 <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: row.textColor }}>
                   {row.label}
@@ -351,7 +428,7 @@ function MobileSchedule({ selectedDay, onSelectDay }) {
               <div className="flex items-center gap-2">
                 <div className="font-condensed font-bold text-sm" style={{ color: row.textColor }}>{row.time}</div>
                 <span className="font-condensed font-black" style={{ color: row.textColor, fontSize: '16px' }}>
-                  {selectedDay ? '▲' : '▼'}
+                  {selectedDay === row.keys[0] ? '▲' : '▼'}
                 </span>
               </div>
             </button>
@@ -371,7 +448,7 @@ function MobileSchedule({ selectedDay, onSelectDay }) {
       ))}
 
       {/* Mobile group detail */}
-      {selectedDay && CLASS_GROUPS[selectedDay] && (
+      {selectedDay && CLASS_GROUPS[selectedDay] && CLASS_GROUPS[selectedDay].length > 0 && (
         <div className="rounded-2xl overflow-hidden"
           style={{ border: '2px solid rgba(250,177,32,0.3)', animation: 'slideDown 0.25s ease' }}>
           <style>{`@keyframes slideDown { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:none } }`}</style>
@@ -393,7 +470,7 @@ function MobileSchedule({ selectedDay, onSelectDay }) {
                     {g.name} · {g.time}
                   </div>
                   <div className="font-condensed text-xs" style={{ color: 'var(--gray)' }}>
-                    {g.program} · {g.age}
+                    {g.program}{g.age ? ` · ${g.age}` : ''}
                   </div>
                 </div>
               </div>

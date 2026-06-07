@@ -13,6 +13,7 @@ import scheduleRoutes from './routes/schedule.js'
 import birthdayRoutes from './routes/birthday.js'
 import parkScheduleRoutes from './routes/parkSchedule.js'
 import kioskRoutes from './routes/kiosk.js'
+import voucherRoutes from './routes/vouchers.js'
 
 const app = express()
 
@@ -60,6 +61,7 @@ app.use('/api/schedule', scheduleRoutes)
 app.use('/api/birthday', birthdayRoutes)
 app.use('/api/park-schedule', parkScheduleRoutes)
 app.use('/api/kiosk', kioskRoutes)
+app.use('/api/vouchers', voucherRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })

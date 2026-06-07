@@ -348,3 +348,77 @@ export async function sendSubscriptionConfirmation(subscription, classType, user
   }
   return info
 }
+
+// ── Voucher email ─────────────────────────────────────────────────────────────
+
+function voucherEmailHtml({ vouchers, type, firstName }) {
+  const isPurchase = type === 'purchase'
+  const isRefund = type === 'refund'
+  const titleSl = isPurchase ? 'Vaša darilna kartica' : isRefund ? 'Kredit za preklicano rezervacijo' : 'Vaš promocijski bon'
+  const titleEn = isPurchase ? 'Your Gift Voucher' : isRefund ? 'Refund Voucher for Cancelled Booking' : 'Your Promotional Voucher'
+  const intro = isPurchase
+    ? `Hvala za nakup! Spodaj najdete ${vouchers.length > 1 ? 'vaše darilne kartice' : 'vašo darilno kartico'}.`
+    : isRefund
+    ? 'Vaša rezervacija je bila uspešno preklicana. Prejeli ste povračilo v obliki kredita.'
+    : 'Prejeli ste promocijski bon za Odbito.'
+
+  const voucherCards = vouchers.map(v => {
+    const expiryStr = new Date(v.expires_at).toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' })
+    return `
+    <div style="background:#1a1f2e;border-radius:12px;padding:24px;margin-bottom:16px;border:1px solid rgba(250,177,32,0.3);text-align:center;">
+      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#fab120;margin-bottom:8px;">Vrednost kartice</div>
+      <div style="font-size:48px;font-weight:900;color:#fab120;margin-bottom:12px;">€${parseFloat(v.denomination).toFixed(0)}</div>
+      <div style="font-family:monospace;font-size:18px;letter-spacing:4px;color:#fff;background:#0d0d0d;padding:12px 20px;border-radius:8px;display:inline-block;margin-bottom:8px;">${v.code}</div>
+      <div style="font-size:12px;color:#666;margin-top:8px;">Veljavno do: ${expiryStr}</div>
+    </div>`
+  }).join('')
+
+  return `<!DOCTYPE html>
+<html lang="sl">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080A0E;font-family:'Helvetica Neue',Arial,sans-serif;color:#F5F5F0;">
+<div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <div style="font-family:Georgia,serif;font-size:36px;letter-spacing:0.1em;color:#F5F5F0;">ODBITO <span style="color:#fab120;">360</span></div>
+  </div>
+  <div style="background:#141820;border-radius:16px;padding:32px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.07);">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#fab120;margin-bottom:8px;">${titleSl}</div>
+    <h1 style="margin:0 0 8px;font-size:28px;color:#F5F5F0;">${titleEn}</h1>
+    <p style="margin:0;color:#7A8499;">${firstName ? `Pozdravljeni, ${firstName}! ` : ''}${intro}</p>
+  </div>
+  ${voucherCards}
+  <div style="background:#141820;border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.07);margin-top:16px;">
+    <p style="margin:0;color:#7A8499;font-size:13px;">Kodo unovčite v vašem profilu na <a href="https://www.odbito.fun" style="color:#fab120;">odbito.fun</a> → "Unovči bon". Koda je veljavna za enkratno uporabo.</p>
+  </div>
+  <div style="text-align:center;margin-top:32px;color:#444;font-size:12px;">© 2026 Odbito 360 · info@odbito.si</div>
+</div>
+</body></html>`
+}
+
+export async function sendVoucherEmail({ vouchers, email, firstName, type }) {
+  const subjectMap = {
+    purchase: 'Vaša darilna kartica — Odbito',
+    refund: 'Kredit za preklicano rezervacijo — Odbito',
+    promotional: 'Vaš promocijski bon — Odbito',
+  }
+
+  if (resendClient) {
+    const { error } = await resendClient.emails.send({
+      from: FROM,
+      to: email,
+      subject: subjectMap[type] || 'Vaš bon — Odbito',
+      html: voucherEmailHtml({ vouchers, type, firstName }),
+    })
+    if (error) console.error('Resend voucher email error:', error)
+    return
+  }
+
+  const transport = createTransport()
+  await transport.sendMail({
+    from: FROM,
+    to: email,
+    subject: subjectMap[type] || 'Vaš bon — Odbito',
+    html: voucherEmailHtml({ vouchers, type, firstName }),
+  })
+  console.log(`[EMAIL DEV] Voucher email → ${email}`)
+}

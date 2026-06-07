@@ -83,6 +83,18 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('upcoming')
   const [qrModal, setQrModal] = useState(null) // { id, booking_code }
+  const [balance, setBalance] = useState(0)
+  const [balanceHistory, setBalanceHistory] = useState([])
+  const [redeemCode, setRedeemCode] = useState('')
+  const [redeemLoading, setRedeemLoading] = useState(false)
+  const [redeemMsg, setRedeemMsg] = useState(null) // { type: 'ok'|'err', text }
+
+  const loadBalance = () => {
+    api.get('/vouchers/balance').then(r => {
+      setBalance(r.data.balance)
+      setBalanceHistory(r.data.history || [])
+    }).catch(() => {})
+  }
 
   useEffect(() => {
     Promise.all([
@@ -92,7 +104,24 @@ export default function CustomerDashboard() {
       setBookings(b.data)
       setSubscriptions(s.data)
     }).catch(() => {}).finally(() => setLoading(false))
+    loadBalance()
   }, [])
+
+  const handleRedeem = async (e) => {
+    e.preventDefault()
+    if (!redeemCode.trim()) return
+    setRedeemLoading(true)
+    setRedeemMsg(null)
+    try {
+      const res = await api.post('/vouchers/redeem', { code: redeemCode.trim() })
+      setRedeemMsg({ type: 'ok', text: res.data.message })
+      setRedeemCode('')
+      loadBalance()
+    } catch (err) {
+      setRedeemMsg({ type: 'err', text: err.response?.data?.error || 'Napaka pri unovčevanju' })
+    }
+    setRedeemLoading(false)
+  }
 
   const today = new Date().toISOString().split('T')[0]
   const upcoming = bookings.filter(b => b.date >= today && b.status !== 'cancelled')
@@ -109,6 +138,7 @@ export default function CustomerDashboard() {
     { key: 'upcoming',  label: 'Open Jump', count: upcoming.length },
     { key: 'past',      label: 'Pretekle',  count: past.length },
     { key: 'subs',      label: 'Naročnine', count: activeSubs.length },
+    { key: 'vouchers',  label: `Boni${balance > 0 ? ` · €${balance.toFixed(2)}` : ''}`, count: null },
     { key: 'profile',   label: 'Profil',    count: null },
   ]
 
@@ -270,6 +300,71 @@ export default function CustomerDashboard() {
               </div>
             )}
           </>
+        )}
+
+        {/* Vouchers / Balance tab */}
+        {activeTab === 'vouchers' && (
+          <div className="flex flex-col gap-4">
+            {/* Balance display */}
+            <div className="card" style={{ textAlign: 'center', padding: '32px 24px' }}>
+              <div className="section-label mb-3">Stanje na računu</div>
+              <div style={{ fontSize: 56, fontWeight: 900, color: 'var(--accent)', lineHeight: 1 }}>
+                €{balance.toFixed(2)}
+              </div>
+              <div style={{ color: 'var(--gray)', fontSize: 13, marginTop: 8 }}>
+                Kredit se avtomatično odšteje pri naslednji rezervaciji
+              </div>
+            </div>
+
+            {/* Redeem form */}
+            <div className="card">
+              <div className="section-label mb-4">Unovči bon / darilno kartico</div>
+              <form onSubmit={handleRedeem} style={{ display: 'flex', gap: 10 }}>
+                <input
+                  value={redeemCode}
+                  onChange={e => { setRedeemCode(e.target.value.toUpperCase()); setRedeemMsg(null) }}
+                  placeholder="ODBITO-XXXX-XXXX-XXXX-XXXX"
+                  style={{
+                    flex: 1, background: '#1a1a1a', border: '1px solid #333',
+                    borderRadius: 8, color: '#fff', padding: '10px 14px',
+                    fontFamily: 'monospace', fontSize: 14, letterSpacing: 2,
+                  }}
+                />
+                <button type="submit" disabled={redeemLoading || !redeemCode.trim()}
+                  style={{ background: 'var(--accent)', border: 'none', borderRadius: 8, color: '#000', padding: '10px 20px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  {redeemLoading ? '…' : 'Unovči'}
+                </button>
+              </form>
+              {redeemMsg && (
+                <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, fontSize: 13,
+                  background: redeemMsg.type === 'ok' ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)',
+                  color: redeemMsg.type === 'ok' ? '#34d399' : '#f87171',
+                  border: `1px solid ${redeemMsg.type === 'ok' ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'}`,
+                }}>
+                  {redeemMsg.text}
+                </div>
+              )}
+            </div>
+
+            {/* History */}
+            {balanceHistory.length > 0 && (
+              <div className="card">
+                <div className="section-label mb-4">Zgodovina unovčevanj</div>
+                {balanceHistory.map(r => (
+                  <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #1a1a1a' }}>
+                    <div>
+                      <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#fab120' }}>{r.voucher?.code}</div>
+                      <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                        {new Date(r.redeemed_at).toLocaleDateString('sl-SI')} ·{' '}
+                        {r.voucher?.type === 'purchase' ? 'Darilna kartica' : r.voucher?.type === 'refund' ? 'Povračilo' : 'Promocijski bon'}
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 700, color: '#34d399' }}>+€{parseFloat(r.voucher?.denomination || 0).toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Profile tab */}

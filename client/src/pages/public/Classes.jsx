@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api.js'
 import { useAuth } from '../../context/AuthContext.jsx'
+import WeeklySchedule from '../../components/WeeklySchedule.jsx'
 
 const DAYS = ['', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja']
 
@@ -73,71 +74,8 @@ export default function Classes() {
       ) : view === 'schedule' ? (
 
         /* ── SCHEDULE VIEW ── */
-        <section className="px-[5%] pb-20">
-          <div className="max-w-6xl mx-auto">
-            {days.length === 0 ? (
-              <div className="card text-center py-16"><p style={{ color: 'var(--gray)' }}>Ni razpoložljivih terminov.</p></div>
-            ) : (
-              <div className="flex flex-col gap-10">
-                {days.map(day => (
-                  <div key={day.date}>
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="font-display text-5xl" style={{ color: 'var(--accent)', lineHeight: 1, minWidth: '56px' }}>
-                        {new Date(day.date + 'T12:00:00').getDate()}
-                      </div>
-                      <div>
-                        <div className="font-condensed font-black text-lg uppercase tracking-wide" style={{ color: 'var(--white)' }}>
-                          {DAYS[day.dow]}
-                        </div>
-                        <div className="font-condensed text-xs uppercase tracking-widest" style={{ color: 'var(--gray)' }}>
-                          {new Date(day.date + 'T12:00:00').toLocaleDateString('sl-SI', { month: 'long', year: 'numeric' })}
-                        </div>
-                      </div>
-                      <div className="flex-1 h-px ml-2" style={{ background: 'var(--border)' }} />
-                    </div>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {day.sessions.map(s => {
-                        const full = s.available <= 0
-                        const almostFull = s.available <= 3 && !full
-                        return (
-                          <div key={s.id} className="card" style={{ borderLeft: `3px solid ${s.class_type.color_hex}` }}>
-                            <div className="flex items-start justify-between mb-3">
-                              <div>
-                                <div className="font-condensed font-black text-base uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
-                                  {s.class_type.name_sl}
-                                </div>
-                                <div className="font-display text-2xl" style={{ color: s.class_type.color_hex, lineHeight: 1 }}>
-                                  {s.start_time} – {s.end_time}
-                                </div>
-                              </div>
-                              <span className="font-condensed text-xs font-bold tracking-widest px-2 py-1 rounded" style={{
-                                background: full ? 'rgba(255,61,0,0.12)' : almostFull ? 'rgba(250,177,32,0.12)' : 'rgba(34,197,94,0.12)',
-                                color: full ? '#FF3D00' : almostFull ? 'var(--accent)' : 'var(--green)',
-                              }}>
-                                {full ? 'POLNO' : `${s.available} MEST`}
-                              </span>
-                            </div>
-                            <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.5)', marginBottom: '14px', lineHeight: 1.5 }}>
-                              {s.class_type.description_sl?.slice(0, 85)}…
-                            </p>
-                            <button onClick={() => handleSubscribe(s.class_type.id)}
-                              className="font-condensed font-bold text-xs tracking-widest uppercase py-2 px-4 rounded-lg w-full transition-all"
-                              style={{
-                                background: full ? 'transparent' : 'var(--accent)',
-                                color: full ? 'var(--gray)' : 'var(--black)',
-                                border: full ? '1px solid var(--border)' : 'none',
-                              }}>
-                              {full ? 'ČAKALNA LISTA' : 'NAROČI SE →'}
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <section className="pb-20">
+          <WeeklySchedule />
         </section>
 
       ) : (

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>ODBITO — Arhitektura sistema</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d0d;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    letter-spacing: 6px;
+    color: #fab120;
+    margin-bottom: 6px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 50px;
+    letter-spacing: 2px;
+  }
+
+  /* GRID LAYOUT */
+  .arch {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* ROW */
+  .row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  /* CARDS */
+  .card {
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 22px 24px;
+    border: 1px solid #2a2a2a;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  .card.accent-yellow { border-top: 3px solid #fab120; }
+  .card.accent-blue   { border-top: 3px solid #60a5fa; }
+  .card.accent-green  { border-top: 3px solid #34d399; }
+  .card.accent-purple { border-top: 3px solid #a78bfa; }
+  .card.accent-red    { border-top: 3px solid #f87171; }
+  .card.accent-orange { border-top: 3px solid #fb923c; }
+  .card.accent-gray   { border-top: 3px solid #6b7280; }
+  .card.accent-pink   { border-top: 3px solid #f472b6; }
+
+  .card-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .card-title {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .card-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .card-url {
+    font-size: 0.72rem;
+    color: #fab120;
+    background: rgba(250,177,32,0.08);
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+    font-family: monospace;
+  }
+  .card-desc {
+    font-size: 0.8rem;
+    color: #999;
+    line-height: 1.6;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin: 2px 2px 0 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .tag-yellow { background: rgba(250,177,32,0.15); color: #fab120; }
+  .tag-blue   { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .tag-green  { background: rgba(52,211,153,0.15); color: #34d399; }
+  .tag-red    { background: rgba(248,113,113,0.15); color: #f87171; }
+  .tag-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  .tag-gray   { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+  /* STATUS DOTS */
+  .status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.75rem; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green  { background: #34d399; box-shadow: 0 0 6px #34d399; }
+  .dot-yellow { background: #fab120; box-shadow: 0 0 6px #fab120; }
+  .dot-red    { background: #f87171; box-shadow: 0 0 6px #f87171; }
+  .dot-gray   { background: #6b7280; }
+
+  /* FLOW ARROWS */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .arrow {
+    color: #444;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #444;
+    margin: 10px 0 -10px;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid #222;
+    margin: 10px 0;
+  }
+
+  /* WIDE CARD */
+  .card.wide { flex: 2; }
+  .card.narrow { flex: 0 0 220px; }
+
+  /* FLOW DIAGRAM */
+  .flow-diagram {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+  }
+  .flow-step {
+    display: inline-flex;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    gap: 8px;
+  }
+  .flow-arrow {
+    color: #fab120;
+    font-size: 1.2rem;
+    margin: 0 6px;
+  }
+
+  /* WARNING BOX */
+  .warn-box {
+    background: rgba(248,113,113,0.06);
+    border: 1px solid rgba(248,113,113,0.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.8rem;
+    color: #f87171;
+    margin-top: 10px;
+  }
+  .ok-box {
+    background: rgba(52,211,153,0.06);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.8rem;
+    color: #34d399;
+    margin-top: 10px;
+  }
+
+  ul.items {
+    list-style: none;
+    margin-top: 8px;
+  }
+  ul.items li {
+    font-size: 0.78rem;
+    color: #aaa;
+    padding: 3px 0;
+    border-bottom: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  ul.items li:last-child { border: none; }
+  ul.items li span { font-family: monospace; font-size: 0.72rem; color: #666; }
+
+  .big-arrow {
+    text-align: center;
+    font-size: 2rem;
+    color: #2a2a2a;
+    margin: -10px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>ODBITO</h1>
+<div class="subtitle">Arhitektura sistema · junij 2026</div>
+
+<div class="arch">
+
+  <!-- WORKFLOW ROW -->
+  <div class="flow-diagram">
+    <div style="font-size:0.65rem;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:16px;">Deploy workflow</div>
+    <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;">
+      <div class="flow-step">💻 Mac (lokalno)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📝 git push</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:#888;">🐙 GitHub</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:#888;">🚂 Railway auto-deploy</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:#fab120;color:#fab120;">🌐 odbito.fun LIVE</div>
+    </div>
+    <div style="margin-top:14px;font-size:0.72rem;color:#555;">Čas deploya: ~2 minuti · Lokalna pot: /Users/MiniMare/CLAUDE FOLDER/Dvorana ODBITO/Booking system/odbito/</div>
+  </div>
+
+  <!-- DOMENE -->
+  <div class="section-label">🌐 Domene</div>
+  <div class="row">
+    <div class="card accent-green">
+      <div class="card-icon">🟢</div>
+      <div class="card-title">Primarna domena</div>
+      <div class="card-name">www.odbito.fun</div>
+      <div class="card-url">odbito-client-production.up.railway.app</div>
+      <div class="card-desc">Glavna booking aplikacija. Sem pridejo stranke za rezervacije.</div>
+      <div style="margin-top:8px;">
+        <span class="tag tag-green">AKTIVNA</span>
+        <span class="tag tag-blue">Railway frontend</span>
+      </div>
+    </div>
+    <div class="card accent-yellow">
+      <div class="card-icon">🟡</div>
+      <div class="card-title">Teaser stran</div>
+      <div class="card-name">odbito.si</div>
+      <div class="card-url">lastni hosting</div>
+      <div class="card-desc">Predotvoritvena landing stran. Statičen HTML. Pred odprtjem naj preusmerja na odbito.fun.</div>
+      <div style="margin-top:8px;">
+        <span class="tag tag-yellow">TEASER</span>
+        <span class="tag tag-gray">GoDaddy DNS</span>
+      </div>
+    </div>
+    <div class="card accent-red">
+      <div class="card-icon">🔴</div>
+      <div class="card-title">Stara stran</div>
+      <div class="card-name">odbito.com</div>
+      <div class="card-url">neaktivna</div>
+      <div class="card-desc">Stara stran za en dogodek. Ni v rabi. Pred odprtjem preusmeri na odbito.fun.</div>
+      <div style="margin-top:8px;">
+        <span class="tag tag-red">NEAKTIVNA</span>
+        <span class="tag tag-gray">GoDaddy DNS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAILWAY -->
+  <div class="section-label">🚂 Railway — strežnik</div>
+  <div class="row">
+    <div class="card accent-blue wide">
+      <div class="card-icon">⚛️</div>
+      <div class="card-title">Railway Service — Frontend</div>
+      <div class="card-name">odbito-client</div>
+      <div class="card-url">www.odbito.fun</div>
+      <div class="card-desc">React + Vite + Tailwind CSS. Buildan statičen bundle. Vse strani kar stranka vidi.</div>
+      <hr class="divider">
+      <div style="font-size:0.72rem;color:#666;margin-bottom:6px;">VSEBUJE STRANI:</div>
+      <ul class="items">
+        <li>Home, Pricing, About, Contact <span>javne strani</span></li>
+        <li>BookingFlow (Open Jump) <span>rezervacije</span></li>
+        <li>BirthdayBookingFlow <span>rojstni dnevi</span></li>
+        <li>CustomerDashboard <span>profil stranke</span></li>
+        <li>AdminPanel <span>admin upravljanje</span></li>
+        <li>StaffPortal <span>osebje</span></li>
+        <li>Login, Register, Waiver <span>avtentikacija</span></li>
+      </ul>
+    </div>
+    <div class="card accent-blue wide">
+      <div class="card-icon">🖥️</div>
+      <div class="card-title">Railway Service — Backend</div>
+      <div class="card-name">odbito (API)</div>
+      <div class="card-url">odbito-production.up.railway.app</div>
+      <div class="card-desc">Node.js + Express. Skrbi za logiko, bazo, emaile, plačila. Ne odpiraj direktno v browserju.</div>
+      <hr class="divider">
+      <div style="font-size:0.72rem;color:#666;margin-bottom:6px;">SKRBI ZA:</div>
+      <ul class="items">
+        <li>Rezervacije, cene, kapaciteta <span>/api/open-jump</span></li>
+        <li>Uporabniki, avtentikacija <span>/api/auth</span></li>
+        <li>Admin funkcije <span>/api/admin</span></li>
+        <li>Urnik parka <span>/api/park-schedule</span></li>
+        <li>Emaili, QR kode <span>services</span></li>
+        <li>Plačila (Stripe) <span>/api/payments</span></li>
+      </ul>
+    </div>
+    <div class="card accent-blue narrow">
+      <div class="card-icon">🗄️</div>
+      <div class="card-title">Railway Service — Baza</div>
+      <div class="card-name">Postgres</div>
+      <div class="card-url">interno (ne javno)</div>
+      <div class="card-desc">PostgreSQL. Vse podatke (rezervacije, uporabniki, urnik...) shranjuje sem.</div>
+      <hr class="divider">
+      <div style="font-size:0.72rem;color:#666;margin-bottom:6px;">TABELE:</div>
+      <div class="card-desc" style="font-size:0.72rem;">users · open_jump_bookings · birthday_bookings · park_schedules · park_closures · discount_codes · user_notes · waiver_versions ···</div>
+    </div>
+  </div>
+
+  <!-- ZUNANJI SERVISI -->
+  <div class="section-label">🔌 Zunanji servisi (3rd party)</div>
+  <div class="row">
+    <div class="card accent-green">
+      <div class="card-icon">📧</div>
+      <div class="card-title">Email — primarni</div>
+      <div class="card-name">Resend</div>
+      <div class="card-url">resend.com</div>
+      <div class="card-desc">Pošilja vse transakcijske emaile iz <strong>info@odbito.si</strong>.</div>
+      <hr class="divider">
+      <div class="card-desc" style="font-size:0.72rem;">
+        ✉️ Potrditev rezervacije<br>
+        ✉️ Verifikacija emaila<br>
+        ✉️ Reset gesla<br>
+        ✉️ Naročnine na vadbe
+      </div>
+      <div class="status"><div class="dot dot-green"></div><span style="color:#34d399;">Aktiven</span></div>
+    </div>
+    <div class="card accent-gray">
+      <div class="card-icon">📨</div>
+      <div class="card-title">Email — backup</div>
+      <div class="card-name">Gmail SMTP</div>
+      <div class="card-url">info@odbito.si</div>
+      <div class="card-desc">Rezervni email server. Nastopan ampak Resend je primarni.</div>
+      <div class="status"><div class="dot dot-gray"></div><span style="color:#6b7280;">Backup / neaktiven</span></div>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-icon">💳</div>
+      <div class="card-title">Plačila</div>
+      <div class="card-name">Stripe</div>
+      <div class="card-url">dashboard.stripe.com</div>
+      <div class="card-desc">Procesira kreditne kartice za rezervacije.</div>
+      <div class="warn-box">⚠️ Trenutno TEST MODE — zamenjaj na live ključe pred odprtjem!</div>
+    </div>
+    <div class="card accent-blue">
+      <div class="card-icon">🔵</div>
+      <div class="card-title">Prijava z Googlom</div>
+      <div class="card-name">Google OAuth</div>
+      <div class="card-url">console.cloud.google.com</div>
+      <div class="card-desc">Strankam omogoča prijavo z Google računom namesto gesla.</div>
+      <div class="ok-box">✅ Nastavljeno danes · In production</div>
+    </div>
+  </div>
+
+  <!-- GITHUB + GODADDY -->
+  <div class="section-label">⚙️ Upravljanje</div>
+  <div class="row">
+    <div class="card accent-gray">
+      <div class="card-icon">🐙</div>
+      <div class="card-title">Koda</div>
+      <div class="card-name">GitHub</div>
+      <div class="card-url">github.com/MiniMare88/odbito</div>
+      <div class="card-desc">Tu živi vsa koda. Ko pushaš na <strong>main</strong> branch → Railway avtomatično deploya.</div>
+      <div style="margin-top:8px;">
+        <span class="tag tag-blue">client/ → frontend</span>
+        <span class="tag tag-blue">server/ → backend</span>
+        <span class="tag tag-yellow">data/pricing.json</span>
+      </div>
+    </div>
+    <div class="card accent-gray">
+      <div class="card-icon">🌍</div>
+      <div class="card-title">Domene & DNS</div>
+      <div class="card-name">GoDaddy</div>
+      <div class="card-url">godaddy.com</div>
+      <div class="card-desc">Registrator za vse domene. DNS nastavitve tukaj.</div>
+      <ul class="items" style="margin-top:8px;">
+        <li>odbito.fun <span>→ Railway</span></li>
+        <li>odbito.si <span>→ lastni hosting</span></li>
+        <li>odbito.com <span>→ neaktivna</span></li>
+      </ul>
+    </div>
+    <div class="card accent-orange">
+      <div class="card-icon">🚂</div>
+      <div class="card-title">Hosting & Deploy</div>
+      <div class="card-name">Railway</div>
+      <div class="card-url">railway.app · projekt: beautiful-cooperation</div>
+      <div class="card-desc">Gosti frontend, backend in bazo. Auto-deploy iz GitHuba. Env varibale tukaj.</div>
+      <div style="margin-top:8px;">
+        <span class="tag tag-green">3 servisi</span>
+        <span class="tag tag-yellow">auto-deploy</span>
+        <span class="tag tag-blue">env variables</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODO PRED ODPRTJEM -->
+  <div class="section-label">⚠️ TODO pred odprtjem</div>
+  <div class="row">
+    <div class="card accent-red" style="flex:none;width:100%;max-width:900px;margin:0 auto;">
+      <div class="card-title">Checklist — kaj je treba narediti pred odprtjem parka</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+        <div style="background:#111;border-radius:8px;padding:12px;">
+          <div style="font-size:0.75rem;color:#f87171;font-weight:700;margin-bottom:8px;">❌ Kritično</div>
+          <ul class="items">
+            <li>Stripe → zamenjaj na LIVE ključe <span>dashboard.stripe.com</span></li>
+            <li>JWT secret → zamenjaj na random strong string <span>Railway env</span></li>
+          </ul>
+        </div>
+        <div style="background:#111;border-radius:8px;padding:12px;">
+          <div style="font-size:0.75rem;color:#fab120;font-weight:700;margin-bottom:8px;">⚠️ Priporočeno</div>
+          <ul class="items">
+            <li>odbito.si → redirect na odbito.fun <span>GoDaddy</span></li>
+            <li>odbito.com → redirect na odbito.fun <span>GoDaddy</span></li>
+            <li>Odloči katero domena je primarna <span>marketing</span></li>
+          </ul>
+        </div>
+        <div style="background:#111;border-radius:8px;padding:12px;">
+          <div style="font-size:0.75rem;color:#34d399;font-weight:700;margin-bottom:8px;">✅ Že narejeno danes</div>
+          <ul class="items">
+            <li>Google OAuth → nastavljeno <span>production</span></li>
+            <li>GOOGLE_CLIENT_ID/SECRET → Railway <span>✅</span></li>
+            <li>GOOGLE_CALLBACK_URL → popravljen <span>✅</span></li>
+          </ul>
+        </div>
+        <div style="background:#111;border-radius:8px;padding:12px;">
+          <div style="font-size:0.75rem;color:#60a5fa;font-weight:700;margin-bottom:8px;">📋 Dostopi — kje so računi</div>
+          <ul class="items">
+            <li>Railway <span>railway.app</span></li>
+            <li>GitHub <span>github.com/MiniMare88</span></li>
+            <li>GoDaddy <span>godaddy.com</span></li>
+            <li>Resend <span>resend.com</span></li>
+            <li>Stripe <span>dashboard.stripe.com</span></li>
+            <li>Google Cloud <span>console.cloud.google.com</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:#333;font-size:0.7rem;margin-top:20px;letter-spacing:2px;">
+    ODBITO.fun · Arhitektura sistema · posodobljeno junij 2026
+  </div>
+
+</div>
+</body>
+</html>

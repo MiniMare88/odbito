@@ -10,6 +10,8 @@ import WaiverVersion from '../models/WaiverVersion.js'
 import StaffMember from '../models/StaffMember.js'
 import BirthdayBooking from '../models/BirthdayBooking.js'
 import UserNote from '../models/UserNote.js'
+import { createRefundVoucher } from './voucherController.js'
+import { sendVoucherEmail } from '../services/emailService.js'
 
 // GET /api/admin/stats
 export async function getStats(req, res) {
@@ -461,13 +463,52 @@ export async function getOccupancy(req, res) {
 
 // PATCH /api/admin/bookings/:id/cancel
 export async function cancelBooking(req, res) {
-  const booking = await OpenJumpBooking.findByPk(req.params.id)
+  const booking = await OpenJumpBooking.findByPk(req.params.id, {
+    include: [{ model: User, as: 'user', attributes: ['id', 'email', 'first_name'] }],
+  })
   if (!booking) return res.status(404).json({ error: 'Rezervacija ne obstaja' })
   if (booking.status === 'cancelled') return res.status(409).json({ error: 'Že preklicano' })
+
+  // Check 48h rule
+  const bookingDateTime = new Date(`${booking.date}T${booking.start_time}`)
+  const hoursUntil = (bookingDateTime - new Date()) / (1000 * 60 * 60)
+  const isRefundable = hoursUntil > 48
 
   booking.status = 'cancelled'
   booking.cancelled_by = req.user.id
   booking.cancelled_at = new Date()
   await booking.save()
-  res.json({ message: 'Preklicano', id: booking.id })
+
+  let refundVoucher = null
+  if (isRefundable && booking.user_id && booking.total_price > 0) {
+    try {
+      refundVoucher = await createRefundVoucher({
+        userId: booking.user_id,
+        amount: parseFloat(booking.total_price),
+        bookingId: booking.id,
+        bookingType: 'open_jump',
+      })
+      if (booking.user?.email) {
+        await sendVoucherEmail({
+          vouchers: [refundVoucher],
+          email: booking.user.email,
+          firstName: booking.user.first_name,
+          type: 'refund',
+        })
+      }
+    } catch (e) {
+      console.error('Refund voucher creation error:', e.message)
+    }
+  }
+
+  res.json({
+    message: 'Preklicano',
+    id: booking.id,
+    refund_voucher: refundVoucher ? {
+      code: refundVoucher.code,
+      denomination: refundVoucher.denomination,
+      expires_at: refundVoucher.expires_at,
+    } : null,
+    refundable: isRefundable,
+  })
 }

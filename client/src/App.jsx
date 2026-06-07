@@ -1,5 +1,11 @@
-import React, { Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import React, { Suspense, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
 import { AuthProvider } from './context/AuthContext.jsx'
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx'
 import Navbar from './components/layout/Navbar.jsx'
@@ -54,6 +60,7 @@ export default function App() {
     <PasswordGate>
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-black text-accent font-display text-4xl">ODBITO</div>}>
           <Routes>
             {/* Public */}
