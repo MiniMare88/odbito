@@ -88,6 +88,10 @@ export default function CustomerDashboard() {
   const [redeemCode, setRedeemCode] = useState('')
   const [redeemLoading, setRedeemLoading] = useState(false)
   const [redeemMsg, setRedeemMsg] = useState(null) // { type: 'ok'|'err', text }
+  const [checkCode, setCheckCode] = useState('')
+  const [checkLoading, setCheckLoading] = useState(false)
+  const [checkResult, setCheckResult] = useState(null) // { valid, code, denomination, remaining, expires_at } | { error }
+  const [scanning, setScanning] = useState(false)
 
   const loadBalance = () => {
     api.get('/vouchers/balance').then(r => {
@@ -106,6 +110,58 @@ export default function CustomerDashboard() {
     }).catch(() => {}).finally(() => setLoading(false))
     loadBalance()
   }, [])
+
+  const handleCheck = async (code) => {
+    const c = (code || checkCode).trim().toUpperCase()
+    if (!c) return
+    setCheckLoading(true)
+    setCheckResult(null)
+    try {
+      const res = await api.post('/vouchers/validate-code', { code: c })
+      setCheckResult({ ...res.data, valid: true })
+    } catch (err) {
+      setCheckResult({ valid: false, error: err.response?.data?.error || 'Napaka pri preverjanju' })
+    }
+    setCheckLoading(false)
+  }
+
+  const handleScan = async () => {
+    setScanning(true)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      stream.getTracks().forEach(t => t.stop())
+      // Open QR scanner — use jsQR via BarcodeDetector if available
+      if ('BarcodeDetector' in window) {
+        const detector = new window.BarcodeDetector({ formats: ['qr_code'] })
+        const video = document.createElement('video')
+        const scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        video.srcObject = scanStream
+        await video.play()
+        const scanFrame = async () => {
+          try {
+            const codes = await detector.detect(video)
+            if (codes.length > 0) {
+              scanStream.getTracks().forEach(t => t.stop())
+              setScanning(false)
+              const val = codes[0].rawValue
+              setCheckCode(val.toUpperCase())
+              handleCheck(val)
+              return
+            }
+          } catch {}
+          if (scanning) requestAnimationFrame(scanFrame)
+        }
+        requestAnimationFrame(scanFrame)
+        setTimeout(() => { scanStream.getTracks().forEach(t => t.stop()); setScanning(false) }, 15000)
+      } else {
+        alert('QR skener ni podprt v tem brskalniku. Prosimo vnesite kodo ročno.')
+        setScanning(false)
+      }
+    } catch {
+      alert('Dostop do kamere ni bil dovoljen.')
+      setScanning(false)
+    }
+  }
 
   const handleRedeem = async (e) => {
     e.preventDefault()
@@ -305,6 +361,122 @@ export default function CustomerDashboard() {
         {/* Vouchers / Balance tab */}
         {activeTab === 'vouchers' && (
           <div className="flex flex-col gap-4">
+
+            {/* CHECK VOUCHER VALUE */}
+            <div className="card">
+              <div className="section-label mb-4">Preverite vrednost vaučerja</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  value={checkCode}
+                  onChange={e => { setCheckCode(e.target.value.toUpperCase()); setCheckResult(null) }}
+                  onKeyDown={e => e.key === 'Enter' && handleCheck()}
+                  placeholder="ODBITO-XXXX-XXXX-XXXX-XXXX"
+                  style={{
+                    flex: 1, background: '#1a1a1a', border: '1px solid #333',
+                    borderRadius: 8, color: '#fff', padding: '10px 14px',
+                    fontFamily: 'monospace', fontSize: 14, letterSpacing: 2,
+                  }}
+                />
+                <button
+                  onClick={handleScan}
+                  disabled={scanning}
+                  title="Skeniraj QR kodo"
+                  style={{
+                    background: '#1a1a1a', border: '1px solid #333', borderRadius: 8,
+                    color: scanning ? 'var(--accent)' : '#888', padding: '10px 14px',
+                    cursor: 'pointer', fontSize: 18, flexShrink: 0,
+                  }}>
+                  {scanning ? '⏳' : '📷'}
+                </button>
+                <button
+                  onClick={() => handleCheck()}
+                  disabled={checkLoading || !checkCode.trim()}
+                  style={{
+                    background: 'var(--accent)', border: 'none', borderRadius: 8,
+                    color: '#000', padding: '10px 20px', fontWeight: 700,
+                    cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                    opacity: (!checkCode.trim() || checkLoading) ? 0.5 : 1,
+                  }}>
+                  {checkLoading ? '…' : 'Preveri'}
+                </button>
+              </div>
+
+              {/* Result card */}
+              {checkResult && (
+                <div style={{
+                  marginTop: 16, borderRadius: 12, padding: '20px 24px',
+                  ...(checkResult.valid ? {
+                    background: 'rgba(52,211,153,0.06)',
+                    border: '1px solid rgba(52,211,153,0.25)',
+                  } : {
+                    background: 'rgba(248,113,113,0.06)',
+                    border: '1px solid rgba(248,113,113,0.25)',
+                  })
+                }}>
+                  {checkResult.valid ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                        <div>
+                          <span className="font-condensed text-xs font-bold tracking-widest"
+                            style={{ color: '#34d399', background: 'rgba(52,211,153,0.12)', padding: '3px 10px', borderRadius: 4 }}>
+                            ✓ VELJAVEN
+                          </span>
+                          <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#666', marginTop: 6 }}>
+                            {checkResult.code}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: 40, fontWeight: 900, color: '#34d399', lineHeight: 1 }}>
+                            €{parseFloat(checkResult.remaining).toFixed(2).replace('.', ',')}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#555', marginTop: 4 }}>preostala vrednost</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                        {checkResult.denomination !== checkResult.remaining && (
+                          <div>
+                            <div style={{ fontSize: 11, color: '#555', marginBottom: 2, letterSpacing: 1 }}>ZAČETNA VREDNOST</div>
+                            <div style={{ fontWeight: 700, color: '#888' }}>€{parseFloat(checkResult.denomination).toFixed(2).replace('.', ',')}</div>
+                          </div>
+                        )}
+                        {checkResult.expires_at && (
+                          <div>
+                            <div style={{ fontSize: 11, color: '#555', marginBottom: 2, letterSpacing: 1 }}>VELJAVNO DO</div>
+                            <div style={{ fontWeight: 700, color: '#ccc' }}>
+                              {new Date(checkResult.expires_at).toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </div>
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontSize: 11, color: '#555', marginBottom: 2, letterSpacing: 1 }}>TIP</div>
+                          <div style={{ fontWeight: 700, color: '#ccc' }}>
+                            {checkResult.type === 'purchase' ? 'Darilna kartica' : checkResult.type === 'refund' ? 'Povračilo' : 'Promocijski bon'}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => { setRedeemCode(checkResult.code); setCheckResult(null); setCheckCode('') }}
+                        style={{
+                          marginTop: 16, background: '#34d399', border: 'none', borderRadius: 8,
+                          color: '#000', padding: '10px 20px', fontWeight: 700, cursor: 'pointer',
+                          fontSize: 13, letterSpacing: 1,
+                        }}>
+                        UNOVČI TA BON →
+                      </button>
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{ fontSize: 24 }}>✗</span>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#f87171', marginBottom: 2 }}>Vaučer ni veljaven</div>
+                        <div style={{ fontSize: 13, color: '#888' }}>{checkResult.error}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Balance display */}
             <div className="card" style={{ textAlign: 'center', padding: '32px 24px' }}>
               <div className="section-label mb-3">Stanje na računu</div>
