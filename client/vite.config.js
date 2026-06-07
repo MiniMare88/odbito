@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     preview: {
       host: '0.0.0.0',
       port: 4173,
-      allowedHosts: ['odbito-client-production.up.railway.app', '.railway.app'],
+      allowedHosts: ['odbito-client-production.up.railway.app', '.railway.app', 'www.odbito.fun', 'odbito.fun'],
     },
     server: {
       port: 5173,
