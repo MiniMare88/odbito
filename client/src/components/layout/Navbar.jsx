@@ -26,6 +26,7 @@ export default function Navbar() {
     { to: '/cenik', label: t('nav.pricing') },
     { to: '/vadbe', label: t('nav.classes') },
     { to: '/kontakt', label: t('nav.contact') },
+    { to: '/darilne-kartice', label: '🎁 Kartice' },
   ]
 
   return (

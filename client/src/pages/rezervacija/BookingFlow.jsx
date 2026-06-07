@@ -924,7 +924,24 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
           </div>
         ))}
       </div>
-      <p className="text-sm mb-8" style={{ color: 'var(--gray)', lineHeight: 1.7 }}>📋 Plačilo na blagajni pri prihodu. Rezervacija velja 15 min po dogovorjeni uri.</p>
+      <p className="text-sm mb-6" style={{ color: 'var(--gray)', lineHeight: 1.7 }}>📋 Plačilo na blagajni pri prihodu. Rezervacija velja 15 min po dogovorjeni uri.</p>
+
+      {/* Voucher upsell */}
+      <div className="rounded-2xl p-5 mb-8 text-left" style={{ background: 'rgba(250,177,32,0.06)', border: '1px solid rgba(250,177,32,0.2)' }}>
+        <div className="flex items-start gap-4">
+          <span style={{ fontSize: 28 }}>🎁</span>
+          <div style={{ flex: 1 }}>
+            <div className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--accent)' }}>Podari izkušnjo prijatelju</div>
+            <p className="text-xs mb-3" style={{ color: 'var(--gray)', lineHeight: 1.6 }}>Kupi darilno kartico in jo pošlji nekomu, ki si tudi zasluži skakati!</p>
+            <Link to="/darilne-kartice"
+              className="font-condensed font-black text-xs uppercase tracking-widest"
+              style={{ background: 'var(--accent)', color: 'var(--black)', padding: '8px 16px', borderRadius: 8, textDecoration: 'none', display: 'inline-block' }}>
+              KUPI DARILNO KARTICO →
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button className="btn-secondary" onClick={onReset}>NOVA REZERVACIJA</button>
         <Link to="/dashboard" className="btn-primary" style={{ textDecoration: 'none', textAlign: 'center' }}>MOJ PROFIL →</Link>
