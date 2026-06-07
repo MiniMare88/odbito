@@ -3,7 +3,7 @@ import { sequelize } from './db.js'
 
 const Voucher = sequelize.define('Voucher', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  code: { type: DataTypes.STRING(24), allowNull: false, unique: true },
+  code: { type: DataTypes.STRING(30), allowNull: false, unique: true },
   type: { type: DataTypes.ENUM('purchase', 'promotional', 'refund'), allowNull: false },
   denomination: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   status: { type: DataTypes.ENUM('unused', 'used', 'expired'), allowNull: false, defaultValue: 'unused' },
