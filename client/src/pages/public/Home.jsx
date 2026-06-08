@@ -860,10 +860,6 @@ export default function Home() {
           {/* Tekst — leva stran, nad vsem */}
           <div className="relative z-10 flex items-center px-[5%] py-16 lg:w-[52%]">
             <div>
-              <div className="font-condensed font-black text-xs uppercase tracking-widest mb-5"
-                style={{ color: '#080A0E', opacity: 0.55, letterSpacing: '0.2em' }}>
-                O Odbito
-              </div>
               <h2 className="font-display leading-none" style={{ fontSize: 'clamp(52px,7vw,100px)', color: '#080A0E' }}>
                 ZABAVA<span style={{ color: '#000' }}>.</span><br />
                 <span style={{ color: '#fff' }}>TRENING</span><span style={{ color: '#000' }}>.</span><br />
