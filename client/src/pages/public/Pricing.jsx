@@ -184,7 +184,7 @@ export default function Pricing() {
           <PriceLine key={g.id} label={`Darilna kartica €${g.value.toFixed(0)}`} price={g.value} />
         ))}
         <div style={{ fontSize: 13, color: 'var(--gray)', padding: '10px 0' }}>
-          {pricing.giftCards.note}
+          Pošlje se na email prejemnika z osebnim sporočilom. · Če želite večjo vrednost, preprosto dodajte večjo količino bonov.
         </div>
 
         {/* ── ŠOLE IN SKUPINE ── */}
