@@ -149,17 +149,14 @@ export default function PoletneKonitnice() {
       {/* ── SLIKA ── */}
       <section className="px-[5%] mb-16">
         <div className="max-w-5xl mx-auto">
-          <div style={{
-            width: '100%', aspectRatio: '16/7', background: '#111',
-            border: '1px solid var(--border)', borderRadius: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexDirection: 'column', gap: 12,
-          }}>
-            <span style={{ fontSize: 48 }}>🏟️</span>
-            <span className="font-condensed text-xs tracking-widest uppercase" style={{ color: '#444' }}>
-              Fotografija — Sport City / Odbito
-            </span>
-          </div>
+          <img
+            src="/ODBITO poletje.png"
+            alt="Odbite počitnice — Odbito"
+            style={{
+              width: '100%', borderRadius: 16, display: 'block',
+              objectFit: 'cover', maxHeight: 520,
+            }}
+          />
         </div>
       </section>
 
