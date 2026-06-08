@@ -21,12 +21,12 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { to: '/', label: t('nav.home') },
-    { to: '/o-nas', label: t('nav.about') },
-    { to: '/cenik', label: t('nav.pricing') },
-    { to: '/vadbe', label: t('nav.classes') },
-    { to: '/kontakt', label: t('nav.contact') },
-    { to: '/darilne-kartice', label: '🎁 Kartice' },
+    { to: '/',                label: 'DOMOV' },
+    { to: '/o-nas',           label: 'O NAS' },
+    { to: '/cenik',           label: 'CENIK' },
+    { to: '/vadbe',           label: 'TRENINGI' },
+    { to: '/darilne-kartice', label: 'BONI' },
+    { to: '/kontakt',         label: 'KONTAKT' },
   ]
 
   return (

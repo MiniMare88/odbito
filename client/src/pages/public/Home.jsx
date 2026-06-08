@@ -196,7 +196,7 @@ function AkademijaSection() {
           <div>
             <div className="section-label mb-3">Sezona 2026/2027 · Sep – Jun</div>
             <h2 className="font-display mb-5 leading-none" style={{ fontSize: 'clamp(40px,7vw,80px)', color: 'var(--white)' }}>
-              ODBITA<br /><span style={{ color: 'var(--accent)' }}>AKADEMIJA.</span>
+              ODBITA<br /><span style={{ color: 'var(--accent)' }}>AKADEMIJA</span>.
             </h2>
             <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '20px' }}>
               Strukturirani vadbeni program pod vodstvom izkušenih inštruktorjev.
@@ -861,9 +861,9 @@ export default function Home() {
           <div className="relative z-10 flex items-center px-[5%] py-16 lg:w-[52%]">
             <div>
               <h2 className="font-display leading-none" style={{ fontSize: 'clamp(52px,7vw,100px)', color: '#080A0E' }}>
-                ZABAVA<span style={{ color: '#000' }}>.</span><br />
+                ZABAVA<span style={{ color: '#fff' }}>.</span><br />
                 <span style={{ color: '#fff' }}>TRENING</span><span style={{ color: '#000' }}>.</span><br />
-                SKUPNOST<span style={{ color: '#000' }}>.</span>
+                SKUPNOST<span style={{ color: '#fff' }}>.</span>
               </h2>
             </div>
           </div>
@@ -939,7 +939,7 @@ export default function Home() {
         <div style={{ position: 'relative', padding: '56px 5%', maxWidth: 600 }}>
           <div className="section-label mb-3" style={{ color: 'var(--accent)' }}>Poletje 2027 · Sport City</div>
           <h2 className="font-display mb-4 leading-none" style={{ fontSize: 'clamp(32px,5vw,60px)', color: 'var(--white)' }}>
-            ODBITE <span style={{ color: 'var(--accent)' }}>POČITNICE.</span>
+            ODBITO <span style={{ color: 'var(--accent)' }}>POLETJE</span><span style={{ color: 'var(--white)' }}>.</span>
           </h2>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginBottom: 28, maxWidth: 420 }}>
             Teden šport, zabave in novih prijateljev. Za otroke od 6 do 16 let — julij in avgust, vsak dan nov šport, nova izkušnja.
@@ -973,15 +973,10 @@ export default function Home() {
             >
               <div className="relative rounded-2xl overflow-hidden mb-4"
                 style={{ border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-                <iframe
-                  title="Odbito lokacija"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2763.3!2d14.4897!3d46.0266!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477acd5b1b1b1b1b%3A0x0!2sDolgi+most+6a%2C+Ljubljana!5e0!3m2!1ssl!2ssi!4v1"
-                  width="100%"
-                  height="300"
-                  style={{ border: 0, display: 'block' }}
-                  allowFullScreen=""
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
+                <img
+                  src="/ODBITO_MAP_.webp"
+                  alt="Odbito lokacija"
+                  style={{ width: '100%', height: '300px', objectFit: 'cover', display: 'block' }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{ background: 'rgba(250,177,32,0.18)', backdropFilter: 'blur(2px)' }}>

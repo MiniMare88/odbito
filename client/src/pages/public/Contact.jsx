@@ -1,11 +1,24 @@
 import React, { useState } from 'react'
 
-const INFO = [
-  { icon: '📍', label: 'Naslov', value: 'Dolgi most, Ljubljana', sub: 'Odprtje jesen 2026' },
-  { icon: '✉️', label: 'E-mail', value: 'info@odbito.si', sub: 'Odgovorimo v 24 urah' },
-  { icon: '🕐', label: 'Open Jump', value: 'Pet – Ned, 09:00–21:00', sub: 'Rezervacija online' },
-  { icon: '📅', label: 'Vadbe', value: 'Pon – Čet po urniku', sub: 'Mesečna/letna naročnina' },
+const HOURS = [
+  { short: 'PON', full: 'Ponedeljek', time: '15:00 – 21:30', tags: ['akademija'] },
+  { short: 'TOR', full: 'Torek',      time: '15:00 – 21:30', tags: ['akademija'] },
+  { short: 'SRE', full: 'Sreda',      time: '15:00 – 21:30', tags: ['akademija'] },
+  { short: 'ČET', full: 'Četrtek',    time: '15:00 – 21:30', tags: ['akademija'] },
+  { short: 'PET', full: 'Petek',      time: '15:00 – 21:30', tags: ['akademija', 'openjump'] },
+  { short: 'SOB', full: 'Sobota',     time: '10:00 – 21:00', tags: ['openjump'] },
+  { short: 'NED', full: 'Nedelja',    time: '10:00 – 20:00', tags: ['openjump'] },
 ]
+
+const TAG_STYLE = {
+  akademija: { label: 'Akademija', bg: 'rgba(250,177,32,0.15)', color: '#fab120' },
+  openjump:  { label: 'Open Jump', bg: 'rgba(74,159,255,0.15)', color: '#4a9eff' },
+}
+
+const SHORT_COLOR = {
+  PON: '#fab120', TOR: '#fab120', SRE: '#fab120', ČET: '#fab120',
+  PET: '#fab120', SOB: '#4a9eff', NED: '#4a9eff',
+}
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
@@ -57,36 +70,73 @@ export default function Contact() {
 
           {/* Info */}
           <div>
-            <div className="flex flex-col gap-4 mb-10">
-              {INFO.map(i => (
-                <div key={i.label} className="card flex items-start gap-4 py-4">
-                  <span style={{ fontSize: '24px', flexShrink: 0 }}>{i.icon}</span>
-                  <div>
-                    <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-0.5" style={{ color: 'var(--gray)' }}>
-                      {i.label}
-                    </div>
-                    <div className="font-condensed font-black text-base uppercase tracking-wide" style={{ color: 'var(--white)' }}>
-                      {i.value}
-                    </div>
-                    <div className="font-condensed text-xs mt-0.5" style={{ color: 'var(--gray)' }}>{i.sub}</div>
+
+            {/* Delovni čas */}
+            <div className="section-label mb-4">Delovni čas</div>
+            <div className="rounded-2xl overflow-hidden mb-8" style={{ border: '1px solid var(--border)' }}>
+              {HOURS.map((row, i) => (
+                <div key={row.short}
+                  className="flex items-center gap-4 px-5 py-3"
+                  style={{
+                    borderBottom: i < HOURS.length - 1 ? '1px solid var(--border)' : 'none',
+                    background: i % 2 === 0 ? 'var(--dark2)' : 'rgba(255,255,255,0.015)',
+                  }}>
+                  <span className="font-condensed font-black text-sm w-10 flex-shrink-0"
+                    style={{ color: SHORT_COLOR[row.short], letterSpacing: '0.1em' }}>
+                    {row.short}
+                  </span>
+                  <span className="font-condensed text-sm flex-1" style={{ color: 'var(--gray)' }}>
+                    {row.full}
+                  </span>
+                  <span className="font-condensed font-black text-sm" style={{ color: 'var(--white)' }}>
+                    {row.time}
+                  </span>
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    {row.tags.map(t => (
+                      <span key={t} className="font-condensed font-bold text-xs uppercase tracking-wider px-2 py-0.5 rounded"
+                        style={{ background: TAG_STYLE[t].bg, color: TAG_STYLE[t].color, letterSpacing: '0.08em' }}>
+                        {TAG_STYLE[t].label}
+                      </span>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Map placeholder */}
-            <div className="rounded-2xl overflow-hidden flex items-center justify-center"
-              style={{ height: '200px', background: 'var(--dark2)', border: '1px solid var(--border)' }}>
-              <div className="text-center">
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🗺️</div>
-                <div className="font-condensed text-sm font-bold tracking-widest uppercase" style={{ color: 'var(--gray)' }}>
-                  Dolgi most, Ljubljana
-                </div>
-                <div className="font-condensed text-xs mt-1" style={{ color: 'var(--gray)' }}>
-                  Karta bo na voljo ob odprtju
+            {/* Map image */}
+            <div className="section-label mb-4">Kje nas najdete</div>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Dolgi+most+6a+1000+Ljubljana"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block group"
+            >
+              <div className="relative rounded-2xl overflow-hidden"
+                style={{ border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+                <img
+                  src="/ODBITO_MAP_3.webp"
+                  alt="Odbito lokacija — Dolgi most 6a, Ljubljana"
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(250,177,32,0.18)', backdropFilter: 'blur(2px)' }}>
+                  <div className="font-condensed font-black text-sm tracking-widest uppercase px-4 py-2 rounded-lg"
+                    style={{ background: 'var(--accent)', color: 'var(--black)' }}>
+                    ODPRI V GOOGLE MAPS →
+                  </div>
                 </div>
               </div>
+            </a>
+
+            {/* Naslov pod zemljevidom */}
+            <div className="flex items-center gap-3 mt-4 px-1">
+              <span style={{ fontSize: '18px' }}>📍</span>
+              <div>
+                <div className="font-condensed text-xs font-bold tracking-widest uppercase" style={{ color: 'var(--gray)' }}>Naslov</div>
+                <div className="font-condensed font-black text-base uppercase tracking-wide" style={{ color: 'var(--white)' }}>Dolgi most 6a, 1000 Ljubljana</div>
+              </div>
             </div>
+
           </div>
 
           {/* Form */}
@@ -160,6 +210,34 @@ export default function Contact() {
                 </form>
               </div>
             )}
+
+            {/* Kontakt — telefon + email */}
+            <div className="mt-6">
+              <div className="section-label mb-4">Kontakt</div>
+              <div className="flex flex-col gap-3">
+                <a href="tel:+38640123456" className="card flex items-center gap-4 py-3"
+                  style={{ textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(250,177,32,0.3)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                  <span style={{ fontSize: '22px', flexShrink: 0 }}>📞</span>
+                  <div>
+                    <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-0.5" style={{ color: 'var(--gray)' }}>Telefon</div>
+                    <div className="font-condensed font-black text-base uppercase tracking-wide" style={{ color: 'var(--white)' }}>040 123 456</div>
+                  </div>
+                </a>
+                <a href="mailto:info@odbito.fun" className="card flex items-center gap-4 py-3"
+                  style={{ textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(250,177,32,0.3)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                  <span style={{ fontSize: '22px', flexShrink: 0 }}>✉️</span>
+                  <div>
+                    <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-0.5" style={{ color: 'var(--gray)' }}>E-mail</div>
+                    <div className="font-condensed font-black text-base tracking-wide" style={{ color: 'var(--white)' }}>info@odbito.fun</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

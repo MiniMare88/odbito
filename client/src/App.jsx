@@ -21,6 +21,7 @@ import Contact from './pages/public/Contact.jsx'
 import Waiver from './pages/public/Waiver.jsx'
 import DarilneKartice from './pages/public/DarilneKartice.jsx'
 import PoletneKonitnice from './pages/public/PoletneKonitnice.jsx'
+import Obisk from './pages/public/Obisk.jsx'
 
 // Kiosk
 import KioskRegister from './pages/kiosk/KioskRegister.jsx'
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/kontakt" element={<AppLayout><Contact /></AppLayout>} />
             <Route path="/izjava" element={<AppLayout><Waiver /></AppLayout>} />
             <Route path="/darilne-kartice" element={<AppLayout><DarilneKartice /></AppLayout>} />
+            <Route path="/obisk" element={<AppLayout><Obisk /></AppLayout>} />
             <Route path="/poletne-pocitnice" element={<AppLayout><PoletneKonitnice /></AppLayout>} />
 
             {/* Auth */}

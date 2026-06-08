@@ -12,11 +12,12 @@ const LEGAL_LINKS = [
 ]
 
 const NAV_LINKS = [
-  { to: '/rezervacija', label: 'Rezervacija' },
-  { to: '/cenik',       label: 'Cenik' },
-  { to: '/vadbe',       label: 'Vadbe' },
-  { to: '/o-nas',       label: 'O nas' },
-  { to: '/kontakt',     label: 'Kontakt' },
+  { to: '/',                label: 'Domov' },
+  { to: '/o-nas',           label: 'O nas' },
+  { to: '/cenik',           label: 'Cenik' },
+  { to: '/vadbe',           label: 'Treningi' },
+  { to: '/darilne-kartice', label: 'Boni' },
+  { to: '/kontakt',         label: 'Kontakt' },
 ]
 
 export default function Footer() {
