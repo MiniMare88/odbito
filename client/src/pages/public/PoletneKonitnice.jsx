@@ -12,6 +12,33 @@ const SPORTS = [
   { icon: '🎯', label: 'Atletika' },
 ]
 
+const HIGHLIGHTS = [
+  {
+    icon: '⚡',
+    title: 'Za vse športne duše',
+    sub: '6 – 15 let',
+    body: 'Dobrodošli so vsi otroci med 6. in 15. letom. Razdelimo jih v primerne starostne skupine, kjer skozi šport, ekipne aktivnosti in skupne izzive nastanejo nova prijateljstva — in mogoče prve prave tekmovalne ekipe.',
+  },
+  {
+    icon: '🏅',
+    title: 'Šport + znanje',
+    sub: 'Aktivno in poučno',
+    body: 'Program otroke popelje skozi različne športne discipline — od trampolininga in gimnastike do plezanja in ekipnih iger. Vsak dan nova disciplina, vsak dan nova možnost, da odkrijejo šport, ki jim bo ostal v srcu.',
+  },
+  {
+    icon: '🧡',
+    title: 'Brez stresa za starše',
+    sub: 'Brezskrbno varstvo',
+    body: 'Parkirišče pred vhodom, hitra predaja v dobre roke. Otroci so z nami od 08:00 do 16:00 pod vodstvom izkušenih animatorjev in trenerjev — vi pa mirno na delo.',
+  },
+  {
+    icon: '🎒',
+    title: 'Vse vključeno',
+    sub: 'All-inclusive paket',
+    body: 'Vstop na vse atrakcije, oprema, animatorji in celodnevni program — vse je že v ceni. Brez skritih stroškov, brez doplačil na licu mesta.',
+  },
+]
+
 function WaitlistForm() {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -195,6 +222,28 @@ export default function PoletneKonitnice() {
                 <div className="section-label" style={{ marginBottom: 6 }}>{item.label}</div>
                 <div className="font-condensed font-black uppercase tracking-wide"
                   style={{ fontSize: 16, color: 'var(--white)' }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── HIGHLIGHTS ── */}
+      <section className="px-[5%] py-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="section-label mb-6">Zakaj Odbite počitnice?</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+            {HIGHLIGHTS.map((h, i) => (
+              <div key={i} style={{
+                background: '#0d0d0d', border: '1px solid var(--border)', borderRadius: 14,
+                padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 12,
+              }}>
+                <div style={{ fontSize: 36, lineHeight: 1 }}>{h.icon}</div>
+                <div>
+                  <div className="section-label" style={{ marginBottom: 4 }}>{h.sub}</div>
+                  <div className="font-display" style={{ fontSize: 22, color: 'var(--white)', lineHeight: 1.1 }}>{h.title.toUpperCase()}</div>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--gray)', lineHeight: 1.75, margin: 0 }}>{h.body}</p>
               </div>
             ))}
           </div>
