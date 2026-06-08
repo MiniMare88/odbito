@@ -56,10 +56,10 @@ export default function Pricing() {
         <div className="max-w-3xl mx-auto">
           <div className="section-label mb-4">Cenik</div>
           <h1 className="font-display mb-4" style={{ fontSize: 'clamp(52px,9vw,100px)', color: 'var(--white)', lineHeight: 1 }}>
-            PREGLEDNO<br /><span style={{ color: 'var(--accent)' }}>IN POŠTENO.</span>
+            <span style={{ color: 'var(--white)' }}>ODBIT</span><span style={{ color: 'var(--accent)' }}>O CENIK</span><span style={{ color: 'var(--white)' }}>.</span>
           </h1>
           <p style={{ fontSize: 16, color: 'var(--gray)', marginTop: 12 }}>
-            Vse cene so z DDV. Brez skritih stroškov.
+            Cene vključujejo DDV.
           </p>
         </div>
       </section>
