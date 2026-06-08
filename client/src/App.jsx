@@ -20,6 +20,7 @@ import Classes from './pages/public/Classes.jsx'
 import Contact from './pages/public/Contact.jsx'
 import Waiver from './pages/public/Waiver.jsx'
 import DarilneKartice from './pages/public/DarilneKartice.jsx'
+import PoletneKonitnice from './pages/public/PoletneKonitnice.jsx'
 
 // Kiosk
 import KioskRegister from './pages/kiosk/KioskRegister.jsx'
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/kontakt" element={<AppLayout><Contact /></AppLayout>} />
             <Route path="/izjava" element={<AppLayout><Waiver /></AppLayout>} />
             <Route path="/darilne-kartice" element={<AppLayout><DarilneKartice /></AppLayout>} />
+            <Route path="/poletne-pocitnice" element={<AppLayout><PoletneKonitnice /></AppLayout>} />
 
             {/* Auth */}
             <Route path="/registracija" element={<AppLayout><Register /></AppLayout>} />

@@ -196,7 +196,7 @@ export default function Pricing() {
         />
 
         {/* ── POLETNI TABOR ── */}
-        <SectionHeader label="POLETNI TABOR" sub="Julij · Avgust · 2027" />
+        <SectionHeader label="POLETNI TABOR" sub="Julij · Avgust · 2027" cta={{ to: '/poletne-pocitnice', label: 'VEČ INFO →' }} />
 
         <div style={{ padding: '16px 0 4px', fontSize: 14, color: 'var(--gray)', lineHeight: 1.8, maxWidth: 620 }}>
           <strong style={{ color: 'var(--white)', fontFamily: 'var(--font-condensed)', letterSpacing: '1px', textTransform: 'uppercase', fontSize: 13 }}>
