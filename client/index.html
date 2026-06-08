@@ -14,5 +14,173 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ── Google Analytics 4 (GDPR consent mode) ────────────────────── -->
+    <script>
+      // Nastavi privzeto stanje consent PRED nalaganjem GA — GDPR obveza
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage:        'denied',
+        wait_for_update:   500,
+      });
+      gtag('js', new Date());
+      gtag('config', 'G-2KMWMBM6JG', { send_page_view: false });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2KMWMBM6JG"></script>
+    <!-- ── /Google Analytics 4 ────────────────────────────────────────── -->
+
+    <!-- ── Cookie Consent Banner ─────────────────────────────────────── -->
+    <div id="odbito-cookie-banner" style="
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 99999;
+      background: #181818;
+      border-top: 2px solid #fab120;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+    ">
+      <div style="
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 18px 28px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      ">
+        <!-- Icon -->
+        <span style="font-size: 26px; flex-shrink: 0;">🍪</span>
+
+        <!-- Text -->
+        <div style="flex: 1; min-width: 220px;">
+          <div style="
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #fab120;
+            margin-bottom: 5px;
+          ">Ta stran uporablja piškotke</div>
+          <div style="
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.5;
+          ">
+            Piškotke uporabljamo za zagotavljanje delovanja strani, analitiko obiskov in izboljšanje tvoje izkušnje.
+            Z nadaljevanjem soglašaš z njihovo uporabo.
+            <a href="/piskotki" style="color: #fab120; text-decoration: none; margin-left: 6px; white-space: nowrap;">
+              Več o piškotkih →
+            </a>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap;">
+          <button id="odbito-cookie-essential" style="
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 9px 20px;
+            cursor: pointer;
+            transition: border-color 0.18s, color 0.18s;
+          ">Samo nujni</button>
+          <button id="odbito-cookie-accept" style="
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: #fab120;
+            color: #0d0d0d;
+            border: none;
+            border-radius: 4px;
+            padding: 9px 24px;
+            cursor: pointer;
+            transition: opacity 0.18s;
+          ">Sprejmi vse</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      var BANNER_ID  = 'odbito-cookie-banner';
+      var STORAGE_KEY = 'odbito_cookie_consent';
+
+      // Hover effects
+      var btnEssential = document.getElementById('odbito-cookie-essential');
+      var btnAccept    = document.getElementById('odbito-cookie-accept');
+
+      btnEssential.addEventListener('mouseenter', function () {
+        this.style.borderColor = '#777';
+        this.style.color = '#ccc';
+      });
+      btnEssential.addEventListener('mouseleave', function () {
+        this.style.borderColor = '#444';
+        this.style.color = '#888';
+      });
+      btnAccept.addEventListener('mouseenter', function () {
+        this.style.opacity = '0.85';
+      });
+      btnAccept.addEventListener('mouseleave', function () {
+        this.style.opacity = '1';
+      });
+
+      function hideBanner() {
+        var banner = document.getElementById(BANNER_ID);
+        banner.style.transform = 'translateY(100%)';
+        setTimeout(function () { banner.style.display = 'none'; }, 420);
+      }
+
+      btnAccept.addEventListener('click', function () {
+        localStorage.setItem(STORAGE_KEY, 'all');
+        hideBanner();
+        // Google Analytics — aktiviraj sledenje
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted' });
+          gtag('event', 'page_view');
+        }
+      });
+
+      btnEssential.addEventListener('click', function () {
+        localStorage.setItem(STORAGE_KEY, 'essential');
+        hideBanner();
+        // Google Analytics — ostane izklopljeno
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied' });
+        }
+      });
+
+      // Če je consent že bil podan — takoj nastavi GA ustrezno
+      var existing = localStorage.getItem(STORAGE_KEY);
+      if (existing === 'all' && typeof gtag === 'function') {
+        gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'granted' });
+        gtag('event', 'page_view');
+      }
+
+      // Show banner only if consent not yet given
+      if (!existing) {
+        setTimeout(function () {
+          var banner = document.getElementById(BANNER_ID);
+          banner.style.display = 'block';
+          // Force reflow before animating
+          banner.getBoundingClientRect();
+          banner.style.transform = 'translateY(0)';
+        }, 800);
+      }
+    })();
+    </script>
+    <!-- ── /Cookie Consent Banner ──────────────────────────────────────── -->
   </body>
 </html>
