@@ -196,12 +196,21 @@ export default function Pricing() {
         />
 
         {/* ── POLETNI TABOR ── */}
-        <SectionHeader label="POLETNI TABOR" sub="Julij · Avgust" />
-        <PriceLine
-          label="Teden tabora / otrok"
-          price={pricing.summerCamp.pricePerChildPerWeek}
-          note={`Pon–Pet · Max ${pricing.summerCamp.capacityPerWeek} otrok na teden`}
-        />
+        <SectionHeader label="POLETNI TABOR" sub="Julij · Avgust · 2027" />
+
+        <div style={{ padding: '16px 0 4px', fontSize: 14, color: 'var(--gray)', lineHeight: 1.8, maxWidth: 620 }}>
+          <strong style={{ color: 'var(--white)', fontFamily: 'var(--font-condensed)', letterSpacing: '1px', textTransform: 'uppercase', fontSize: 13 }}>
+            Vsak teden v juliju in avgustu · 08:00–16:00 · za otroke od 6 do 14 let
+          </strong>
+          <br /><br />
+          Med poletnimi počitnicami ODBITO postane baza. Pet dni na teden, od jutra do popoldneva — skakanje, plezanje, igre, ustvarjalne delavnice, tematski dnevi in animatorji, ki poskrbijo, da ni niti minute dolgčasa. Starši mirni. Otroci zažgani.
+          <br /><br />
+          <span style={{ color: '#555', fontSize: 12, fontStyle: 'italic' }}>Program bo na voljo za sezono 2027.</span>
+        </div>
+
+        <PriceLine label="Dan / otrok" price={pricing.summerCamp.pricePerDay} />
+        <PriceLine label="Teden / otrok" price={pricing.summerCamp.pricePerWeek} accent highlight note="Prihranek 5 dnevnih vstopnic" />
+        <PriceLine label="Popust za drugega otroka" price={`–${pricing.summerCamp.siblingDiscount} %`} note="Velja za oba paketa" indent />
 
         {/* ── FAQ ── */}
         <SectionHeader label="POGOSTA VPRAŠANJA" />

@@ -205,10 +205,14 @@
     "label": "Poletni tabor",
     "schedule": {
       "months": ["julij", "avgust"],
-      "weeks": 6,
-      "days": ["monday", "tuesday", "wednesday", "thursday", "friday"]
+      "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+      "hours": "08:00–16:00",
+      "ageMin": 6,
+      "ageMax": 14
     },
-    "pricePerChildPerWeek": 199.00,
-    "capacityPerWeek": 40
+    "pricePerDay": 45.00,
+    "pricePerWeek": 225.00,
+    "siblingDiscount": 15,
+    "season": "2027"
   }
 }
