@@ -63,14 +63,25 @@ function FAQ({ items }) {
   )
 }
 
-function SectionHeader({ label, sub }) {
+function SectionHeader({ label, sub, cta }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 20, margin: '48px 0 8px' }}>
-      <div>
+      <div style={{ flexShrink: 0 }}>
         {sub && <div className="section-label mb-1">{sub}</div>}
         <h2 className="font-display" style={{ fontSize: 'clamp(28px,4vw,44px)', color: 'var(--white)', lineHeight: 1 }}>{label}</h2>
       </div>
       <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+      {cta && (
+        <Link to={cta.to}
+          className="font-condensed font-bold tracking-widest uppercase"
+          style={{
+            flexShrink: 0, background: 'var(--accent)', color: 'var(--black)',
+            padding: '9px 18px', fontSize: 12, letterSpacing: '2px',
+            whiteSpace: 'nowrap', textDecoration: 'none',
+          }}>
+          {cta.label}
+        </Link>
+      )}
     </div>
   )
 }
@@ -98,7 +109,7 @@ export default function Pricing() {
       <div className="max-w-3xl mx-auto px-[5%] pb-24">
 
         {/* ── OPEN JUMP ── */}
-        <SectionHeader label="OPEN JUMP" sub="Pet · Sob · Ned" />
+        <SectionHeader label="OPEN JUMP" sub="Pet · Sob · Ned" cta={{ to: '/rezervacija', label: 'REZERVIRAJ →' }} />
 
         <PriceLine label="60 minut" price={14.00} />
         <PriceLine label="90 minut" price={19.50} accent highlight note="Najpopularnejše" />
@@ -123,12 +134,8 @@ export default function Pricing() {
         <PriceLine label="Odbito nogavice (obvezne ob prvem obisku)" price={3.00}
           note="Lastništvo — prineseš na vsak naslednji obisk" />
 
-        <div style={{ marginTop: 20 }}>
-          <Link to="/rezervacija" className="btn-primary">REZERVIRAJ TERMIN →</Link>
-        </div>
-
         {/* ── VADBENE URE ── */}
-        <SectionHeader label="VADBENE URE" sub="Pon · Tor · Sre · Čet" />
+        <SectionHeader label="VADBENE URE" sub="Pon · Tor · Sre · Čet" cta={{ to: '/vadbe', label: 'OGLEJ SI URNIK →' }} />
 
         {/* Toggle */}
         <div className="flex gap-1 p-1 rounded-xl mb-4" style={{ background: 'var(--dark2)', display: 'inline-flex' }}>
@@ -155,12 +162,8 @@ export default function Pricing() {
           />
         ))}
 
-        <div style={{ marginTop: 20 }}>
-          <Link to="/vadbe" className="btn-primary">OGLEJ SI URNIK →</Link>
-        </div>
-
         {/* ── ROJSTNI DNEVI ── */}
-        <SectionHeader label="ROJSTNI DNEVI" />
+        <SectionHeader label="ROJSTNI DNEVI" cta={{ to: '/kontakt', label: 'POVPRAŠI →' }} />
 
         {pricing.birthdayParties.packages.map(p => (
           <PriceLine
@@ -175,7 +178,7 @@ export default function Pricing() {
         <PriceLine label="Spremljevalci (starši)" price="brezplačno" note="Med trajanjem zabave" indent />
 
         {/* ── DARILNE KARTICE ── */}
-        <SectionHeader label="DARILNE KARTICE" />
+        <SectionHeader label="DARILNE KARTICE" cta={{ to: '/darilne-kartice', label: 'KUPI KARTICO →' }} />
 
         {pricing.giftCards.options.map(g => (
           <PriceLine key={g.id} label={`Darilna kartica €${g.value.toFixed(0)}`} price={g.value} />
