@@ -3,13 +3,128 @@ import { Link } from 'react-router-dom'
 
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwrx4zJ6tFtyrtzPn0PpxB6CoW9sMZ_6FrNMN0L6DjWzLHJ3NR2RuAOdNtLv8LLpFZL/exec'
 
+const SportIcons = {
+  Gimnastika: () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* head */}
+      <circle cx="24" cy="7" r="4" fill="currentColor"/>
+      {/* body arched back */}
+      <path d="M24 11 C18 14 14 20 16 27" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* legs split */}
+      <path d="M16 27 L10 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M16 27 L26 36" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arms wide */}
+      <path d="M20 17 L10 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M21 16 L32 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Košarka: () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* head */}
+      <circle cx="20" cy="7" r="4" fill="currentColor"/>
+      {/* body */}
+      <path d="M20 11 L20 26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* legs */}
+      <path d="M20 26 L15 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M20 26 L25 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arm shooting up */}
+      <path d="M20 18 L30 12 L36 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* other arm */}
+      <path d="M20 20 L13 17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* ball */}
+      <circle cx="37" cy="6" r="4" stroke="currentColor" strokeWidth="2" fill="none"/>
+      <path d="M33 6 Q37 3 41 6" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+      <path d="M37 2 Q40 6 37 10" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+    </svg>
+  ),
+  Plezanje: () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* wall */}
+      <line x1="36" y1="2" x2="36" y2="46" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3"/>
+      {/* holds */}
+      <rect x="30" y="8" width="6" height="3" rx="1.5" fill="currentColor" fillOpacity="0.4"/>
+      <rect x="30" y="20" width="6" height="3" rx="1.5" fill="currentColor" fillOpacity="0.4"/>
+      <rect x="30" y="33" width="6" height="3" rx="1.5" fill="currentColor" fillOpacity="0.4"/>
+      {/* head */}
+      <circle cx="22" cy="10" r="4" fill="currentColor"/>
+      {/* body */}
+      <path d="M22 14 L22 26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arm up to hold */}
+      <path d="M22 16 L30 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arm lower */}
+      <path d="M22 20 L30 21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* legs on wall */}
+      <path d="M22 26 L28 32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M22 26 L18 36" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  'Igre z žogo': () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* head */}
+      <circle cx="24" cy="7" r="4" fill="currentColor"/>
+      {/* body leaning */}
+      <path d="M24 11 L22 26" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* legs running */}
+      <path d="M22 26 L16 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M22 26 L30 34 L28 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arm kicking-style back */}
+      <path d="M22 18 L14 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arm forward */}
+      <path d="M22 16 L32 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* ball on ground */}
+      <circle cx="13" cy="40" r="5" stroke="currentColor" strokeWidth="2" fill="none"/>
+      <path d="M10 37 Q13 35 16 37" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+      <path d="M8 40 Q13 45 18 40" stroke="currentColor" strokeWidth="1.2" fill="none" strokeOpacity="0.5"/>
+    </svg>
+  ),
+  Trampolining: () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* trampoline bed */}
+      <path d="M4 38 Q24 34 44 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* legs of trampoline */}
+      <path d="M8 38 L4 46" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
+      <path d="M40 38 L44 46" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeOpacity="0.5"/>
+      {/* figure in air, tucked */}
+      <circle cx="24" cy="10" r="4" fill="currentColor"/>
+      {/* body tucked */}
+      <path d="M24 14 C22 18 20 20 20 22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* knees up */}
+      <path d="M20 22 L18 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M20 22 L24 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* arms out */}
+      <path d="M22 16 L14 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M23 16 L32 13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Atletika: () => (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="44" height="44">
+      {/* head */}
+      <circle cx="18" cy="7" r="4" fill="currentColor"/>
+      {/* body sprinting forward */}
+      <path d="M18 11 L20 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* front leg forward */}
+      <path d="M20 24 L28 32 L32 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* back leg back */}
+      <path d="M20 24 L14 34 L10 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* front arm back */}
+      <path d="M19 18 L12 22" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* back arm forward */}
+      <path d="M20 16 L30 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* motion lines */}
+      <line x1="4" y1="24" x2="10" y2="24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.4"/>
+      <line x1="2" y1="29" x2="9" y2="29" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.3"/>
+      <line x1="5" y1="34" x2="10" y2="34" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.2"/>
+    </svg>
+  ),
+}
+
 const SPORTS = [
-  { icon: '🤸', label: 'Gimnastika' },
-  { icon: '🏀', label: 'Košarka' },
-  { icon: '🧗', label: 'Plezanje' },
-  { icon: '🤾', label: 'Igre z žogo' },
-  { icon: '⛹️', label: 'Trampolining' },
-  { icon: '🎯', label: 'Atletika' },
+  { label: 'Gimnastika' },
+  { label: 'Košarka' },
+  { label: 'Plezanje' },
+  { label: 'Igre z žogo' },
+  { label: 'Trampolining' },
+  { label: 'Atletika' },
 ]
 
 const HIGHLIGHTS = [
@@ -272,17 +387,20 @@ export default function PoletneKonitnice() {
             <div>
               <div className="section-label mb-4">Kaj nas čaka</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {SPORTS.map(s => (
-                  <div key={s.label} style={{
-                    background: '#111', border: '1px solid var(--border)',
-                    borderRadius: 10, padding: '14px 16px',
-                    display: 'flex', alignItems: 'center', gap: 12,
-                  }}>
-                    <span style={{ fontSize: 22 }}>{s.icon}</span>
-                    <span className="font-condensed font-bold tracking-wide uppercase"
-                      style={{ fontSize: 13, color: 'var(--white)' }}>{s.label}</span>
-                  </div>
-                ))}
+                {SPORTS.map(s => {
+                  const Icon = SportIcons[s.label]
+                  return (
+                    <div key={s.label} style={{
+                      background: '#111', border: '1px solid var(--border)',
+                      borderRadius: 10, padding: '16px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10,
+                    }}>
+                      <span style={{ color: 'var(--accent)' }}><Icon /></span>
+                      <span className="font-condensed font-bold tracking-wide uppercase"
+                        style={{ fontSize: 13, color: 'var(--white)' }}>{s.label}</span>
+                    </div>
+                  )
+                })}
               </div>
               <p style={{ fontSize: 13, color: '#444', marginTop: 12, lineHeight: 1.6 }}>
                 In še veliko več — program se oblikuje za vsako sezono posebej.
