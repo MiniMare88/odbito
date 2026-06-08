@@ -954,7 +954,7 @@ export default function Home() {
             ODBITE <span style={{ color: 'var(--accent)' }}>POČITNICE.</span>
           </h2>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginBottom: 28, maxWidth: 420 }}>
-            Teden šport, zabave in novih prijateljev. Za otroke od 6 do 16 let — julij in avgust, vsak dan nova disciplina.
+            Teden šport, zabave in novih prijateljev. Za otroke od 6 do 16 let — julij in avgust, vsak dan nov šport, nova izkušnja.
           </p>
           <Link
             to="/poletne-pocitnice"
