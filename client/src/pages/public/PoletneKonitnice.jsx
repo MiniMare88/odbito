@@ -194,7 +194,7 @@ export default function PoletneKonitnice() {
     <div style={{ background: 'var(--black)' }}>
 
       {/* ── HERO ── */}
-      <section className="px-[5%] pt-20 pb-16">
+      <section className="px-[5%] pt-20 pb-6">
         <div className="max-w-5xl mx-auto">
           <div className="section-label mb-4">Poletje 2027 · Sport City</div>
           <h1 className="font-display mb-6" style={{ fontSize: 'clamp(40px,7vw,96px)', color: 'var(--white)', lineHeight: 0.95, whiteSpace: 'nowrap' }}>
@@ -207,7 +207,7 @@ export default function PoletneKonitnice() {
       </section>
 
       {/* ── SLIKA ── */}
-      <section className="px-[5%] mb-16">
+      <section className="px-[5%] mb-6">
         <div className="max-w-5xl mx-auto">
           <img
             src="/ODBITO poletje.png"
