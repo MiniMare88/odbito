@@ -32,6 +32,37 @@ function PriceLine({ label, price, note, highlight, accent, indent }) {
   )
 }
 
+function FAQ({ items }) {
+  const [open, setOpen] = React.useState(null)
+  return (
+    <div style={{ marginTop: 8 }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', gap: 16,
+              padding: '18px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+            }}>
+            <span className="font-condensed font-bold tracking-wide uppercase"
+              style={{ fontSize: 15, color: open === i ? 'var(--accent)' : 'var(--white)' }}>
+              {item.q}
+            </span>
+            <span style={{ color: 'var(--accent)', fontSize: 20, flexShrink: 0, transition: 'transform 0.2s',
+              transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+          </button>
+          {open === i && (
+            <div style={{ padding: '0 0 18px', fontSize: 14, color: 'var(--gray)', lineHeight: 1.7, maxWidth: 600 }}>
+              {item.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function SectionHeader({ label, sub }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 20, margin: '48px 0 8px' }}>
@@ -168,6 +199,43 @@ export default function Pricing() {
           price={pricing.summerCamp.pricePerChildPerWeek}
           note={`Pon–Pet · Max ${pricing.summerCamp.capacityPerWeek} otrok na teden`}
         />
+
+        {/* ── FAQ ── */}
+        <SectionHeader label="POGOSTA VPRAŠANJA" />
+        <FAQ items={[
+          {
+            q: 'Ali moram nogavice kupiti ob vsakem obisku?',
+            a: 'Ne. Nogavice kupiš enkrat (€3,00) in so tvoje za vedno. Prineseš jih na vsak naslednji obisk. Brez nogavic vstop ni dovoljen.',
+          },
+          {
+            q: 'Ali lahko rezervacijo prekličem ali prestavim?',
+            a: 'Rezervacij ni mogoče preklicati samostojno. V primeru višje sile nas kontaktiraj vsaj 24 ur pred terminom na info@odbito.fun in skupaj najdemo rešitev.',
+          },
+          {
+            q: 'Koliko vnaprej moram rezervirati?',
+            a: 'Rezervacijo je možno narediti do 30 minut pred začetkom termina, dokler so mesta na voljo. Priporočamo rezervacijo vsaj dan vnaprej, posebej za vikende.',
+          },
+          {
+            q: 'Kaj je skupinski popust in kako se upošteva?',
+            a: 'Pri 5 ali več osebah v eni rezervaciji sistem avtomatično upošteva nižje cene (skupinski popust). Ni potrebno ničesar posebej aktivirati.',
+          },
+          {
+            q: 'Ali so starši, ki spremljajo otroke, brezplačno?',
+            a: 'Starši, ki le opazujejo in ne skačejo, so brezplačno. Kdor skoči na trampolinski park, potrebuje veljavno vstopnico in podpisano izjavo o odgovornosti.',
+          },
+          {
+            q: 'Kako deluje program zvestobe?',
+            a: 'Po 10 obiskih dobiš 1 uro skakanja brezplačno. Obiski se avtomatično beležijo prek tvojega profila. Ob rojstnem dnevu prav tako prejmete 10 % popust (velja 30 dni).',
+          },
+          {
+            q: 'Kako kupim ali unovčim darilno kartico?',
+            a: 'Darilne kartice (€25, €50, €100) kupiš prek spletne strani. Pošljemo jih po e-pošti z osebnim sporočilom. Unovčiš jih v svojem profilu pod "Boni" — kredit se odšteje pri naslednji rezervaciji.',
+          },
+          {
+            q: 'Kakšna je razlika med Open Jump in Vadbenimi urami?',
+            a: 'Open Jump je prosto skakanje brez vodje — prideš, skakaš, greš. Poteka ob petkih, sobotah in nedeljah. Vadbene ure so vodene skupinske vadbe s trenerjem (akrobatika, freestyle, fitnes na trampolinu) in potekajo od ponedeljka do četrtka.',
+          },
+        ]} />
 
         {/* Note */}
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
