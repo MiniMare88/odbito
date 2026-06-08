@@ -932,49 +932,41 @@ export default function Home() {
       <BirthdaySection />
 
       {/* ── POLETNE POČITNICE PROMO ── */}
-      <section className="px-[5%] py-0" style={{ background: 'var(--black)' }}>
-        <div className="max-w-6xl mx-auto">
-          <div style={{
-            position: 'relative', borderRadius: 20, overflow: 'hidden',
-            minHeight: 320, display: 'flex', alignItems: 'center',
-            border: '1px solid var(--border)',
-          }}>
-            {/* slika v ozadju */}
-            <img
-              src="/ODBITO poletje.png"
-              alt="Odbite počitnice"
-              style={{
-                position: 'absolute', inset: 0, width: '100%', height: '100%',
-                objectFit: 'cover', objectPosition: 'center top',
-              }}
-            />
-            {/* overlay */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(90deg, rgba(0,0,0,0.88) 40%, rgba(0,0,0,0.3) 100%)',
-            }} />
-            {/* vsebina */}
-            <div style={{ position: 'relative', padding: '48px 48px', maxWidth: 560 }}>
-              <div className="section-label mb-3" style={{ color: 'var(--accent)' }}>Poletje 2027 · Sport City</div>
-              <h2 className="font-display mb-4 leading-none" style={{ fontSize: 'clamp(32px,5vw,60px)', color: 'var(--white)' }}>
-                ODBITE <span style={{ color: 'var(--accent)' }}>POČITNICE.</span>
-              </h2>
-              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginBottom: 28, maxWidth: 420 }}>
-                Teden šport, zabave in novih prijateljev. Za otroke od 6 do 16 let — julij in avgust, vsak dan nova disciplina.
-              </p>
-              <Link
-                to="/poletne-pocitnice"
-                className="font-condensed font-black tracking-widest uppercase"
-                style={{
-                  display: 'inline-block',
-                  background: 'var(--accent)', color: 'var(--black)',
-                  padding: '13px 28px', fontSize: 13, letterSpacing: '2px',
-                  textDecoration: 'none', borderRadius: 4,
-                }}>
-                VEČ O POLETNIH POČITNICAH →
-              </Link>
-            </div>
-          </div>
+      <section style={{ position: 'relative', minHeight: 360, display: 'flex', alignItems: 'center', background: 'var(--black)' }}>
+        {/* slika čez celo širino */}
+        <img
+          src="/ODBITO poletje.png"
+          alt="Odbite počitnice"
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center center',
+          }}
+        />
+        {/* overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(90deg, rgba(0,0,0,0.90) 35%, rgba(0,0,0,0.25) 100%)',
+        }} />
+        {/* vsebina */}
+        <div style={{ position: 'relative', padding: '56px 5%', maxWidth: 600 }}>
+          <div className="section-label mb-3" style={{ color: 'var(--accent)' }}>Poletje 2027 · Sport City</div>
+          <h2 className="font-display mb-4 leading-none" style={{ fontSize: 'clamp(32px,5vw,60px)', color: 'var(--white)' }}>
+            ODBITE <span style={{ color: 'var(--accent)' }}>POČITNICE.</span>
+          </h2>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginBottom: 28, maxWidth: 420 }}>
+            Teden šport, zabave in novih prijateljev. Za otroke od 6 do 16 let — julij in avgust, vsak dan nova disciplina.
+          </p>
+          <Link
+            to="/poletne-pocitnice"
+            className="font-condensed font-black tracking-widest uppercase"
+            style={{
+              display: 'inline-block',
+              background: 'var(--accent)', color: 'var(--black)',
+              padding: '13px 28px', fontSize: 13, letterSpacing: '2px',
+              textDecoration: 'none', borderRadius: 4,
+            }}>
+            VEČ O POLETNIH POČITNICAH →
+          </Link>
         </div>
       </section>
 
