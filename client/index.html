@@ -83,17 +83,19 @@
         <div style="display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap;">
           <button id="odbito-cookie-essential" style="
             font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 700;
-            font-size: 14px;
+            font-weight: 400;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             background: transparent;
-            color: #888;
-            border: 1px solid #444;
+            color: #444;
+            border: none;
             border-radius: 4px;
-            padding: 9px 20px;
+            padding: 9px 14px;
             cursor: pointer;
-            transition: border-color 0.18s, color 0.18s;
+            transition: color 0.18s;
+            text-decoration: underline;
+            text-decoration-color: #333;
           ">Samo nujni</button>
           <button id="odbito-cookie-accept" style="
             font-family: 'Barlow Condensed', sans-serif;
@@ -123,12 +125,10 @@
       var btnAccept    = document.getElementById('odbito-cookie-accept');
 
       btnEssential.addEventListener('mouseenter', function () {
-        this.style.borderColor = '#777';
-        this.style.color = '#ccc';
+        this.style.color = '#666';
       });
       btnEssential.addEventListener('mouseleave', function () {
-        this.style.borderColor = '#444';
-        this.style.color = '#888';
+        this.style.color = '#444';
       });
       btnAccept.addEventListener('mouseenter', function () {
         this.style.opacity = '0.85';
