@@ -260,7 +260,10 @@ export default function PoletneKonitnice() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div style={{ background: '#111', border: '1px solid var(--border)', borderRadius: 12, padding: '28px 24px' }}>
               <div className="section-label mb-2">Dnevna vstopnina</div>
-              <div className="font-display" style={{ fontSize: 48, color: 'var(--white)', lineHeight: 1 }}>€45</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <span className="font-condensed" style={{ fontSize: 14, color: 'var(--gray)', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>od</span>
+                <span className="font-display" style={{ fontSize: 48, color: 'var(--white)', lineHeight: 1 }}>€45</span>
+              </div>
               <div style={{ fontSize: 13, color: 'var(--gray)', marginTop: 8 }}>na otroka / dan</div>
             </div>
             <div style={{ background: '#111', border: '1px solid var(--accent)', borderRadius: 12, padding: '28px 24px', position: 'relative' }}>
@@ -269,7 +272,10 @@ export default function PoletneKonitnice() {
                   style={{ background: 'var(--accent)', color: 'var(--black)' }}>PRIPOROČENO</span>
               </div>
               <div className="section-label mb-2">Tedenski paket</div>
-              <div className="font-display" style={{ fontSize: 48, color: 'var(--accent)', lineHeight: 1 }}>€225</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <span className="font-condensed" style={{ fontSize: 14, color: 'var(--gray)', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>od</span>
+                <span className="font-display" style={{ fontSize: 48, color: 'var(--accent)', lineHeight: 1 }}>€225</span>
+              </div>
               <div style={{ fontSize: 13, color: 'var(--gray)', marginTop: 8 }}>na otroka / teden (pon–pet)</div>
             </div>
             <div style={{ background: '#111', border: '1px solid var(--border)', borderRadius: 12, padding: '28px 24px' }}>
