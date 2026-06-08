@@ -128,6 +128,67 @@ function WaitlistForm() {
   )
 }
 
+const TABOR_FAQ = [
+  {
+    q: 'Kdaj se začnejo prijave za Odbite počitnice 2027?',
+    a: 'Prijave bodo odprte spomladi 2027. Vsi, ki se prijavijo na čakalni seznam, bodo obveščeni pred splošno objavo in bodo imeli prednost pri vpisu. Priporočamo zgodnjo prijavo, saj so mesta omejena.',
+  },
+  {
+    q: 'Kaj vse je vključeno v ceno tabora?',
+    a: 'V ceni je vključeno vse: vstop na vse atrakcije v Sport City, vodeni program z animatorji in trenerji, oprema za uporabo atrakcij ter celodnevno varstvo od 08:00 do 16:00. Morebitne dodatke (malica, prevoz) bomo objavili ob odprtju prijav.',
+  },
+  {
+    q: 'Kakšne starosti so primerne za Odbite počitnice?',
+    a: 'Program je namenjen otrokom med 6. in 16. letom. Otroke razdelimo v starostne skupine, da je program prilagojen njihovim zmožnostim in interesom. Mlajši odkrivajo šport skozi igro, starejši pa se lotijo bolj zahtevnih disciplin.',
+  },
+  {
+    q: 'Ali je potrebna kakršna koli predhodna športna izkušnja?',
+    a: 'Sploh ne. Odbite počitnice so odprte za vse — od popolnih začetnikov do tistih, ki šport že trenirajo. Animatorji in trenerji prilagodijo program vsakemu otroku posebej. Cilj je zabava, odkrivanje in napredek — ne tekmovalnost.',
+  },
+  {
+    q: 'Kako poteka oddaja in prevzem otroka?',
+    a: 'Otroke sprejemate pri vhodu v Sport City od 08:00 naprej. Prevzem je do 16:00. Parkirišče je pred objektom, predaja je hitra in organizirana. Podrobnejša navodila glede oddaje in varnostnih postopkov bomo posredovali ob vpisu.',
+  },
+  {
+    q: 'Kaj pa, če otrok ne more priti določen dan?',
+    a: 'Razumemo, da se planovi kdaj spremenijo. Podrobna pravila o odpovedih in morebitnih nadomestitvah bomo objavili skupaj s pogoji vpisa. V primeru bolezni ali višje sile nas prosimo čim prej obvestite na info@odbito.fun.',
+  },
+]
+
+function TaborFAQ() {
+  const [open, setOpen] = React.useState(null)
+  return (
+    <div>
+      {TABOR_FAQ.map((item, i) => (
+        <div key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between', gap: 16,
+              padding: '20px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+            }}>
+            <span className="font-condensed font-bold tracking-wide uppercase"
+              style={{ fontSize: 15, color: open === i ? 'var(--accent)' : 'var(--white)' }}>
+              {item.q}
+            </span>
+            <span style={{
+              color: 'var(--accent)', fontSize: 22, flexShrink: 0,
+              transition: 'transform 0.2s', transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)',
+              display: 'inline-block',
+            }}>+</span>
+          </button>
+          {open === i && (
+            <div style={{ padding: '0 0 20px', fontSize: 14, color: 'var(--gray)', lineHeight: 1.8, maxWidth: 620 }}>
+              {item.a}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function PoletneKonitnice() {
   return (
     <div style={{ background: 'var(--black)' }}>
@@ -308,16 +369,27 @@ export default function PoletneKonitnice() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="px-[5%] py-10" style={{ background: 'var(--dark)', borderTop: '1px solid var(--border)' }}>
-        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-6">
+      {/* ── FAQ ── */}
+      <section className="px-[5%] py-20" style={{ background: 'var(--dark)' }}>
+        <div className="max-w-3xl mx-auto">
+          <div className="section-label mb-4">Pogosta vprašanja</div>
+          <h2 className="font-display mb-10" style={{ fontSize: 'clamp(32px,5vw,56px)', color: 'var(--white)', lineHeight: 1 }}>
+            IMAŠ VPRAŠANJA<span style={{ color: 'var(--accent)' }}>?</span>
+          </h2>
+          <TaborFAQ />
+        </div>
+      </section>
+
+      {/* ── KONTAKT CTA ── */}
+      <section className="px-[5%] py-16" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="max-w-3xl mx-auto" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
           <div>
-            <div className="font-condensed font-bold tracking-wide uppercase" style={{ color: 'var(--gray)', fontSize: 13 }}>
-              Imaš vprašanje?
+            <div className="section-label mb-2">Dodatna vprašanja?</div>
+            <div className="font-display" style={{ fontSize: 'clamp(28px,4vw,44px)', color: 'var(--white)', lineHeight: 1 }}>
+              PIŠI NAM.<span style={{ color: 'var(--accent)' }}> Z VESELJEM</span><br />ODGOVORIMO.
             </div>
-            <div className="font-display" style={{ fontSize: 24, color: 'var(--white)' }}>Piši nam.</div>
           </div>
-          <Link to="/kontakt" className="btn-primary">KONTAKTIRAJ NAS →</Link>
+          <Link to="/kontakt" className="btn-primary" style={{ flexShrink: 0 }}>KONTAKTIRAJ NAS →</Link>
         </div>
       </section>
 
