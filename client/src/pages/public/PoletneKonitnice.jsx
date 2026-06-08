@@ -266,7 +266,7 @@ const TABOR_FAQ = [
   },
   {
     q: 'Kaj pa, če otrok ne more priti določen dan?',
-    a: 'Razumemo, da se planovi kdaj spremenijo. Podrobna pravila o odpovedih in morebitnih nadomestitvah bomo objavili skupaj s pogoji vpisa. V primeru bolezni ali višje sile nas prosimo čim prej obvestite na info@odbito.fun.',
+    a: 'Razumemo, da se plani kdaj spremenijo. Podrobna pravila o odpovedih in morebitnih nadomestitvah bomo objavili skupaj s pogoji vpisa. V primeru bolezni ali višje sile nas prosimo čim prej obvestite na info@odbito.si.',
   },
 ]
 
