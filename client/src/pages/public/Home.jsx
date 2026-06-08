@@ -296,24 +296,16 @@ function BirthdaySection() {
     <section className="px-[5%] py-20" style={{ background: 'var(--dark)' }}>
       <div className="max-w-6xl mx-auto">
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start mb-12">
+        <div className="grid lg:grid-cols-2 gap-12 items-start mb-6">
           <div>
             <div className="section-label mb-3">Rojstni dnevi</div>
             <h2 className="font-display mb-5 leading-none" style={{ fontSize: 'clamp(32px,5vw,64px)', color: 'var(--white)' }}>
               ODBITO<br /><span style={{ color: 'var(--accent)' }}>ROJSTNODNEVNO</span><br />PRAZNOVANJE<span style={{ color: 'var(--accent)' }}>.</span>
             </h2>
-            <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '20px' }}>
+            <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: 0 }}>
               Praznuj rojstni dan na edinstven način — s skakanjem, animacijo in vodenim programom.
               Na voljo je prostor za pogostitev, vse pa rezerviraš enostavno online. Nekaj novega v Ljubljani.
             </p>
-            <div className="flex flex-wrap gap-3 mb-8">
-              {['Prostor za pogostitev', 'Rezervacija online', 'Animacija in voden program', 'Nekaj novega v Ljubljani'].map(t => (
-                <span key={t} className="font-condensed text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full"
-                  style={{ background: 'rgba(250,177,32,0.1)', border: '1px solid rgba(250,177,32,0.25)', color: 'var(--accent)' }}>
-                  {t}
-                </span>
-              ))}
-            </div>
           </div>
 
           {/* Slika rojstni dan */}
