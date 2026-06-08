@@ -474,9 +474,9 @@ export default function PoletneKonitnice() {
             PRIJAVI SE<br /><span style={{ color: 'var(--accent)' }}>NA SEZNAM.</span>
           </h2>
           <p style={{ fontSize: 15, color: 'var(--gray)', lineHeight: 1.8, marginBottom: 32 }}>
-            Program za poletje 2027 je v pripravi. Prijava na čakalni seznam ti zagotovi <strong style={{ color: 'var(--white)' }}>prednost pri vpisu</strong> in obvestilo takoj, ko bo program odprt za prijave — preden objavimo splošno.
+            Program za poletje 2027 je v pripravi. Prijava na čakalni seznam ti zagotovi <strong style={{ color: 'var(--white)' }}>prednost pri vpisu</strong> in obvestilo takoj, ko bo program odprt za prijave — preden objavimo splošno. Prijava na čakalni seznam je neobvezujoča in ni prijava v program. Bomo pa upoštevali — prej kot se prijaviš, večja je tvoja prednost.
             <br /><br />
-            Zanimam se za Odbite počitnice. Bodi med prvimi.
+            Zanimam se za Odbite počitnice. Sporočite mi takoj, ko bo kakšna nova informacija.
           </p>
 
           <WaitlistForm />
