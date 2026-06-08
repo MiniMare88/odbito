@@ -136,12 +136,11 @@ export default function PoletneKonitnice() {
       <section className="px-[5%] pt-20 pb-16">
         <div className="max-w-5xl mx-auto">
           <div className="section-label mb-4">Poletje 2027 · Sport City</div>
-          <h1 className="font-display mb-6" style={{ fontSize: 'clamp(52px,10vw,110px)', color: 'var(--white)', lineHeight: 0.95 }}>
-            ODBITE<br />
-            <span style={{ color: 'var(--accent)' }}>POČITNICE.</span>
+          <h1 className="font-display mb-6" style={{ fontSize: 'clamp(40px,7vw,96px)', color: 'var(--white)', lineHeight: 0.95, whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--white)' }}>ODBITE </span><span style={{ color: 'var(--accent)' }}>POČITNICE</span><span style={{ color: 'var(--white)' }}>.</span>
           </h1>
-          <p style={{ fontSize: 18, color: 'var(--gray)', maxWidth: 560, lineHeight: 1.7 }}>
-            Teden, ki ga otroci ne bodo pozabili. Julij in avgust, vsak dan nova avantura — v enem izmed največjih športno-rekreativnih centrov v Sloveniji.
+          <p style={{ fontSize: 16, color: 'var(--gray)', maxWidth: 760, lineHeight: 1.75 }}>
+            Teden, ki ga otroci ne bodo pozabili. Julij in avgust, vsak dan nova izkušnja — v enem izmed največjih športno-rekreativnih centrov v Sloveniji se bodo otroci preizkusili v različnih športih in morda našli svojo novo ljubezen do športa. <strong style={{ color: 'var(--white)' }}>Prebujamo iskrice v talentih in bodočih zvezdnikih.</strong>
           </p>
         </div>
       </section>
