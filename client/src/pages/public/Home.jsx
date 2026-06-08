@@ -932,14 +932,14 @@ export default function Home() {
       <BirthdaySection />
 
       {/* ── POLETNE POČITNICE PROMO ── */}
-      <section style={{ position: 'relative', minHeight: 360, display: 'flex', alignItems: 'center', background: 'var(--black)' }}>
+      <section style={{ position: 'relative', minHeight: 460, display: 'flex', alignItems: 'center', background: 'var(--black)' }}>
         {/* slika čez celo širino */}
         <img
           src="/ODBITO poletje.png"
           alt="Odbite počitnice"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center center',
+            objectFit: 'cover', objectPosition: 'center 60%',
           }}
         />
         {/* overlay */}
