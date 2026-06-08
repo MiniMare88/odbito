@@ -202,22 +202,30 @@ export default function PoletneKonitnice() {
       </section>
 
       {/* ── INFO STRIP ── */}
-      <section className="px-[5%] py-10">
+      <section className="px-[5%] py-12">
         <div className="max-w-5xl mx-auto">
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-            gap: 1, background: 'var(--border)', borderRadius: 12, overflow: 'hidden',
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 12,
           }}>
             {[
-              { label: 'Kdaj', value: 'Julij & Avgust' },
-              { label: 'Urnik', value: 'Pon – Pet · 08–16' },
-              { label: 'Starost', value: '6 – 14 let' },
-              { label: 'Lokacija', value: 'Sport City' },
+              { icon: '📅', label: 'Kdaj', value: 'Julij & Avgust' },
+              { icon: '🕗', label: 'Urnik', value: 'Pon – Pet · 08–16' },
+              { icon: '🧒', label: 'Starost', value: '6 – 16 let' },
+              { icon: '📍', label: 'Lokacija', value: 'Sport City' },
             ].map(item => (
-              <div key={item.label} style={{ background: 'var(--dark2)', padding: '20px 24px', textAlign: 'center' }}>
-                <div className="section-label" style={{ marginBottom: 6 }}>{item.label}</div>
-                <div className="font-condensed font-black uppercase tracking-wide"
-                  style={{ fontSize: 16, color: 'var(--white)' }}>{item.value}</div>
+              <div key={item.label} style={{
+                background: '#0d0d0d', border: '1px solid var(--border)',
+                borderRadius: 14, padding: '24px 20px',
+                display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start',
+              }}>
+                <span style={{ fontSize: 28 }}>{item.icon}</span>
+                <div>
+                  <div className="section-label" style={{ marginBottom: 4 }}>{item.label}</div>
+                  <div className="font-display" style={{ fontSize: 20, color: 'var(--white)', lineHeight: 1.1 }}>
+                    {item.value}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
