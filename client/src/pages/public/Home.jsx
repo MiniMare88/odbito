@@ -541,6 +541,78 @@ function OpenJumpSection() {
   )
 }
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwrx4zJ6tFtyrtzPn0PpxB6CoW9sMZ_6FrNMN0L6DjWzLHJ3NR2RuAOdNtLv8LLpFZL/exec'
+
+function NewsletterForm() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState(null) // null | 'loading' | 'ok' | 'error'
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email) return
+    setStatus('loading')
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, vir: 'spletna stran' }),
+      })
+      setStatus('ok')
+      setEmail('')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (status === 'ok') {
+    return (
+      <div className="flex flex-col gap-1 px-5 py-3 rounded-lg"
+        style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.2)', maxWidth: '340px' }}>
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: '16px' }}>✓</span>
+          <span className="font-condensed font-black text-sm uppercase tracking-wide" style={{ color: '#080A0E' }}>
+            Hvala za oddano prijavo.
+          </span>
+        </div>
+        <span className="font-condensed text-sm" style={{ color: '#080A0E', opacity: 0.75, lineHeight: 1.4 }}>
+          Uspešno ste bili dodani na seznam in boste med prvimi obveščeni o Odbitih novičkah.
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full sm:w-auto">
+      <input
+        type="email"
+        placeholder="tvoj@email.si"
+        required
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        disabled={status === 'loading'}
+        className="newsletter-input font-condensed text-sm px-4 py-2 rounded-lg outline-none flex-1 sm:w-56"
+        style={{ background: 'rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.2)', color: '#080A0E', opacity: status === 'loading' ? 0.6 : 1 }}
+        onFocus={e => e.currentTarget.style.background = 'rgba(0,0,0,0.18)'}
+        onBlur={e => e.currentTarget.style.background = 'rgba(0,0,0,0.12)'}
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="font-condensed font-black text-sm uppercase tracking-widest px-5 py-2 rounded-lg"
+        style={{ background: '#080A0E', color: '#fab120', whiteSpace: 'nowrap', transition: 'opacity 0.18s', opacity: status === 'loading' ? 0.6 : 1 }}
+        onMouseEnter={e => { if (status !== 'loading') e.currentTarget.style.opacity = '0.85' }}
+        onMouseLeave={e => e.currentTarget.style.opacity = status === 'loading' ? '0.6' : '1'}
+      >
+        {status === 'loading' ? '...' : 'Prijavi se'}
+      </button>
+      {status === 'error' && (
+        <span className="font-condensed text-xs" style={{ color: '#080A0E', opacity: 0.7 }}>Napaka, poskusi znova.</span>
+      )}
+    </form>
+  )
+}
+
 export default function Home() {
   return (
     <div style={{ background: 'var(--black)' }}>
@@ -1057,29 +1129,7 @@ export default function Home() {
               Bodi prvi obveščen o novostih, popustih in dogodkih odbite ekipe.
             </span>
           </div>
-          <form
-            onSubmit={e => { e.preventDefault(); alert('Hvala! Prijavili ste se na Odbite novičke.') }}
-            className="flex items-center gap-2 w-full sm:w-auto"
-          >
-            <input
-              type="email"
-              placeholder="tvoj@email.si"
-              required
-              className="newsletter-input font-condensed text-sm px-4 py-2 rounded-lg outline-none flex-1 sm:w-56"
-              style={{ background: 'rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.2)', color: '#080A0E' }}
-              onFocus={e => e.currentTarget.style.background = 'rgba(0,0,0,0.18)'}
-              onBlur={e => e.currentTarget.style.background = 'rgba(0,0,0,0.12)'}
-            />
-            <button
-              type="submit"
-              className="font-condensed font-black text-sm uppercase tracking-widest px-5 py-2 rounded-lg"
-              style={{ background: '#080A0E', color: '#fab120', whiteSpace: 'nowrap', transition: 'opacity 0.18s' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >
-              Prijavi se
-            </button>
-          </form>
+          <NewsletterForm />
         </div>
       </section>
 
