@@ -205,7 +205,7 @@ export default function Pricing() {
         <FAQ items={[
           {
             q: 'Ali moram nogavice kupiti ob vsakem obisku?',
-            a: 'Ne. Nogavice kupiš enkrat (€3,00) in so tvoje za vedno. Prineseš jih na vsak naslednji obisk. Brez nogavic vstop ni dovoljen.',
+            a: 'Ne. Nogavice kupiš enkrat (€2,20) in so tvoje za vedno. Prineseš jih na vsak naslednji obisk. Brez nogavic vstop ni dovoljen.',
           },
           {
             q: 'Ali lahko rezervacijo prekličem ali prestavim?',
@@ -240,7 +240,7 @@ export default function Pricing() {
         {/* Note */}
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
           <p style={{ fontSize: 13, color: 'var(--gray)', lineHeight: 1.8 }}>
-            Vse cene vključujejo 22 % DDV. ·
+            Vse cene vključujejo DDV. ·
             Rezervacij ni mogoče preklicati samostojno. ·
             Skupinski popust se avtomatsko upošteva pri 5 ali več udeležencih. ·
             Nogavice so obvezne in last kupca.
