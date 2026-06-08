@@ -650,8 +650,8 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link to="/rezervacija" className="btn-primary">REZERVIRAJ TERMIN</Link>
-              <Link to="/vadbe" className="btn-secondary">VADBENE URE →</Link>
+              <Link to="/rezervacija" className="btn-primary">KUPI KARTO</Link>
+              <Link to="/vadbe" className="btn-secondary">VPIŠI SE NA TRENING →</Link>
             </div>
           </div>
         </div>
