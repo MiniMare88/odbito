@@ -159,6 +159,37 @@ export default function PoletneKonitnice() {
         </div>
       </section>
 
+      {/* ── INFO STRIP ── */}
+      <section className="px-[5%] py-12">
+        <div className="max-w-5xl mx-auto">
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: 12,
+          }}>
+            {[
+              { icon: '📅', label: 'Kdaj', value: 'Julij & Avgust' },
+              { icon: '🕗', label: 'Urnik', value: 'Pon – Pet · 08–16' },
+              { icon: '🧒', label: 'Starost', value: '6 – 16 let' },
+              { icon: '📍', label: 'Lokacija', value: 'Sport City' },
+            ].map(item => (
+              <div key={item.label} style={{
+                background: '#0d0d0d', border: '1px solid var(--border)',
+                borderRadius: 14, padding: '24px 20px',
+                display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start',
+              }}>
+                <span style={{ fontSize: 28 }}>{item.icon}</span>
+                <div>
+                  <div className="section-label" style={{ marginBottom: 4 }}>{item.label}</div>
+                  <div className="font-display" style={{ fontSize: 20, color: 'var(--white)', lineHeight: 1.1 }}>
+                    {item.value}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── PROGRAM ── */}
       <section className="px-[5%] py-16" style={{ background: 'var(--dark)' }}>
         <div className="max-w-5xl mx-auto">
@@ -197,37 +228,6 @@ export default function PoletneKonitnice() {
               </p>
             </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* ── INFO STRIP ── */}
-      <section className="px-[5%] py-12">
-        <div className="max-w-5xl mx-auto">
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 12,
-          }}>
-            {[
-              { icon: '📅', label: 'Kdaj', value: 'Julij & Avgust' },
-              { icon: '🕗', label: 'Urnik', value: 'Pon – Pet · 08–16' },
-              { icon: '🧒', label: 'Starost', value: '6 – 16 let' },
-              { icon: '📍', label: 'Lokacija', value: 'Sport City' },
-            ].map(item => (
-              <div key={item.label} style={{
-                background: '#0d0d0d', border: '1px solid var(--border)',
-                borderRadius: 14, padding: '24px 20px',
-                display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start',
-              }}>
-                <span style={{ fontSize: 28 }}>{item.icon}</span>
-                <div>
-                  <div className="section-label" style={{ marginBottom: 4 }}>{item.label}</div>
-                  <div className="font-display" style={{ fontSize: 20, color: 'var(--white)', lineHeight: 1.1 }}>
-                    {item.value}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
