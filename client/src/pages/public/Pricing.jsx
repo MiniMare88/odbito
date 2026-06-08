@@ -225,7 +225,7 @@ export default function Pricing() {
           },
           {
             q: 'Kako deluje program zvestobe?',
-            a: 'Po 10 obiskih dobiš 1 uro skakanja brezplačno. Obiski se avtomatično beležijo prek tvojega profila. Ob rojstnem dnevu prav tako prejmete 10 % popust (velja 30 dni).',
+            a: 'Po 10 obiskih dobiš 1 uro skakanja brezplačno. Obiski se avtomatično beležijo prek tvojega profila. Ob rojstnem dnevu prejmete 10 % popust za naslednji obisk — popust dobiš v obliki kupona po e-pošti in velja 30 dni.',
           },
           {
             q: 'Kako kupim ali unovčim darilno kartico?',
