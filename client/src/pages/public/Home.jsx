@@ -211,25 +211,12 @@ function AkademijaSection() {
             </div>
           </div>
 
-          <div className="lg:pt-4">
-            <p className="font-condensed text-xs font-bold tracking-widest uppercase mb-3" style={{ color: 'var(--gray)' }}>
-              Programi
-            </p>
-            {/* Program legend */}
-            {[
-              { label: 'Osnove gimnastike', age: '5–7 let & 8–10 let', color: '#7BB3E8' },
-              { label: 'Napredna gimnastika', age: '10–12 let & 12–15 let', color: '#9B8FE0' },
-            ].map(p => (
-              <div key={p.label} className="flex items-center gap-3 mb-3">
-                <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: p.color }} />
-                <span className="font-condensed font-bold text-sm" style={{ color: 'var(--white)' }}>{p.label}</span>
-                <span className="font-condensed text-xs" style={{ color: 'var(--gray)' }}>{p.age}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Groups list */}
+        <p className="font-condensed font-bold tracking-widest uppercase mb-3" style={{ fontSize: 11, color: 'var(--gray)', letterSpacing: '0.15em' }}>
+          SKUPINE
+        </p>
         <div className="mb-8" style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
           {ALL_GROUPS.map((g, i) => {
             const activeDays = ['Pon','Tor','Sre','Čet','Pet'].filter(d => g.days.includes(d))
