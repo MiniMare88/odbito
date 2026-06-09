@@ -16,9 +16,34 @@ const PRESET_COLORS = [
 ]
 
 const EMPTY_FORM = {
-  name: '', program: '', age_range: '', color_hex: '#A8C8E8',
-  days: [], time_start: '15:00', time_end: '15:30',
+  name: '', program: '',
+  age_from: '', age_to: '',
+  color_hex: '#A8C8E8',
+  day_schedules: [],    // [{day:'pon', start:'15:00', end:'16:00'}]
+  trainer_id: '', assistant_trainer_id: '',
   sort_order: 0, notes: '', is_active: true,
+}
+
+// Convert old-format group to new form shape
+function groupToForm(g) {
+  let day_schedules = g.day_schedules
+  // backward compat: if day_schedules null, build from legacy days+time
+  if (!day_schedules && g.days?.length) {
+    day_schedules = g.days.map(d => ({ day: d, start: g.time_start || '15:00', end: g.time_end || '16:00' }))
+  }
+  return {
+    name: g.name || '',
+    program: g.program || '',
+    age_from: g.age_from ?? (g.age_range ? g.age_range.match(/\d+/)?.[0] || '' : ''),
+    age_to:   g.age_to   ?? (g.age_range ? g.age_range.match(/\d+/g)?.[1] || '' : ''),
+    color_hex: g.color_hex || '#A8C8E8',
+    day_schedules: day_schedules || [],
+    trainer_id: g.trainer_id || '',
+    assistant_trainer_id: g.assistant_trainer_id || '',
+    sort_order: g.sort_order || 0,
+    notes: g.notes || '',
+    is_active: g.is_active !== false,
+  }
 }
 
 function Badge({ color, label }) {
@@ -53,99 +78,168 @@ function DayChip({ day, selected, onClick }) {
 
 // ── Group Form ────────────────────────────────────────────────────────
 
-function GroupForm({ initial, onSave, onCancel, loading }) {
+function GroupForm({ initial, onSave, onCancel, loading, staffUsers }) {
   const [form, setForm] = useState(initial || EMPTY_FORM)
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
-  const toggleDay = (key) => set('days', form.days.includes(key)
-    ? form.days.filter(d => d !== key)
-    : [...form.days, key]
-  )
 
-  const inputStyle = {
+  // Per-day schedule helpers
+  const toggleDay = (key) => {
+    const exists = form.day_schedules.find(d => d.day === key)
+    if (exists) {
+      set('day_schedules', form.day_schedules.filter(d => d.day !== key))
+    } else {
+      // add with default times
+      const ordered = [...form.day_schedules, { day: key, start: '15:00', end: '16:00' }]
+        .sort((a, b) => DAYS_OPTIONS.findIndex(d => d.key === a.day) - DAYS_OPTIONS.findIndex(d => d.key === b.day))
+      set('day_schedules', ordered)
+    }
+  }
+  const updateDayTime = (key, field, val) => {
+    set('day_schedules', form.day_schedules.map(d => d.day === key ? { ...d, [field]: val } : d))
+  }
+
+  const IS = {
     background: 'var(--dark3)', border: '1px solid var(--border)',
     borderRadius: 8, color: 'var(--white)', padding: '9px 12px',
     fontSize: 14, outline: 'none', width: '100%',
     fontFamily: 'Barlow, sans-serif', transition: 'border-color 0.18s',
   }
-  const label = (txt) => (
+  const onFocus = e => e.target.style.borderColor = 'var(--accent)'
+  const onBlur  = e => e.target.style.borderColor = 'var(--border)'
+  const lbl = (txt) => (
     <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gray)', marginBottom: 5 }}>
       {txt}
     </div>
   )
 
+  const ageOptions = ['', ...Array.from({length: 18}, (_, i) => i + 1)]
+
   return (
     <form onSubmit={e => { e.preventDefault(); onSave(form) }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-      {/* Row 1: name + program + age */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 12 }}>
+      {/* Row 1: name + program */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
         <div>
-          {label('Ime skupine')}
+          {lbl('Ime skupine')}
           <input value={form.name} onChange={e => set('name', e.target.value)} required
-            placeholder="5.1" style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            placeholder="5.1" style={IS} onFocus={onFocus} onBlur={onBlur} />
         </div>
         <div>
-          {label('Program')}
+          {lbl('Program')}
           <input value={form.program} onChange={e => set('program', e.target.value)} required
-            placeholder="Gimnastika" style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
-        </div>
-        <div>
-          {label('Starost')}
-          <input value={form.age_range} onChange={e => set('age_range', e.target.value)}
-            placeholder="11–13 let" style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            placeholder="Gimnastika" style={IS} onFocus={onFocus} onBlur={onBlur} />
         </div>
       </div>
 
-      {/* Row 2: time + sort_order */}
+      {/* Row 2: age from / age to / sort_order */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
         <div>
-          {label('Začetek')}
-          <input type="time" value={form.time_start} onChange={e => set('time_start', e.target.value)} required
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+          {lbl('Starost — od (let)')}
+          <select value={form.age_from} onChange={e => set('age_from', e.target.value ? Number(e.target.value) : '')}
+            style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+            <option value="">–</option>
+            {ageOptions.slice(1).map(n => <option key={n} value={n}>{n} let</option>)}
+          </select>
         </div>
         <div>
-          {label('Konec')}
-          <input type="time" value={form.time_end} onChange={e => set('time_end', e.target.value)} required
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+          {lbl('Starost — do (let)')}
+          <select value={form.age_to} onChange={e => set('age_to', e.target.value ? Number(e.target.value) : '')}
+            style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+            <option value="">–</option>
+            {ageOptions.slice(1).map(n => <option key={n} value={n}>{n} let</option>)}
+          </select>
         </div>
         <div>
-          {label('Vrstni red')}
+          {lbl('Vrstni red')}
           <input type="number" value={form.sort_order} onChange={e => set('sort_order', parseInt(e.target.value) || 0)}
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-            onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+            style={IS} onFocus={onFocus} onBlur={onBlur} />
         </div>
       </div>
 
-      {/* Row 3: days */}
+      {/* Row 3: Dnevi vadbe — per-day time picker */}
       <div>
-        {label('Dnevi vadbe')}
-        <div style={{ display: 'flex', gap: 6 }}>
-          {DAYS_OPTIONS.map(d => (
-            <DayChip key={d.key} day={d} selected={form.days.includes(d.key)} onClick={() => toggleDay(d.key)} />
-          ))}
+        {lbl('Dnevi vadbe')}
+        {/* Day selector chips */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {DAYS_OPTIONS.map(d => {
+            const active = form.day_schedules.some(s => s.day === d.key)
+            return (
+              <button key={d.key} type="button" onClick={() => toggleDay(d.key)} style={{
+                padding: '5px 14px', borderRadius: 6,
+                border: active ? '1.5px solid var(--accent)' : '1px solid var(--border)',
+                background: active ? 'rgba(250,177,32,0.12)' : 'transparent',
+                color: active ? 'var(--accent)' : 'var(--gray)',
+                fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900,
+                fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.15s',
+              }}>
+                {d.label}
+              </button>
+            )
+          })}
         </div>
-        {form.days.length === 0 && (
-          <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#e07878', marginTop: 4 }}>
+
+        {/* Per-day time rows */}
+        {form.day_schedules.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {form.day_schedules.map(s => (
+              <div key={s.day} style={{
+                display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: 10, alignItems: 'center',
+                background: 'rgba(250,177,32,0.05)', border: '1px solid rgba(250,177,32,0.15)',
+                borderRadius: 8, padding: '8px 12px',
+              }}>
+                <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900, fontSize: 13, color: 'var(--accent)', letterSpacing: '0.1em' }}>
+                  {DAYS_OPTIONS.find(d => d.key === s.day)?.label}
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, color: 'var(--gray)', marginBottom: 3, letterSpacing: '0.08em' }}>ZAČETEK</div>
+                  <input type="time" value={s.start} onChange={e => updateDayTime(s.day, 'start', e.target.value)}
+                    style={{ ...IS, padding: '6px 10px', fontSize: 13 }} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, color: 'var(--gray)', marginBottom: 3, letterSpacing: '0.08em' }}>KONEC</div>
+                  <input type="time" value={s.end} onChange={e => updateDayTime(s.day, 'end', e.target.value)}
+                    style={{ ...IS, padding: '6px 10px', fontSize: 13 }} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {form.day_schedules.length === 0 && (
+          <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#e07878' }}>
             Izberite vsaj en dan
           </div>
         )}
       </div>
 
-      {/* Row 4: color */}
+      {/* Row 4: Trenerji */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div>
+          {lbl('Glavni trener')}
+          <select value={form.trainer_id} onChange={e => set('trainer_id', e.target.value ? Number(e.target.value) : '')}
+            style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+            <option value="">— Ni določen —</option>
+            {staffUsers.map(u => (
+              <option key={u.id} value={u.id}>{u.first_name} {u.last_name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          {lbl('Pomočnik trenerja')}
+          <select value={form.assistant_trainer_id} onChange={e => set('assistant_trainer_id', e.target.value ? Number(e.target.value) : '')}
+            style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+            <option value="">— Ni določen —</option>
+            {staffUsers.map(u => (
+              <option key={u.id} value={u.id}>{u.first_name} {u.last_name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Row 5: color */}
       <div>
-        {label('Barva')}
+        {lbl('Barva')}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
           {PRESET_COLORS.map(c => (
             <button key={c} type="button" onClick={() => set('color_hex', c)} style={{
@@ -156,28 +250,22 @@ function GroupForm({ initial, onSave, onCancel, loading }) {
               transition: 'all 0.15s',
             }} />
           ))}
-          {/* custom hex */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 4 }}>
             <input type="color" value={form.color_hex} onChange={e => set('color_hex', e.target.value)}
               style={{ width: 32, height: 32, padding: 0, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'none' }} />
             <input value={form.color_hex} onChange={e => set('color_hex', e.target.value)}
-              style={{ ...inputStyle, width: 90 }}
-              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-              onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+              style={{ ...IS, width: 90 }} onFocus={onFocus} onBlur={onBlur} />
           </div>
-          {/* preview */}
           <Badge color={form.color_hex} label={form.name || 'Skupina'} />
         </div>
       </div>
 
-      {/* Row 5: notes */}
+      {/* Row 6: notes */}
       <div>
-        {label('Opombe (neobvezno)')}
+        {lbl('Opombe (neobvezno)')}
         <textarea value={form.notes || ''} onChange={e => set('notes', e.target.value)} rows={2}
           placeholder="Interne opombe o skupini…"
-          style={{ ...inputStyle, resize: 'vertical' }}
-          onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-          onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+          style={{ ...IS, resize: 'vertical' }} onFocus={onFocus} onBlur={onBlur} />
       </div>
 
       {/* Active toggle */}
@@ -200,13 +288,13 @@ function GroupForm({ initial, onSave, onCancel, loading }) {
 
       {/* Buttons */}
       <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
-        <button type="submit" disabled={loading || form.days.length === 0}
+        <button type="submit" disabled={loading || form.day_schedules.length === 0}
           style={{
             flex: 1, padding: '10px 20px', borderRadius: 9,
             background: 'var(--accent)', border: 'none', cursor: 'pointer',
             fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900,
             fontSize: 14, letterSpacing: '0.1em', color: '#080A0E',
-            opacity: loading || form.days.length === 0 ? 0.6 : 1,
+            opacity: loading || form.day_schedules.length === 0 ? 0.6 : 1,
           }}>
           {loading ? 'SHRANJUJEM…' : 'SHRANI SKUPINO'}
         </button>
@@ -227,6 +315,7 @@ function GroupForm({ initial, onSave, onCancel, loading }) {
 
 export default function SkupineTab() {
   const [groups, setGroups]   = useState([])
+  const [staffUsers, setStaffUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
   const [saveError, setSaveError] = useState(null)
@@ -238,8 +327,12 @@ export default function SkupineTab() {
   const load = async () => {
     setLoading(true)
     try {
-      const { data } = await api.get('/admin/akademija-groups')
-      setGroups(data)
+      const [groupsRes, staffRes] = await Promise.all([
+        api.get('/admin/akademija-groups'),
+        api.get('/admin/staff-users'),
+      ])
+      setGroups(groupsRes.data)
+      setStaffUsers(staffRes.data)
     } catch (e) {
       console.error('Load error:', e)
     } finally {
@@ -291,12 +384,12 @@ export default function SkupineTab() {
     return true
   })
 
-  // group by time slot for display
-  const byTime = {}
+  // group by program for display
+  const byProgram = {}
   displayed.forEach(g => {
-    const key = `${g.time_start}–${g.time_end}`
-    if (!byTime[key]) byTime[key] = []
-    byTime[key].push(g)
+    const key = g.program || '–'
+    if (!byProgram[key]) byProgram[key] = []
+    byProgram[key].push(g)
   })
 
   const uniquePrograms = [...new Set(groups.map(g => g.program))].sort()
@@ -335,10 +428,11 @@ export default function SkupineTab() {
             {mode === 'new' ? '+ NOVA SKUPINA' : `UREDI — Skupina ${mode.edit.name}`}
           </div>
           <GroupForm
-            initial={mode === 'new' ? EMPTY_FORM : { ...mode.edit }}
+            initial={mode === 'new' ? EMPTY_FORM : groupToForm(mode.edit)}
             onSave={handleSave}
             onCancel={() => { setMode(null); setSaveError(null) }}
             loading={saving}
+            staffUsers={staffUsers}
           />
           {saveError && (
             <div style={{
@@ -400,7 +494,7 @@ export default function SkupineTab() {
       )}
 
       {/* Groups table by time */}
-      {!loading && Object.keys(byTime).length === 0 && (
+      {!loading && Object.keys(byProgram).length === 0 && (
         <div style={{
           textAlign: 'center', padding: 40, border: '1px dashed var(--border)', borderRadius: 16,
           fontFamily: 'Barlow Condensed, sans-serif', color: 'var(--gray)',
@@ -409,16 +503,16 @@ export default function SkupineTab() {
         </div>
       )}
 
-      {!loading && Object.entries(byTime).sort().map(([timeKey, gs]) => (
-        <div key={timeKey} style={{ marginBottom: 20 }}>
-          {/* Time slot header */}
+      {!loading && Object.entries(byProgram).sort().map(([programKey, gs]) => (
+        <div key={programKey} style={{ marginBottom: 20 }}>
+          {/* Program header */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
           }}>
             <div style={{
               fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 11,
               letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent)',
-            }}>⏱ {timeKey.replace('–', ' – ')}</div>
+            }}>{programKey}</div>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
@@ -456,18 +550,37 @@ export default function SkupineTab() {
                   )}
                 </div>
 
-                {/* Days chips */}
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {DAYS_OPTIONS.map(d => (
-                    <span key={d.key} style={{
-                      fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900, fontSize: 10,
-                      letterSpacing: '0.1em', padding: '2px 7px', borderRadius: 5,
-                      background: g.days.includes(d.key) ? `${g.color_hex}25` : 'transparent',
-                      color: g.days.includes(d.key) ? g.color_hex : 'rgba(255,255,255,0.1)',
-                      border: g.days.includes(d.key) ? `1px solid ${g.color_hex}50` : '1px solid rgba(255,255,255,0.05)',
-                    }}>{d.label}</span>
+                {/* Days chips with time */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 260 }}>
+                  {(g.day_schedules?.length
+                    ? g.day_schedules
+                    : (g.days || []).map(d => ({ day: d, start: g.time_start, end: g.time_end }))
+                  ).map(s => (
+                    <span key={s.day} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 10,
+                      letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 5,
+                      background: `${g.color_hex}25`, color: g.color_hex,
+                      border: `1px solid ${g.color_hex}50`,
+                    }}>
+                      <span style={{ fontWeight: 900 }}>{DAYS_OPTIONS.find(d => d.key === s.day)?.label}</span>
+                      <span style={{ opacity: 0.7 }}>{s.start}–{s.end}</span>
+                    </span>
                   ))}
                 </div>
+
+                {/* Trainer */}
+                {(g.trainer_id || g.assistant_trainer_id) && (() => {
+                  const trainer = staffUsers.find(u => u.id === g.trainer_id)
+                  const asst    = staffUsers.find(u => u.id === g.assistant_trainer_id)
+                  return (
+                    <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: 'var(--gray)', whiteSpace: 'nowrap' }}>
+                      {trainer && <span>👤 {trainer.first_name} {trainer.last_name}</span>}
+                      {trainer && asst && <span style={{ opacity: 0.4 }}> · </span>}
+                      {asst && <span style={{ opacity: 0.6 }}>+ {asst.first_name} {asst.last_name}</span>}
+                    </div>
+                  )
+                })()}
 
                 {/* Active toggle */}
                 <button onClick={() => toggleActive(g)} title={g.is_active ? 'Deaktiviraj' : 'Aktiviraj'} style={{

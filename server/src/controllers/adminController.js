@@ -375,24 +375,77 @@ export async function updateClassType(req, res) {
 
 // ── Akademija Groups ──────────────────────────────────────────────────
 
+// GET /api/admin/staff-users  — staff + admin users for trainer dropdowns
+export async function getStaffUsers(req, res) {
+  const users = await User.findAll({
+    where: { role: ['staff', 'admin'] },
+    attributes: ['id', 'first_name', 'last_name', 'email', 'role'],
+    order: [['last_name', 'ASC'], ['first_name', 'ASC']],
+  })
+  res.json(users)
+}
+
+// Helper: derive legacy fields from day_schedules
+function deriveLegacyFields(day_schedules) {
+  if (!day_schedules || day_schedules.length === 0) return {}
+  const days = day_schedules.map(d => d.day)
+  const time_start = day_schedules[0].start
+  const time_end   = day_schedules[0].end
+  return { days, time_start, time_end }
+}
+
 export async function getAkademijaGroups(req, res) {
   const groups = await AkademijaGroup.findAll({ order: [['sort_order', 'ASC'], ['name', 'ASC']] })
   res.json(groups)
 }
 
 export async function createAkademijaGroup(req, res) {
-  const { name, program, age_range, color_hex, days, time_start, time_end, sort_order, notes } = req.body
-  if (!name || !program || !days || !time_start || !time_end)
-    return res.status(400).json({ error: 'Manjkajo obvezna polja' })
-  const g = await AkademijaGroup.create({ name, program, age_range, color_hex, days, time_start, time_end, sort_order: sort_order || 0, notes })
+  const { name, program, age_from, age_to, color_hex, day_schedules,
+          trainer_id, assistant_trainer_id, sort_order, notes, is_active,
+          // legacy fallback
+          age_range, days, time_start, time_end } = req.body
+
+  if (!name || !program) return res.status(400).json({ error: 'Manjkajo obvezna polja' })
+
+  const legacy = day_schedules?.length ? deriveLegacyFields(day_schedules) : {}
+  const ageRange = age_from != null && age_to != null ? `${age_from}–${age_to} let` : (age_range || '')
+
+  const g = await AkademijaGroup.create({
+    name, program,
+    age_range: ageRange, age_from, age_to,
+    color_hex: color_hex || '#A8C8E8',
+    day_schedules: day_schedules || null,
+    days: legacy.days || days || [],
+    time_start: legacy.time_start || time_start || '00:00',
+    time_end: legacy.time_end || time_end || '00:00',
+    trainer_id: trainer_id || null,
+    assistant_trainer_id: assistant_trainer_id || null,
+    sort_order: sort_order || 0,
+    notes: notes || null,
+    is_active: is_active !== false,
+  })
   res.status(201).json(g)
 }
 
 export async function updateAkademijaGroup(req, res) {
   const g = await AkademijaGroup.findByPk(req.params.id)
   if (!g) return res.status(404).json({ error: 'Skupina ne obstaja' })
-  const fields = ['name', 'program', 'age_range', 'color_hex', 'days', 'time_start', 'time_end', 'sort_order', 'is_active', 'notes']
-  fields.forEach(f => { if (req.body[f] !== undefined) g[f] = req.body[f] })
+
+  const { day_schedules, age_from, age_to, ...rest } = req.body
+
+  if (day_schedules !== undefined) {
+    g.day_schedules = day_schedules
+    const legacy = deriveLegacyFields(day_schedules)
+    if (legacy.days) { g.days = legacy.days; g.time_start = legacy.time_start; g.time_end = legacy.time_end }
+  }
+  if (age_from !== undefined) g.age_from = age_from
+  if (age_to   !== undefined) g.age_to   = age_to
+  if (age_from != null && age_to != null) g.age_range = `${age_from}–${age_to} let`
+
+  const fields = ['name', 'program', 'age_range', 'color_hex', 'days', 'time_start', 'time_end',
+                  'trainer_id', 'assistant_trainer_id', 'sort_order', 'is_active', 'notes']
+  fields.forEach(f => { if (rest[f] !== undefined) g[f] = rest[f] })
+
   await g.save()
   res.json(g)
 }

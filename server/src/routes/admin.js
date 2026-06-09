@@ -11,6 +11,7 @@ import {
   cancelBooking,
   getOccupancy,
   getAkademijaGroups, createAkademijaGroup, updateAkademijaGroup, deleteAkademijaGroup,
+  getStaffUsers,
 } from '../controllers/adminController.js'
 
 const router = Router()
@@ -48,6 +49,8 @@ router.get('/class-types', getClassTypes)
 router.patch('/class-types/:id', updateClassType)
 
 router.get('/occupancy', getOccupancy)
+
+router.get('/staff-users',          getStaffUsers)
 
 router.get('/akademija-groups',     getAkademijaGroups)
 router.post('/akademija-groups',    createAkademijaGroup)
