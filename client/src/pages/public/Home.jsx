@@ -229,41 +229,63 @@ function AkademijaSection() {
           </div>
         </div>
 
-        {/* Groups grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          {ALL_GROUPS.map(g => (
-            <div key={g.id} className="rounded-xl overflow-hidden"
-              style={{ border: `1px solid ${g.color}35`, background: 'var(--dark2)' }}>
-              {/* Top color bar */}
-              <div className="h-1" style={{ background: g.color }} />
-              <div className="p-4">
-                {/* Skupina number + days */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="font-display text-3xl leading-none" style={{ color: g.color }}>{g.id}</div>
-                    <span className="font-condensed text-xs font-black uppercase tracking-wide" style={{ color: 'var(--gray)' }}>
-                      SKUPINA
-                    </span>
-                  </div>
-                  <span className="font-condensed text-xs font-bold px-2 py-1 rounded"
-                    style={{ background: `${g.color}18`, color: g.color }}>
-                    {g.days}
+        {/* Groups list */}
+        <div className="mb-8" style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+          {ALL_GROUPS.map((g, i) => {
+            const activeDays = ['Pon','Tor','Sre','Čet','Pet'].filter(d => g.days.includes(d))
+            const dayTime = activeDays.map(d => {
+              const label = d === 'Pon' ? 'PON' : d === 'Tor' ? 'TOR' : d === 'Sre' ? 'SRE' : d === 'Čet' ? 'ČET' : 'PET'
+              return `${label} ${g.time}`
+            }).join(' / ')
+
+            return (
+              <div key={g.id}
+                className="flex flex-wrap items-center gap-x-5 gap-y-2 px-5 py-4"
+                style={{
+                  borderBottom: i < ALL_GROUPS.length - 1 ? '1px solid var(--border)' : 'none',
+                  background: 'var(--dark2)',
+                }}>
+
+                {/* Ime skupine */}
+                <div className="flex items-center gap-2" style={{ minWidth: 90, flexShrink: 0 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: g.color, flexShrink: 0 }} />
+                  <span className="font-condensed font-black uppercase tracking-widest"
+                    style={{ fontSize: 11, color: g.color, letterSpacing: '0.12em' }}>
+                    SKUPINA {g.id}
                   </span>
                 </div>
 
                 {/* Program */}
-                <div className="font-condensed font-black text-sm uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
+                <div className="font-condensed font-black uppercase tracking-wide"
+                  style={{ fontSize: 13, color: 'var(--white)', flex: 1, minWidth: 140 }}>
                   {g.program}
                 </div>
 
-                {/* Age + time */}
-                <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
-                  <div className="badge text-xs" style={{ '--badge-dot': g.color, fontSize: '11px' }}>{g.age}</div>
-                  <span className="font-condensed font-bold text-xs" style={{ color: 'var(--gray)' }}>{g.time}</span>
+                {/* Starost */}
+                <div className="font-condensed font-bold"
+                  style={{ fontSize: 12, color: 'var(--gray)', minWidth: 60, flexShrink: 0 }}>
+                  {g.age}
                 </div>
+
+                {/* Dan + ura */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {activeDays.map(d => {
+                    const label = d === 'Pon' ? 'PON' : d === 'Tor' ? 'TOR' : d === 'Sre' ? 'SRE' : d === 'Čet' ? 'ČET' : 'PET'
+                    return (
+                      <span key={d} className="font-condensed font-black px-2 py-1 rounded"
+                        style={{ fontSize: 10, background: g.color, color: '#080A0E', letterSpacing: '0.05em' }}>
+                        {label}
+                      </span>
+                    )
+                  })}
+                  <span className="font-condensed font-bold" style={{ fontSize: 11, color: 'var(--gray)' }}>
+                    {g.time}
+                  </span>
+                </div>
+
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         <Link to="/vadbe" className="btn-primary">NAJDI SVOJO SKUPINO →</Link>
