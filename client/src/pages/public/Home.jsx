@@ -266,7 +266,7 @@ function AkademijaSection() {
           ))}
         </div>
 
-        <Link to="/vadbe" className="btn-primary">NAROČI SE NA VADBO →</Link>
+        <Link to="/vadbe" className="btn-primary">NAJDI SVOJO SKUPINO →</Link>
       </div>
     </section>
   )
