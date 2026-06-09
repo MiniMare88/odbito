@@ -2,9 +2,9 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const DAYS = [
-  { short: 'PET', sub: 'vsak petek',   time: '15:00 – 20:00', highlight: false },
-  { short: 'SOB', sub: 'vsako soboto', time: '10:00 – 21:00', highlight: true, tag: 'NAJVEČ UR' },
-  { short: 'NED', sub: 'vsako nedeljo', time: '10:00 – 20:00', highlight: false },
+  { short: 'PETEK',   time: '15:00 – 20:00', highlight: false },
+  { short: 'SOBOTA',  time: '10:00 – 21:00', highlight: true, tag: 'NAJVEČ UR' },
+  { short: 'NEDELJA', time: '10:00 – 20:00', highlight: false },
 ]
 
 const INFO_BADGES = [
@@ -45,9 +45,15 @@ export default function Obisk() {
           </div>
 
           {/* ── Urnik dni ── */}
-          <div className="font-condensed font-black text-sm tracking-widest uppercase mb-5"
-            style={{ color: 'var(--gray)', letterSpacing: '0.2em' }}>
-            VIKENDI SO NAMENJENI ENKRATNI ZABAVI
+          <div className="flex items-baseline gap-3 mb-5 flex-wrap">
+            <div className="font-condensed font-black text-sm tracking-widest uppercase"
+              style={{ color: 'var(--gray)', letterSpacing: '0.2em' }}>
+              VIKENDI SO NAMENJENI ODBITI IZKUŠNJI
+            </div>
+            <Link to="/rezervacija" className="font-condensed font-bold text-xs uppercase tracking-widest"
+              style={{ color: 'var(--accent)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              rezerviraj svoj termin →
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 max-w-2xl">
@@ -63,13 +69,9 @@ export default function Obisk() {
                     {d.tag}
                   </div>
                 )}
-                <div className="font-display text-4xl leading-none"
-                  style={{ color: d.highlight ? '#080A0E' : 'var(--accent)' }}>
+                <div className="font-display leading-none"
+                  style={{ fontSize: 'clamp(28px,5vw,38px)', color: d.highlight ? '#080A0E' : 'var(--accent)' }}>
                   {d.short}
-                </div>
-                <div className="font-condensed text-sm"
-                  style={{ color: d.highlight ? 'rgba(8,10,14,0.7)' : 'var(--gray)' }}>
-                  {d.sub}
                 </div>
                 <div className="font-condensed font-black text-base mt-1"
                   style={{ color: d.highlight ? '#080A0E' : 'var(--white)' }}>
