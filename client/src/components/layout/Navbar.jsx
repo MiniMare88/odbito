@@ -147,11 +147,14 @@ export default function Navbar() {
               </button>
               {user ? (
                 <>
-                  <Link to={user.role === 'admin' ? '/admin' : user.role === 'staff' ? '/osobje' : '/dashboard'}
-                    onClick={() => setMenuOpen(false)} className="text-sm text-white/70">
-                    {t('nav.dashboard')}
+                  <Link
+                    to={user.role === 'admin' ? '/admin' : user.role === 'staff' ? '/osobje' : '/dashboard'}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 font-semibold text-sm px-4 py-2 rounded"
+                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000' }}>
+                    <span>👤</span> MOJ PROFIL
                   </Link>
-                  <button onClick={handleLogout} className="text-sm text-white/50">{t('nav.logout')}</button>
+                  <button onClick={handleLogout} className="text-sm text-white/40">{t('nav.logout')}</button>
                 </>
               ) : (
                 <div className="flex gap-2">
