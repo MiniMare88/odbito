@@ -617,9 +617,9 @@ const HOME_DAYS = [
 ]
 
 const HOME_BLOCKS = [
-  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Vodene vadbe',    color: '#fab120', tc: '#080A0E', days: ['pon','tor','sre','cet'], startH: 15, endH: 21 },
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pon','tor','sre','cet'], startH: 15, endH: 21 },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['pet'],                  startH: 10, endH: 20, link: '/rezervacija' },
-  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Vodene vadbe',    color: '#fab120', tc: '#080A0E', days: ['pet'],                  startH: 19, endH: 21 },
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pet'],                  startH: 19, endH: 21 },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['sob'],                  startH: 10, endH: 21, link: '/rezervacija' },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['ned'],                  startH: 10, endH: 20, link: '/rezervacija' },
 ]
@@ -755,7 +755,7 @@ function HomeWeekOverview() {
           <Link to="/vadbe" style={{ textDecoration: 'none' }}>
             <div className="flex items-center gap-4 px-4 py-4" style={{ background: '#fab120' }}>
               <div className="flex-1">
-                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>Vodene vadbe</div>
+                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>Urnik treningov</div>
                 <div className="font-condensed text-sm" style={{ color: 'rgba(8,10,14,0.6)' }}>Ponedeljek – Četrtek</div>
               </div>
               <div className="font-condensed font-bold text-sm" style={{ color: '#080A0E' }}>15:00 – 21:00</div>
@@ -1038,40 +1038,36 @@ export default function Home() {
         {/* Zgornji del: levo rumeno + desno črno s sliko, diagonalni razdelek */}
         <div className="relative min-h-[480px] flex">
 
-          {/* Rumeno ozadje leve strani */}
+          {/* ── DESKTOP ozadja ── */}
           <div className="absolute inset-0 hidden lg:block" style={{ background: 'var(--accent)' }} />
-          <div className="absolute inset-0 lg:hidden" style={{ background: 'rgba(250,177,32,0.72)' }} />
-
-          {/* Črno ozadje desne strani — z clip-path diagonal (desktop) */}
           <div className="absolute inset-0 hidden lg:block" style={{
             background: '#000',
             clipPath: 'polygon(38% 0%, 100% 0%, 100% 100%, 38% 100%)',
           }} />
-
-          {/* Slika — desna stran, nad črnim ozadjem, rezana z isto diagonalo */}
           <div className="absolute inset-y-0 right-0 hidden lg:block" style={{ left: '38%' }}>
             <img src="/Dunking Devils Team.png" alt="Odbito ekipa"
-              className="w-full h-full object-cover object-center"
-            />
-            {/* Comic bubbles */}
+              className="w-full h-full object-cover object-center" />
             <ComicBubbles />
           </div>
 
-            {/* Tekst — leva stran, nad vsem */}
+          {/* ── MOBILNO ozadje — slika čez celo širino ── */}
+          <div className="lg:hidden absolute inset-0">
+            <img src="/Dunking Devils Team.png" alt="Odbito ekipa"
+              className="w-full h-full object-cover object-center" style={{ opacity: 0.9 }} />
+          </div>
+          {/* rumeni overlay samo na levi polovici */}
+          <div className="lg:hidden absolute inset-y-0 left-0 w-1/2"
+            style={{ background: 'rgba(250,177,32,0.90)' }} />
+
+          {/* Tekst — leva stran */}
           <div className="relative z-10 flex items-center px-[5%] py-8 lg:py-16 lg:w-[52%] w-1/2">
             <div>
-              <h2 className="font-display leading-none" style={{ fontSize: 'clamp(52px,7vw,100px)', color: '#080A0E' }}>
-                ZABAVA<span style={{ color: '#fff' }}>.</span><br />
-                <span style={{ color: '#fff' }}>TRENING</span><span style={{ color: '#000' }}>.</span><br />
-                SKUPNOST<span style={{ color: '#fff' }}>.</span>
+              <h2 className="font-display leading-none" style={{ fontSize: 'clamp(52px,7vw,100px)', lineHeight: 0.95 }}>
+                <span style={{ color: '#080A0E' }}>ZABAVA</span><span style={{ color: '#fff' }}>.</span><br />
+                <span style={{ color: '#fff' }}>TRENING</span><span style={{ color: '#080A0E' }}>.</span><br />
+                <span style={{ color: '#080A0E' }}>SKUPNOST</span><span style={{ color: '#fff' }}>.</span>
               </h2>
             </div>
-          </div>
-
-          {/* Mobilna slika — desna polovica */}
-          <div className="lg:hidden absolute inset-y-0 right-0 w-1/2" style={{ background: '#000' }}>
-            <img src="/Dunking Devils Team.png" alt="Odbito ekipa"
-              className="w-full h-full object-cover object-center" style={{ opacity: 0.7 }} />
           </div>
         </div>
 
@@ -1083,7 +1079,8 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 lg:mb-10">
             <div>
-              <h2 className="font-display leading-none" style={{ fontSize: 'clamp(24px,4vw,52px)', color: 'var(--white)', whiteSpace: 'nowrap' }}>
+              <div className="section-label mb-3">Tako izgleda teden pri nas</div>
+              <h2 className="font-display leading-none" style={{ fontSize: 'clamp(40px,7vw,80px)', color: 'var(--white)' }}>
                 <span style={{ color: 'var(--accent)' }}>TEDENSKI</span>{' '}
                 <span style={{ color: 'var(--white)' }}>URNIK</span>
                 <span style={{ color: 'var(--accent)' }}>.</span>
