@@ -98,7 +98,20 @@ export default function Obisk() {
         <div className="max-w-6xl mx-auto">
           <div className="section-label mb-6 pt-16">Cenik · Prosto skakanje</div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {/* Mobile: ena vrstica / Desktop: vse 4 */}
+          <div className="sm:hidden mb-8">
+            <div className="rounded-2xl p-6 flex items-center justify-between"
+              style={{ background: 'var(--dark2)', border: '1px solid var(--border)' }}>
+              <div className="font-condensed font-bold text-sm uppercase tracking-wide" style={{ color: 'var(--gray)' }}>
+                Enkraten obisk
+              </div>
+              <div className="font-display text-4xl leading-none" style={{ color: 'var(--accent)' }}>
+                od 14 €
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {PRICES.map(p => (
               <div key={p.label}
                 className="rounded-2xl p-6 flex flex-col gap-3 relative"
@@ -128,10 +141,10 @@ export default function Obisk() {
           {/* CTA */}
           <div className="flex flex-col sm:flex-row gap-4 items-start">
             <Link to="/rezervacija" className="btn-primary" style={{ textDecoration: 'none' }}>
-              Rezerviraj →
+              REZERVIRAJ TERMIN →
             </Link>
             <Link to="/cenik" className="btn-secondary" style={{ textDecoration: 'none' }}>
-              Celoten cenik
+              CELOTEN CENIK
             </Link>
           </div>
         </div>
