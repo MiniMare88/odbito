@@ -154,17 +154,21 @@ export default function Navbar() {
                   <button onClick={handleLogout} className="text-sm text-white/50">{t('nav.logout')}</button>
                 </>
               ) : (
-                <div className="relative w-full">
-                  <button
-                    onClick={() => setAuthOpen(v => !v)}
-                    className="bg-accent text-black font-semibold text-sm px-4 py-2 rounded">
-                    MOJ PROFIL {authOpen ? '▲' : '▾'}
-                  </button>
-                  {authOpen && (
-                    <div className="mt-2">
-                      <AuthPanel onClose={() => setAuthOpen(false)} />
-                    </div>
-                  )}
+                <div className="flex gap-2">
+                  <Link
+                    to="/prijava"
+                    onClick={() => setMenuOpen(false)}
+                    className="bg-accent text-black font-semibold text-sm px-4 py-2 rounded"
+                    style={{ textDecoration: 'none' }}>
+                    PRIJAVI SE
+                  </Link>
+                  <Link
+                    to="/registracija"
+                    onClick={() => setMenuOpen(false)}
+                    className="font-semibold text-sm px-4 py-2 rounded"
+                    style={{ textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--white)' }}>
+                    REGISTRIRAJ SE
+                  </Link>
                 </div>
               )}
             </div>
