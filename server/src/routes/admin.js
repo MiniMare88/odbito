@@ -10,6 +10,7 @@ import {
   getClassTypes, updateClassType,
   cancelBooking,
   getOccupancy,
+  getAkademijaGroups, createAkademijaGroup, updateAkademijaGroup, deleteAkademijaGroup,
 } from '../controllers/adminController.js'
 
 const router = Router()
@@ -47,5 +48,10 @@ router.get('/class-types', getClassTypes)
 router.patch('/class-types/:id', updateClassType)
 
 router.get('/occupancy', getOccupancy)
+
+router.get('/akademija-groups',     getAkademijaGroups)
+router.post('/akademija-groups',    createAkademijaGroup)
+router.patch('/akademija-groups/:id', updateAkademijaGroup)
+router.delete('/akademija-groups/:id', deleteAkademijaGroup)
 
 export default router

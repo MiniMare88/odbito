@@ -9,12 +9,20 @@ import {
   registerSession,
   unregisterSession,
 } from '../controllers/classController.js'
+import AkademijaGroup from '../models/AkademijaGroup.js'
 
 const router = Router()
 
 // Public
 router.get('/types', getClassTypes)
 router.get('/schedule', getSchedule)
+router.get('/akademija-groups', async (req, res) => {
+  const groups = await AkademijaGroup.findAll({
+    where: { is_active: true },
+    order: [['sort_order', 'ASC'], ['name', 'ASC']],
+  })
+  res.json(groups)
+})
 
 // Authenticated
 router.get('/my-subscriptions', requireAuth, mySubscriptions)

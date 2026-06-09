@@ -9,6 +9,7 @@ import BirthdayTab from './BirthdayTab.jsx'
 import UrnikParkaTab from './UrnikParkaTab.jsx'
 import VouchersTab from './VouchersTab.jsx'
 import UserDrawer from './UserDrawer.jsx'
+import SkupineTab from './SkupineTab.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -993,6 +994,13 @@ const NAV_GROUPS = [
     ],
   },
   {
+    key: 'akademija',
+    label: 'AKADEMIJA',
+    tabs: [
+      { key: 'skupine', label: 'Skupine' },
+    ],
+  },
+  {
     key: 'osebje',
     label: 'OSEBJE',
     tabs: [
@@ -1094,6 +1102,7 @@ export default function AdminPanel() {
             {tab === 'overview'   && <OverviewTab />}
             {tab === 'occupancy'   && <OccupancyTab />}
             {tab === 'urnik-parka' && <UrnikParkaTab />}
+            {tab === 'skupine'    && <SkupineTab />}
             {tab === 'prijave'    && <PrijaveTab />}
             {tab === 'urnik'      && <UrnikTab />}
             {tab === 'bookings'   && <BookingsTab />}

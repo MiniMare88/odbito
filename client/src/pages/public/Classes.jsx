@@ -48,9 +48,13 @@ export default function Classes() {
       {/* Hero */}
       <section className="px-[5%] pt-20 pb-12">
         <div className="max-w-6xl mx-auto">
-          <div className="section-label mb-4">Sezona 2026/2027 · Sep 2026 – Jun 2027</div>
+          <div className="section-label mb-4">
+            <span style={{ color: 'var(--accent)' }}>Sezona 2026/2027</span>
+            <span style={{ color: 'rgba(245,245,240,0.3)', margin: '0 8px' }}>|</span>
+            <span style={{ color: 'var(--white)' }}>Sep 2026 – Jun 2027</span>
+          </div>
           <h1 className="font-display mb-5" style={{ fontSize: 'clamp(56px, 10vw, 110px)', color: 'var(--white)', lineHeight: 1 }}>
-            VADBENE<br /><span style={{ color: 'var(--accent)' }}>URE.</span>
+            ODBIT <span style={{ color: 'var(--accent)' }}>TRENING.</span>
           </h1>
           <p className="max-w-xl mb-8" style={{ fontSize: '17px' }}>
             Organizirane vadbe vsak teden pod vodstvom inštruktorjev. Naroči se na mesečno ali letno naročnino in treniraš pon–čet. Prvi termini se začnejo september 2026.
@@ -74,8 +78,10 @@ export default function Classes() {
       ) : view === 'schedule' ? (
 
         /* ── SCHEDULE VIEW ── */
-        <section className="pb-20">
-          <WeeklySchedule />
+        <section className="px-[5%] pb-20">
+          <div className="max-w-6xl mx-auto">
+            <WeeklySchedule />
+          </div>
         </section>
 
       ) : (

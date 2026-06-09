@@ -1,6 +1,7 @@
 import { Op, fn, col, literal } from 'sequelize'
 import { sequelize } from '../models/db.js'
 import User from '../models/User.js'
+import AkademijaGroup from '../models/AkademijaGroup.js'
 import OpenJumpBooking from '../models/OpenJumpBooking.js'
 import Subscription from '../models/Subscription.js'
 import ClassType from '../models/ClassType.js'
@@ -370,6 +371,37 @@ export async function updateClassType(req, res) {
   allowed.forEach(f => { if (req.body[f] !== undefined) ct[f] = req.body[f] })
   await ct.save()
   res.json(ct)
+}
+
+// ── Akademija Groups ──────────────────────────────────────────────────
+
+export async function getAkademijaGroups(req, res) {
+  const groups = await AkademijaGroup.findAll({ order: [['sort_order', 'ASC'], ['name', 'ASC']] })
+  res.json(groups)
+}
+
+export async function createAkademijaGroup(req, res) {
+  const { name, program, age_range, color_hex, days, time_start, time_end, sort_order, notes } = req.body
+  if (!name || !program || !days || !time_start || !time_end)
+    return res.status(400).json({ error: 'Manjkajo obvezna polja' })
+  const g = await AkademijaGroup.create({ name, program, age_range, color_hex, days, time_start, time_end, sort_order: sort_order || 0, notes })
+  res.status(201).json(g)
+}
+
+export async function updateAkademijaGroup(req, res) {
+  const g = await AkademijaGroup.findByPk(req.params.id)
+  if (!g) return res.status(404).json({ error: 'Skupina ne obstaja' })
+  const fields = ['name', 'program', 'age_range', 'color_hex', 'days', 'time_start', 'time_end', 'sort_order', 'is_active', 'notes']
+  fields.forEach(f => { if (req.body[f] !== undefined) g[f] = req.body[f] })
+  await g.save()
+  res.json(g)
+}
+
+export async function deleteAkademijaGroup(req, res) {
+  const g = await AkademijaGroup.findByPk(req.params.id)
+  if (!g) return res.status(404).json({ error: 'Skupina ne obstaja' })
+  await g.destroy()
+  res.json({ ok: true })
 }
 
 // GET /api/admin/occupancy?view=month&year=2026&month=6

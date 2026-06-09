@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import WeeklySchedule from '../../components/WeeklySchedule.jsx'
 import pricing from '../../data/pricing.json'
 
 const CHARS = 'ABCDEFGHIJKLMNOPRSTUVZX0123456789#@!%&'
@@ -188,7 +187,7 @@ function ComicBubbles() {
 
 function AkademijaSection() {
   return (
-    <section className="px-[5%] py-20" style={{ background: 'var(--dark)' }}>
+    <section className="px-[5%] py-8 lg:py-20" style={{ background: 'var(--dark)' }}>
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
@@ -293,7 +292,7 @@ function BirthdaySection() {
   }, [])
 
   return (
-    <section className="px-[5%] py-20" style={{ background: 'var(--dark)' }}>
+    <section className="px-[5%] py-8 lg:py-20" style={{ background: 'var(--dark)' }}>
       <div className="max-w-6xl mx-auto">
 
         <div className="grid lg:grid-cols-2 gap-12 items-start mb-6">
@@ -430,7 +429,7 @@ function OpenJumpSection() {
   ]
 
   return (
-    <section className="px-[5%] py-16" style={{ background: '#D8D8D4' }}>
+    <section className="px-[5%] py-8 lg:py-16" style={{ background: '#D8D8D4' }}>
       <div className="max-w-6xl mx-auto">
         <div className="section-label mb-4" style={{ color: '#7A8499' }}>Open Jump</div>
 
@@ -605,17 +604,217 @@ function NewsletterForm() {
   )
 }
 
+// ── Home week overview (static, visual only) ─────────────────────────
+
+const HOME_DAYS = [
+  { key: 'pon', label: 'PON', full: 'Ponedeljek' },
+  { key: 'tor', label: 'TOR', full: 'Torek' },
+  { key: 'sre', label: 'SRE', full: 'Sreda' },
+  { key: 'cet', label: 'ČET', full: 'Četrtek' },
+  { key: 'pet', label: 'PET', full: 'Petek' },
+  { key: 'sob', label: 'SOB', full: 'Sobota' },
+  { key: 'ned', label: 'NED', full: 'Nedelja' },
+]
+
+const HOME_BLOCKS = [
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Vodene vadbe',    color: '#fab120', tc: '#080A0E', days: ['pon','tor','sre','cet'], startH: 15, endH: 21 },
+  { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['pet'],                  startH: 10, endH: 20, link: '/rezervacija' },
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Vodene vadbe',    color: '#fab120', tc: '#080A0E', days: ['pet'],                  startH: 19, endH: 21 },
+  { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['sob'],                  startH: 10, endH: 21, link: '/rezervacija' },
+  { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['ned'],                  startH: 10, endH: 20, link: '/rezervacija' },
+]
+
+const DAY_START = 10
+const DAY_END   = 21
+const TOTAL_H   = DAY_END - DAY_START
+const GRID_H    = 480
+
+function homePct(h, m = 0) {
+  return ((h - DAY_START + m / 60) / TOTAL_H) * 100
+}
+
+const HOUR_MARKS = Array.from({ length: TOTAL_H + 1 }, (_, i) => DAY_START + i)
+
+function HomeWeekOverview() {
+  return (
+    <div>
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        {/* Day headers */}
+        <div className="grid mb-2" style={{ gridTemplateColumns: '46px repeat(7, 1fr)', gap: '4px' }}>
+          <div />
+          {HOME_DAYS.map(d => (
+            <div key={d.key} className="text-center py-2 font-condensed font-black text-sm tracking-widest uppercase"
+              style={{ color: 'var(--gray)' }}>
+              {d.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Timeline */}
+        <div className="grid" style={{ gridTemplateColumns: '46px repeat(7, 1fr)', gap: '4px' }}>
+          {/* Hour axis */}
+          <div className="relative" style={{ height: GRID_H }}>
+            {HOUR_MARKS.map(h => (
+              <div key={h} className="absolute font-condensed font-bold"
+                style={{ top: `${homePct(h)}%`, right: '6px', color: 'rgba(245,245,240,0.25)', transform: 'translateY(-50%)', fontSize: '11px' }}>
+                {h}:00
+              </div>
+            ))}
+          </div>
+
+          {/* Columns */}
+          {HOME_DAYS.map(day => {
+            const blocks = HOME_BLOCKS.filter(b => b.days.includes(day.key))
+            return (
+              <div key={day.key} className="relative rounded-xl overflow-hidden"
+                style={{ height: GRID_H, background: 'var(--dark2)', border: '1px solid var(--border)' }}>
+                {/* Hour lines */}
+                {HOUR_MARKS.map(h => (
+                  <div key={h} className="absolute w-full" style={{
+                    top: `${homePct(h)}%`, height: '1px',
+                    background: h % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.025)',
+                  }} />
+                ))}
+
+                {blocks.length === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span style={{ color: 'rgba(255,255,255,0.06)', fontSize: '20px' }}>—</span>
+                  </div>
+                )}
+
+                {blocks.map((b, i) => {
+                  const top = homePct(b.startH)
+                  const h   = homePct(b.endH) - top
+                  const inner = (
+                    <div key={i} className="absolute left-1 right-1 rounded-lg flex flex-col justify-between p-2.5"
+                      style={{
+                        top: `${top}%`, height: `${h}%`,
+                        background: b.color, zIndex: 1,
+                        transition: 'transform 0.15s, box-shadow 0.15s',
+                        cursor: b.link ? 'pointer' : 'default',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = `0 6px 20px ${b.color}80`; e.currentTarget.style.zIndex = 3 }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)';    e.currentTarget.style.boxShadow = 'none';                    e.currentTarget.style.zIndex = 1 }}
+                    >
+                      <div>
+                        <div className="font-condensed font-black leading-tight"
+                          style={{ color: b.tc, fontSize: '11px', letterSpacing: '0.07em' }}>
+                          {b.label}
+                        </div>
+                        <div style={{ color: b.tc, opacity: 0.65, fontSize: '9px', marginTop: '2px', fontFamily: 'Barlow Condensed, sans-serif' }}>
+                          {b.sub}
+                        </div>
+                      </div>
+                      <div className="font-condensed font-bold" style={{ color: b.tc, opacity: 0.8, fontSize: '10px' }}>
+                        {String(b.startH).padStart(2,'0')}:00 – {String(b.endH).padStart(2,'0')}:00
+                      </div>
+                    </div>
+                  )
+                  return b.link
+                    ? <Link key={i} to={b.link} style={{ textDecoration: 'none' }}>{inner}</Link>
+                    : inner
+                })}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-6 mt-4 justify-center flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm" style={{ background: '#fab120' }} />
+            <span className="font-condensed text-xs">
+              <span className="font-black uppercase tracking-wide" style={{ color: '#fab120' }}>Odbita Akademija —</span>{' '}
+              <span className="font-black uppercase tracking-wide" style={{ color: 'var(--gray)' }}>Pon–Čet</span>{' '}
+              <span style={{ color: 'var(--gray)' }}>(klikni</span>{' '}
+              <Link to="/vadbe" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Treningi</Link>
+              <span style={{ color: 'var(--gray)' }}> za podrobnosti)</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm" style={{ background: '#2563a8' }} />
+            <span className="font-condensed text-xs">
+              <span className="font-black uppercase tracking-wide" style={{ color: '#4a9eff' }}>Open Jump —</span>{' '}
+              <span className="font-black uppercase tracking-wide" style={{ color: 'var(--gray)' }}>Pet–Ned</span>{' '}
+              <span style={{ color: 'var(--gray)' }}>(klikni za rezervacijo)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile */}
+      <div className="lg:hidden flex flex-col gap-4">
+
+        {/* Sklop 1 — Odbita Akademija */}
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(250,177,32,0.3)' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'rgba(250,177,32,0.12)' }}>
+            <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#fab120' }}>Odbita Akademija · Treningi</span>
+            <span className="font-condensed text-xs" style={{ color: 'rgba(250,177,32,0.6)' }}>PON – ČET</span>
+          </div>
+          <Link to="/vadbe" style={{ textDecoration: 'none' }}>
+            <div className="flex items-center gap-4 px-4 py-4" style={{ background: '#fab120' }}>
+              <div className="flex-1">
+                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>Vodene vadbe</div>
+                <div className="font-condensed text-sm" style={{ color: 'rgba(8,10,14,0.6)' }}>Ponedeljek – Četrtek</div>
+              </div>
+              <div className="font-condensed font-bold text-sm" style={{ color: '#080A0E' }}>15:00 – 21:00</div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Sklop 2 — Open Jump */}
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(74,158,255,0.3)' }}>
+          <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'rgba(37,99,168,0.2)' }}>
+            <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#4a9eff' }}>Open Jump · Enkratni obiski</span>
+            <span className="font-condensed text-xs" style={{ color: 'rgba(74,158,255,0.6)' }}>PET – NED</span>
+          </div>
+          {[
+            { label: 'Petek',   time: '10:00 – 21:00' },
+            { label: 'Sobota',  time: '10:00 – 21:00' },
+            { label: 'Nedelja', time: '10:00 – 20:00' },
+          ].map((row, i, arr) => (
+            <Link key={row.label} to="/rezervacija" style={{ textDecoration: 'none' }}>
+              <div className="flex items-center gap-4 px-4 py-3.5"
+                style={{
+                  background: '#2563a8',
+                  borderTop: i > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                }}>
+                <div className="font-condensed font-black text-sm tracking-wider uppercase flex-1" style={{ color: '#F5F5F0' }}>{row.label}</div>
+                <div className="font-condensed font-bold text-sm" style={{ color: 'rgba(245,245,240,0.7)' }}>{row.time}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <div style={{ background: 'var(--black)' }}>
 
       {/* ── HERO ── */}
-      <section className="relative flex items-center min-h-[92vh] px-[5%] overflow-hidden" style={{ background: '#000000' }}>
+      <section className="relative flex items-start lg:items-center min-h-0 lg:min-h-[92vh] px-[5%] pt-6 pb-10 lg:pt-0 lg:pb-0 overflow-hidden" style={{ background: '#000000' }}>
         {/* bg grid */}
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: 'linear-gradient(rgba(250,177,32,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(250,177,32,0.04) 1px, transparent 1px)',
           backgroundSize: '60px 60px',
         }} />
+
+        {/* Mobile hero image — pritrjena na dno, lik tik nad pasico */}
+        <div className="absolute inset-x-0 bottom-0 pointer-events-none lg:hidden" style={{ top: '-30%' }}>
+          <img
+            src="/mobile_web_hero_S.webp"
+            alt="Odbito"
+            className="w-full h-full object-cover"
+            style={{ opacity: 0.55, objectPosition: 'center 70%' }}
+          />
+          {/* gradient zgoraj — da tekst ostane berljiv */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.0) 100%)' }} />
+        </div>
 
         {/* Hero image — desna stran */}
         <div className="absolute inset-y-0 right-0 w-[75%] pointer-events-none hidden lg:block">
@@ -651,13 +850,13 @@ export default function Home() {
 
             <div className="flex flex-wrap gap-4">
               <Link to="/rezervacija" className="btn-primary">KUPI KARTO</Link>
-              <Link to="/vadbe" className="btn-secondary">VPIŠI SE NA TRENING →</Link>
+              <Link to="/vadbe" className="btn-secondary" style={{ whiteSpace: 'nowrap' }}>VPIŠI SE NA TRENING →</Link>
             </div>
           </div>
         </div>
 
-        {/* scroll hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+        {/* scroll hint — desktop only */}
+        <div className="hidden lg:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-40">
           <span className="font-condensed text-xs tracking-widest" style={{ color: 'var(--white)' }}>SCROLL</span>
           <div className="w-px h-10 bg-white/40" />
         </div>
@@ -677,7 +876,7 @@ export default function Home() {
       })()}
 
       {/* ── IZBERI SVOJO POT ── */}
-      <section className="py-16" style={{ background: '#0d0f12' }}>
+      <section className="py-8 lg:py-16" style={{ background: '#0d0f12' }}>
         <div className="max-w-6xl mx-auto px-[5%]">
           <div className="text-center mb-10">
             <div className="section-label mb-3" style={{ justifyContent: 'center' }}>Kakšne so želje?</div>
@@ -840,10 +1039,11 @@ export default function Home() {
         <div className="relative min-h-[480px] flex">
 
           {/* Rumeno ozadje leve strani */}
-          <div className="absolute inset-0" style={{ background: 'var(--accent)' }} />
+          <div className="absolute inset-0 hidden lg:block" style={{ background: 'var(--accent)' }} />
+          <div className="absolute inset-0 lg:hidden" style={{ background: 'rgba(250,177,32,0.72)' }} />
 
-          {/* Črno ozadje desne strani — z clip-path diagonal */}
-          <div className="absolute inset-0" style={{
+          {/* Črno ozadje desne strani — z clip-path diagonal (desktop) */}
+          <div className="absolute inset-0 hidden lg:block" style={{
             background: '#000',
             clipPath: 'polygon(38% 0%, 100% 0%, 100% 100%, 38% 100%)',
           }} />
@@ -857,8 +1057,8 @@ export default function Home() {
             <ComicBubbles />
           </div>
 
-          {/* Tekst — leva stran, nad vsem */}
-          <div className="relative z-10 flex items-center px-[5%] py-16 lg:w-[52%]">
+            {/* Tekst — leva stran, nad vsem */}
+          <div className="relative z-10 flex items-center px-[5%] py-8 lg:py-16 lg:w-[52%] w-1/2">
             <div>
               <h2 className="font-display leading-none" style={{ fontSize: 'clamp(52px,7vw,100px)', color: '#080A0E' }}>
                 ZABAVA<span style={{ color: '#fff' }}>.</span><br />
@@ -868,9 +1068,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mobilna slika */}
-          <div className="lg:hidden absolute inset-0">
-            <img src="/Dunking Devils Team.png" alt="Odbito ekipa" className="w-full h-full object-cover" style={{ opacity: 0.15 }} />
+          {/* Mobilna slika — desna polovica */}
+          <div className="lg:hidden absolute inset-y-0 right-0 w-1/2" style={{ background: '#000' }}>
+            <img src="/Dunking Devils Team.png" alt="Odbito ekipa"
+              className="w-full h-full object-cover object-center" style={{ opacity: 0.7 }} />
           </div>
         </div>
 
@@ -878,9 +1079,9 @@ export default function Home() {
       </section>
 
       {/* ── TEDENSKI URNIK ── */}
-      <section className="px-[5%] py-16" style={{ background: 'var(--dark)' }}>
+      <section className="px-[5%] py-8 lg:py-16" style={{ background: 'var(--dark)' }}>
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 lg:mb-10">
             <div>
               <h2 className="font-display leading-none" style={{ fontSize: 'clamp(24px,4vw,52px)', color: 'var(--white)', whiteSpace: 'nowrap' }}>
                 <span style={{ color: 'var(--accent)' }}>TEDENSKI</span>{' '}
@@ -905,7 +1106,7 @@ export default function Home() {
             </div>
           </div>
 
-          <WeeklySchedule />
+          <HomeWeekOverview />
 
         </div>
       </section>
@@ -959,7 +1160,7 @@ export default function Home() {
       </section>
 
       {/* ── LOKACIJA + KONTAKT ── */}
-      <section className="px-[5%] py-16" style={{ background: '#E6E6E1' }}>
+      <section className="px-[5%] py-8 lg:py-16" style={{ background: '#E6E6E1' }}>
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
 
           {/* ── LEVA: ZEMLJEVID ── */}
@@ -974,9 +1175,9 @@ export default function Home() {
               <div className="relative rounded-2xl overflow-hidden mb-4"
                 style={{ border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
                 <img
-                  src="/ODBITO_MAP_.webp"
+                  src="/ODBITO_MAP_3.webp"
                   alt="Odbito lokacija"
-                  style={{ width: '100%', height: '300px', objectFit: 'cover', display: 'block' }}
+                  style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{ background: 'rgba(250,177,32,0.18)', backdropFilter: 'blur(2px)' }}>

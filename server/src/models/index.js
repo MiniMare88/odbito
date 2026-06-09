@@ -30,6 +30,7 @@ import UserNote from './UserNote.js'
 import Voucher from './Voucher.js'
 import CustomerBalance from './CustomerBalance.js'
 import VoucherRedemption from './VoucherRedemption.js'
+import AkademijaGroup from './AkademijaGroup.js'
 
 // ── Associations ─────────────────────────────────────────────
 
@@ -186,6 +187,7 @@ export {
   Voucher,
   CustomerBalance,
   VoucherRedemption,
+  AkademijaGroup,
 }
 
 export default sequelize
