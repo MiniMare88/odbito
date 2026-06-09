@@ -193,13 +193,13 @@ function AkademijaSection() {
         {/* Header */}
         <div className="grid lg:grid-cols-2 gap-12 items-start mb-14">
           <div>
-            <div className="section-label mb-3">Sezona 2026/2027 · Sep – Jun</div>
-            <h2 className="font-display mb-5 leading-none" style={{ fontSize: 'clamp(40px,7vw,80px)', color: 'var(--white)' }}>
-              ODBITA<br /><span style={{ color: 'var(--accent)' }}>AKADEMIJA</span>.
+            <div className="section-label mb-3">Sezona Sep. 2026 – Jun. 2027</div>
+            <h2 className="font-display mb-5 leading-none" style={{ fontSize: 'clamp(40px,7vw,80px)', color: 'var(--white)', whiteSpace: 'nowrap' }}>
+              <span style={{ color: 'var(--accent)' }}>ODBITA </span>AKADEMIJA.
             </h2>
             <p style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '20px' }}>
-              Strukturirani vadbeni program pod vodstvom izkušenih inštruktorjev.
-              Vsaka skupina je prilagojena starosti in nivoju — od prvih saltov do napredne gimnastike.
+              Treningi pod vodstvom izkušenih trenerjev.
+              Vsaka skupina je prilagojena starosti in nivoju — od prvih korakov v svet odbitega gibanja do naprednih skokov, letenja in kontroliranega pristajanja.
             </p>
             <div className="flex flex-wrap gap-3">
               {['Max. 15 otrok / skupino', 'Mesečna & letna naročnina', 'Čakalna lista'].map(t => (
