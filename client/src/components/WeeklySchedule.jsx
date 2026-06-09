@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/api.js'
 
 // ── Static day config ─────────────────────────────────────────────────
@@ -248,6 +248,7 @@ function AkademijaGrid({ allGroups, classGroups }) {
   const [hovered, setHovered]       = useState(null)
   const [filteredGroup, setFiltered] = useState(null)
   const MAX_START = AK_DAYS.length - 3 // = 2
+  const navigate = useNavigate()
 
   // when filter selected, jump to first day where group appears
   const handleSelect = (g) => {
@@ -446,13 +447,14 @@ function AkademijaGrid({ allGroups, classGroups }) {
                             key={gi}
                             onMouseEnter={() => setHovered({ dayKey: day.key, timeStr, gi })}
                             onMouseLeave={() => setHovered(null)}
+                            onClick={() => navigate('/vadbe')}
                             style={{
                               flex: 1,
                               background: isDimmed ? `${g.color}30` : g.color,
                               borderRadius: 7,
                               padding: '4px 5px',
                               display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
-                              overflow: 'hidden', cursor: 'default',
+                              overflow: 'hidden', cursor: 'pointer',
                               position: 'relative',
                               opacity: isDimmed ? 0.35 : 1,
                               boxShadow: isMatch
