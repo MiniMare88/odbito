@@ -81,7 +81,7 @@ export default function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setPonudbaOpen(v => !v)}
-                className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-accent"
+                className="flex items-center gap-2 text-sm font-medium transition-colors hover:text-accent"
                 style={{ color: ponudbaActive || ponudbaOpen ? 'var(--accent)' : 'rgba(255,255,255,0.7)' }}>
                 PONUDBA
                 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ transition: 'transform 0.2s', transform: ponudbaOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
@@ -91,17 +91,17 @@ export default function Navbar() {
 
               {ponudbaOpen && (
                 <div className="absolute top-full left-0 mt-2 py-1 rounded-xl z-50"
-                  style={{ background: '#131518', border: '1px solid var(--border)', minWidth: 210, boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
+                  style={{ background: '#131518', border: '1px solid var(--border)', minWidth: 240, boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
                   {PONUDBA_ITEMS.map(item => (
                     item.soon ? (
-                      <div key={item.label} className="flex items-center justify-between px-4 py-2.5 cursor-default">
+                      <div key={item.label} className="flex items-center justify-between cursor-default" style={{ padding: '10px 20px' }}>
                         <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>{item.label}</span>
-                        <span className="font-condensed font-bold text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(250,177,32,0.1)', color: 'var(--accent)', fontSize: 9, letterSpacing: '0.1em' }}>KMALU</span>
+                        <span className="font-condensed font-bold text-xs px-2 py-0.5 rounded" style={{ background: 'rgba(250,177,32,0.1)', color: 'var(--accent)', fontSize: 9, letterSpacing: '0.1em', marginLeft: 12 }}>KMALU</span>
                       </div>
                     ) : (
                       <Link key={item.to} to={item.to} onClick={() => setPonudbaOpen(false)}
-                        className="flex items-center px-4 py-2.5 transition-colors hover:bg-white/5"
-                        style={{ textDecoration: 'none' }}>
+                        className="flex items-center transition-colors hover:bg-white/5"
+                        style={{ textDecoration: 'none', padding: '10px 20px' }}>
                         <span className="font-condensed font-black text-xs tracking-widest uppercase"
                           style={{ color: location.pathname === item.to ? 'var(--accent)' : 'rgba(255,255,255,0.75)' }}>
                           {item.label}
