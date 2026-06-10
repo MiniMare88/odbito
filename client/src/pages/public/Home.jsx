@@ -187,7 +187,7 @@ function ComicBubbles() {
 
 function AkademijaSection() {
   return (
-    <section className="px-[5%] py-8 lg:py-20" style={{ background: 'var(--dark)' }}>
+    <section className="px-[5%] pt-6 pb-8 lg:pt-10 lg:pb-20" style={{ background: 'var(--dark)' }}>
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
