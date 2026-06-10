@@ -217,7 +217,7 @@ export default function Navbar() {
             background: '#16181C',
             borderTop: '1px solid rgba(250,177,32,0.2)',
             borderBottom: '3px solid var(--accent)',
-            padding: '20px 0 24px',
+            padding: '20px 20px 24px',
           }}>
 
             {/* Nav links — brez bubbles, večji tekst */}
