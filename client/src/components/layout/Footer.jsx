@@ -37,7 +37,7 @@ export default function Footer() {
               ODBITO<span style={{ color: 'var(--white)' }}>.</span>
             </div>
             <p className="font-condensed text-sm leading-relaxed mb-4" style={{ color: 'var(--gray)' }}>
-              Gibalni center na Dolgem mostu v Ljubljani. Trampolini, akrobatika, fun park.
+              Dvorana ODBITO je del športno rekreacijskega centera SPORT CITY na Dolgem mostu v Ljubljani.
             </p>
             <div className="flex flex-col gap-1">
               <span className="font-condensed text-xs" style={{ color: 'var(--gray)' }}>
