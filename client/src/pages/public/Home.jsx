@@ -758,14 +758,13 @@ function HomeWeekOverview() {
         {/* Sklop 1 — Odbita Akademija */}
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(250,177,32,0.3)' }}>
           <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: 'rgba(250,177,32,0.12)' }}>
-            <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#fab120' }}>Odbita Akademija · Treningi</span>
+            <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#fab120' }}>Odbita Akademija · Urnik treningov</span>
             <span className="font-condensed text-xs" style={{ color: 'rgba(250,177,32,0.6)' }}>PON – ČET</span>
           </div>
           <Link to="/vadbe" style={{ textDecoration: 'none' }}>
             <div className="flex items-center gap-4 px-4 py-4" style={{ background: '#fab120' }}>
               <div className="flex-1">
-                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>Urnik treningov</div>
-                <div className="font-condensed text-sm" style={{ color: 'rgba(8,10,14,0.6)' }}>Ponedeljek – Četrtek</div>
+                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>PONEDELJEK – ČETRTEK</div>
               </div>
               <div className="font-condensed font-bold text-sm" style={{ color: '#080A0E' }}>15:00 – 21:00</div>
             </div>
