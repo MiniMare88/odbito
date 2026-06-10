@@ -56,26 +56,29 @@ export default function Obisk() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 max-w-2xl">
+          <div className="grid grid-cols-3 gap-3 mb-10">
             {DAYS.map(d => (
-              <div key={d.short} className="rounded-2xl p-5 flex flex-col gap-1 relative"
+              <div key={d.short} className="rounded-2xl flex flex-col items-center justify-center relative"
                 style={{
-                  background: d.highlight ? 'var(--accent)' : 'var(--dark2)',
-                  border: d.highlight ? 'none' : '1px solid var(--border)',
+                  padding: 'clamp(12px,4vw,20px) 8px',
+                  background: '#111215',
+                  border: d.highlight ? '2px solid var(--accent)' : '1px solid rgba(255,255,255,0.08)',
                 }}>
                 {d.tag && (
-                  <div className="absolute top-3 right-3 font-condensed font-black text-xs uppercase tracking-wider px-2 py-0.5 rounded"
-                    style={{ background: 'rgba(0,0,0,0.2)', color: d.highlight ? '#080A0E' : 'var(--accent)', fontSize: '9px' }}>
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 font-condensed font-black uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
+                    style={{ background: 'var(--accent)', color: '#080A0E', fontSize: 8, letterSpacing: '0.1em' }}>
                     {d.tag}
                   </div>
                 )}
-                <div className="font-display leading-none"
-                  style={{ fontSize: 'clamp(28px,5vw,38px)', color: d.highlight ? '#080A0E' : 'var(--accent)' }}>
+                <div className="font-display leading-none text-center"
+                  style={{ fontSize: 'clamp(18px,5.5vw,28px)', color: 'var(--white)', marginBottom: 6 }}>
                   {d.short}
                 </div>
-                <div className="font-condensed font-black text-base mt-1"
-                  style={{ color: d.highlight ? '#080A0E' : 'var(--white)' }}>
-                  {d.time}
+                <div className="font-condensed font-black text-center"
+                  style={{ fontSize: 'clamp(12px,3.5vw,16px)', color: 'var(--accent)', lineHeight: 1.2 }}>
+                  {d.time.replace(' – ', '\n–\n').split('\n').map((t, i) => (
+                    <span key={i}>{t}</span>
+                  ))}
                 </div>
               </div>
             ))}
@@ -100,22 +103,26 @@ export default function Obisk() {
         <div className="max-w-6xl mx-auto">
           <div className="section-label mb-6 pt-16">Cenik · Prosto skakanje</div>
 
-          {/* Mobile: ena vrstica / Desktop: vse 4 */}
-          <div className="sm:hidden mb-8">
-            <div className="rounded-2xl p-5 flex items-center justify-between gap-4"
-              style={{ background: 'var(--dark2)', border: '1px solid var(--border)' }}>
-              <div>
-                <div className="font-condensed font-black text-sm uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
-                  Prosto skakanje · enkratni obisk
-                </div>
-                <div className="font-display text-4xl leading-none" style={{ color: 'var(--accent)' }}>
-                  od 14 €
-                </div>
-              </div>
-              <Link to="/cenik" className="font-condensed font-bold text-xs uppercase tracking-widest flex-shrink-0"
-                style={{ color: 'var(--accent)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                Cel cenik →
+          {/* Mobile: kompaktna tabela / Desktop: vse 4 kartice */}
+          <div className="sm:hidden mb-8" style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, overflow: 'hidden' }}>
+            {/* Header row */}
+            <div className="flex items-center justify-between px-4 py-3"
+              style={{ background: 'rgba(250,177,32,0.08)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: 'var(--accent)', letterSpacing: '0.14em' }}>
+                CENIK · PROSTO SKAKANJE
+              </span>
+              <Link to="/rezervacija" className="font-condensed font-bold text-xs" style={{ color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>
+                Rezerviraj →
               </Link>
+            </div>
+            {/* Price row */}
+            <div className="flex items-center justify-between px-4 py-4" style={{ background: '#111215' }}>
+              <span className="font-condensed font-bold text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Prosto skakanje - enkraten obisk
+              </span>
+              <span className="font-condensed font-black" style={{ color: 'var(--accent)', fontSize: 18, whiteSpace: 'nowrap', marginLeft: 8 }}>
+                od 14,00 €
+              </span>
             </div>
           </div>
 
@@ -147,12 +154,12 @@ export default function Obisk() {
           </div>
 
           {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <Link to="/rezervacija" className="btn-primary" style={{ textDecoration: 'none' }}>
-              REZERVIRAJ TERMIN →
+          <div className="flex gap-3 sm:flex-row">
+            <Link to="/rezervacija" className="btn-primary flex-1 text-center sm:flex-none" style={{ textDecoration: 'none' }}>
+              REZERVIRAJ TERMIN
             </Link>
-            <Link to="/cenik" className="btn-secondary" style={{ textDecoration: 'none' }}>
-              CELOTEN CENIK
+            <Link to="/cenik" className="btn-secondary flex-1 text-center sm:flex-none" style={{ textDecoration: 'none' }}>
+              POGLEJ CEL CENIK
             </Link>
           </div>
         </div>
