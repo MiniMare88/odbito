@@ -102,14 +102,20 @@ export default function Obisk() {
 
           {/* Mobile: ena vrstica / Desktop: vse 4 */}
           <div className="sm:hidden mb-8">
-            <div className="rounded-2xl p-6 flex items-center justify-between"
+            <div className="rounded-2xl p-5 flex items-center justify-between gap-4"
               style={{ background: 'var(--dark2)', border: '1px solid var(--border)' }}>
-              <div className="font-condensed font-bold text-sm uppercase tracking-wide" style={{ color: 'var(--gray)' }}>
-                Enkraten obisk
+              <div>
+                <div className="font-condensed font-black text-sm uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
+                  Prosto skakanje · enkratni obisk
+                </div>
+                <div className="font-display text-4xl leading-none" style={{ color: 'var(--accent)' }}>
+                  od 14 €
+                </div>
               </div>
-              <div className="font-display text-4xl leading-none" style={{ color: 'var(--accent)' }}>
-                od 14 €
-              </div>
+              <Link to="/cenik" className="font-condensed font-bold text-xs uppercase tracking-widest flex-shrink-0"
+                style={{ color: 'var(--accent)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Cel cenik →
+              </Link>
             </div>
           </div>
 
