@@ -764,12 +764,20 @@ function HomeWeekOverview() {
             <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#fab120' }}>Odbita Akademija · Urnik treningov</span>
             <span className="font-condensed text-xs" style={{ color: 'rgba(250,177,32,0.6)' }}>PON – ČET</span>
           </div>
-          <Link to="/vadbe" style={{ textDecoration: 'none' }}>
-            <div className="flex items-center gap-4 px-4 py-4" style={{ background: '#fab120' }}>
-              <div className="flex-1">
-                <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>PONEDELJEK – ČETRTEK</div>
-              </div>
-              <div className="font-condensed font-bold text-sm" style={{ color: '#080A0E' }}>15:00 – 21:00</div>
+          <div className="flex items-center gap-4 px-4 py-4" style={{ background: '#fab120' }}>
+            <div className="flex-1">
+              <div className="font-condensed font-black text-base tracking-wider uppercase" style={{ color: '#080A0E' }}>PONEDELJEK – ČETRTEK</div>
+            </div>
+            <div className="font-condensed font-bold text-sm" style={{ color: '#080A0E' }}>15:00 – 21:00</div>
+          </div>
+          {/* CTA pasica */}
+          <Link to="/vadbe" style={{ textDecoration: 'none', display: 'block' }}>
+            <div className="flex items-center justify-between px-4 py-3"
+              style={{ background: 'rgba(250,177,32,0.18)', borderTop: '1px solid rgba(250,177,32,0.25)' }}>
+              <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#fab120' }}>
+                TRENIRAJ ODBITO · Najdi svojo skupino
+              </span>
+              <span style={{ color: '#fab120', fontSize: 14 }}>→</span>
             </div>
           </Link>
         </div>
