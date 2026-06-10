@@ -804,6 +804,16 @@ function HomeWeekOverview() {
               </div>
             </Link>
           ))}
+          {/* CTA pasica */}
+          <Link to="/rezervacija" style={{ textDecoration: 'none', display: 'block' }}>
+            <div className="flex items-center justify-between px-4 py-3"
+              style={{ background: 'rgba(74,158,255,0.15)', borderTop: '1px solid rgba(74,158,255,0.25)' }}>
+              <span className="font-condensed font-black text-xs tracking-widest uppercase" style={{ color: '#4a9eff' }}>
+                REZERVIRAJ SVOJ ENKRATNI OBISK
+              </span>
+              <span style={{ color: '#4a9eff', fontSize: 14 }}>→</span>
+            </div>
+          </Link>
         </div>
 
       </div>
