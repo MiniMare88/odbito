@@ -218,6 +218,8 @@ function AkademijaSection() {
           SKUPINE
         </p>
         <div className="mb-8" style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+          {/* scrollable on mobile only */}
+          <div className="max-h-[380px] overflow-y-auto sm:max-h-none sm:overflow-visible">
           {ALL_GROUPS.map((g, i) => {
             const activeDays = ['Pon','Tor','Sre','Čet','Pet'].filter(d => g.days.includes(d))
             const dayTime = activeDays.map(d => {
@@ -273,6 +275,7 @@ function AkademijaSection() {
               </div>
             )
           })}
+          </div>{/* /scrollable */}
         </div>
 
         <Link to="/vadbe" className="btn-primary">NAJDI SVOJO SKUPINO →</Link>
