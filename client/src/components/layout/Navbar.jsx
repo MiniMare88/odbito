@@ -125,24 +125,46 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <button className="md:hidden text-white p-2" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
-            <div className="w-5 h-0.5 bg-current mb-1" />
-            <div className="w-5 h-0.5 bg-current mb-1" />
-            <div className="w-5 h-0.5 bg-current" />
+          <button className="md:hidden text-white p-2 flex items-center justify-center" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu"
+            style={{ width: 36, height: 36 }}>
+            {menuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <line x1="3" y1="3" x2="17" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="17" y1="3" x2="3" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
+                <line x1="0" y1="1" x2="22" y2="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="0" y1="8" x2="22" y2="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="0" y1="15" x2="22" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            )}
           </button>
         </div>
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden py-4 border-t border-white/10 flex flex-col gap-4">
-            {navLinks.map(({ to, label }) => (
-              <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}
-                className={({ isActive }) => `text-base font-medium ${isActive ? 'text-accent' : 'text-white/70'}`}>
-                {label}
-              </NavLink>
-            ))}
-            <div className="flex items-center gap-3 pt-2 border-t border-white/10 flex-wrap">
-              <button onClick={toggleLang} className="text-xs border border-white/20 rounded px-2 py-1">
+          <div className="md:hidden border-t border-white/10" style={{ padding: '16px 0 20px' }}>
+
+            {/* Nav links — horizontal wrap */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {navLinks.map(({ to, label }) => (
+                <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg transition-colors ${isActive ? 'text-black' : 'text-white/70'}`
+                  }
+                  style={({ isActive }) => ({
+                    background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
+                    textDecoration: 'none',
+                  })}>
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Auth row */}
+            <div className="flex items-center gap-2 pt-3 border-t border-white/10 flex-wrap">
+              <button onClick={toggleLang} className="text-xs border border-white/20 rounded px-2 py-1 text-white/50">
                 {i18n.language === 'sl' ? 'EN' : 'SLO'}
               </button>
               {user ? (
@@ -150,31 +172,28 @@ export default function Navbar() {
                   <Link
                     to={user.role === 'admin' ? '/admin' : user.role === 'staff' ? '/osobje' : '/dashboard'}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 font-semibold text-sm px-4 py-2 rounded"
+                    className="flex items-center gap-2 font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
                     style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000' }}>
-                    <span>👤</span> MOJ PROFIL
+                    👤 MOJ PROFIL
                   </Link>
-                  <button onClick={handleLogout} className="text-sm text-white/40">{t('nav.logout')}</button>
+                  <button onClick={handleLogout} className="text-xs text-white/40 font-condensed">{t('nav.logout')}</button>
                 </>
               ) : (
-                <div className="flex gap-2">
-                  <Link
-                    to="/prijava"
-                    onClick={() => setMenuOpen(false)}
-                    className="bg-accent text-black font-semibold text-sm px-4 py-2 rounded"
-                    style={{ textDecoration: 'none' }}>
+                <>
+                  <Link to="/prijava" onClick={() => setMenuOpen(false)}
+                    className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
+                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000' }}>
                     PRIJAVI SE
                   </Link>
-                  <Link
-                    to="/registracija"
-                    onClick={() => setMenuOpen(false)}
-                    className="font-semibold text-sm px-4 py-2 rounded"
+                  <Link to="/registracija" onClick={() => setMenuOpen(false)}
+                    className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
                     style={{ textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--white)' }}>
                     REGISTRIRAJ SE
                   </Link>
-                </div>
+                </>
               )}
             </div>
+
           </div>
         )}
       </div>
