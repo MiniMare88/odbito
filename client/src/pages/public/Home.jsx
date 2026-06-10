@@ -1115,21 +1115,6 @@ export default function Home() {
                 <span style={{ color: 'var(--accent)' }}>.</span>
               </h2>
             </div>
-            <div className="flex flex-row gap-3 items-center">
-              {[
-                { to: '/vadbe',      bg: '#fab120', color: '#080A0E', shadow: 'rgba(250,177,32,0.35)', line1: 'TRENIRAJ ODBITO',         line2: 'Odbita Akademija', line2color: 'rgba(8,10,14,0.55)' },
-                { to: '/rezervacija', bg: '#1e50a0', color: '#ffffff', shadow: 'rgba(30,80,160,0.35)',  line1: 'REZERVIRAJ ENKRATNI OBISK', line2: 'Open-Jump',        line2color: 'rgba(255,255,255,0.55)' },
-              ].map(btn => (
-                <Link key={btn.to} to={btn.to}
-                  className="font-condensed font-black uppercase tracking-widest rounded-xl flex flex-col items-center justify-center"
-                  style={{ fontSize: '13px', padding: '11px 22px', textAlign: 'center', whiteSpace: 'nowrap', background: btn.bg, color: btn.color, textDecoration: 'none', lineHeight: 1.25, transition: 'all 0.18s', minWidth: 0 }}
-                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 6px 20px ${btn.shadow}`; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}>
-                  {btn.line1}
-                  <span style={{ fontSize: '10px', color: btn.line2color, letterSpacing: '0.1em', fontWeight: 600, marginTop: 2, textTransform: 'none' }}>{btn.line2}</span>
-                </Link>
-              ))}
-            </div>
           </div>
 
           <HomeWeekOverview />
