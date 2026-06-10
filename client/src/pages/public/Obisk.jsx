@@ -25,7 +25,7 @@ export default function Obisk() {
     <div style={{ background: 'var(--black)' }}>
 
       {/* ── Hero ── */}
-      <section className="px-[5%] pt-20 pb-16" style={{ background: 'var(--black)' }}>
+      <section className="px-[5%] pt-10 lg:pt-20 pb-16" style={{ background: 'var(--black)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="section-label mb-4">Open Jump</div>
           <h1 className="font-display mb-6"

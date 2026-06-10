@@ -53,7 +53,7 @@ export default function Contact() {
     <div style={{ background: 'var(--black)' }}>
 
       {/* Hero */}
-      <section className="px-[5%] pt-20 pb-12">
+      <section className="px-[5%] pt-10 lg:pt-20 pb-12">
         <div className="max-w-6xl mx-auto">
           <div className="section-label mb-4">Kontakt</div>
           <h1 className="font-display mb-5" style={{ fontSize: 'clamp(56px,10vw,110px)', color: 'var(--white)', lineHeight: 1 }}>

@@ -46,7 +46,7 @@ export default function Classes() {
     <div style={{ background: 'var(--black)' }}>
 
       {/* Hero */}
-      <section className="px-[5%] pt-20 pb-12">
+      <section className="px-[5%] pt-10 lg:pt-20 pb-12">
         <div className="max-w-6xl mx-auto">
           <div className="section-label mb-4">
             <span style={{ color: 'var(--accent)' }}>Sezona 2026/2027</span>

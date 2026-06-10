@@ -21,7 +21,7 @@ export default function About() {
     <div style={{ background: 'var(--black)' }}>
 
       {/* Hero */}
-      <section className="px-[5%] pt-20 pb-12">
+      <section className="px-[5%] pt-10 lg:pt-20 pb-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <div className="section-label mb-4">O nas</div>
