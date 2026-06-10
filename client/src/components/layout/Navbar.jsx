@@ -213,111 +213,129 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden border-t border-white/10" style={{ padding: '16px 0 20px' }}>
+          <div className="md:hidden" style={{
+            background: '#16181C',
+            borderTop: '1px solid rgba(250,177,32,0.2)',
+            borderBottom: '3px solid var(--accent)',
+            padding: '20px 0 24px',
+          }}>
 
-            {/* Nav links — horizontal wrap */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {/* DOMOV, O NAS, CENIK */}
+            {/* Nav links — brez bubbles, večji tekst */}
+            <div className="flex flex-col gap-1">
               {navLinks.slice(0, 3).map(({ to, label }) => (
                 <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg transition-colors ${isActive ? 'text-black' : 'text-white/70'}`
-                  }
                   style={({ isActive }) => ({
-                    background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
                     textDecoration: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 0',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    color: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
+                    fontFamily: 'Bebas Neue, sans-serif',
+                    fontSize: 28, letterSpacing: '0.06em',
                   })}>
-                  {label}
+                  {({ isActive }) => (
+                    <>
+                      {label}
+                      {isActive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
+                    </>
+                  )}
                 </NavLink>
               ))}
 
-              {/* PONUDBA — expandable */}
-              <button
-                onClick={() => setPonudbaMobOpen(v => !v)}
-                className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg flex items-center gap-1"
-                style={{
-                  background: ponudbaActive || ponudbaMobOpen ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
-                  color: ponudbaActive || ponudbaMobOpen ? '#000' : 'rgba(255,255,255,0.7)',
-                }}>
-                PONUDBA
-                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" style={{ transition: 'transform 0.2s', transform: ponudbaMobOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  <path d="M1 1l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              {/* PONUDBA — expandable row */}
+              <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <button onClick={() => setPonudbaMobOpen(v => !v)}
+                  className="w-full flex items-center justify-between"
+                  style={{
+                    padding: '10px 0', background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, letterSpacing: '0.06em',
+                    color: ponudbaActive || ponudbaMobOpen ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
+                  }}>
+                  PONUDBA
+                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none"
+                    style={{ transition: 'transform 0.2s', transform: ponudbaMobOpen ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
+                    <path d="M1 1l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {ponudbaMobOpen && (
+                  <div className="flex flex-col gap-0 pb-2" style={{ paddingLeft: 16, borderLeft: '2px solid var(--accent)' }}>
+                    {PONUDBA_ITEMS.map(item => (
+                      item.soon ? (
+                        <div key={item.label} className="flex items-center gap-3 py-2">
+                          <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                            {item.label}
+                          </span>
+                          <span style={{ fontSize: 9, background: 'rgba(250,177,32,0.12)', color: 'var(--accent)', padding: '2px 6px', borderRadius: 4, letterSpacing: '0.12em', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700 }}>KMALU</span>
+                        </div>
+                      ) : (
+                        <Link key={item.to} to={item.to}
+                          onClick={() => { setMenuOpen(false); setPonudbaMobOpen(false) }}
+                          style={{
+                            textDecoration: 'none', padding: '8px 0',
+                            fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 800,
+                            fontSize: 15, letterSpacing: '0.12em', textTransform: 'uppercase',
+                            color: location.pathname === item.to ? 'var(--accent)' : 'rgba(255,255,255,0.7)',
+                          }}>
+                          {item.label}
+                        </Link>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* KONTAKT */}
               {navLinks.slice(3).map(({ to, label }) => (
                 <NavLink key={to} to={to} onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg transition-colors ${isActive ? 'text-black' : 'text-white/70'}`
-                  }
                   style={({ isActive }) => ({
-                    background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
                     textDecoration: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 0',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    color: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
+                    fontFamily: 'Bebas Neue, sans-serif',
+                    fontSize: 28, letterSpacing: '0.06em',
                   })}>
-                  {label}
+                  {({ isActive }) => (
+                    <>
+                      {label}
+                      {isActive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
+                    </>
+                  )}
                 </NavLink>
               ))}
             </div>
 
-            {/* PONUDBA submenu — expanded inline */}
-            {ponudbaMobOpen && (
-              <div className="flex flex-wrap gap-2 mb-4 pl-2"
-                style={{ borderLeft: '2px solid var(--accent)' }}>
-                {PONUDBA_ITEMS.map(item => (
-                  item.soon ? (
-                    <span key={item.label}
-                      className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg flex items-center gap-2"
-                      style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.25)', cursor: 'default' }}>
-                      {item.label}
-                      <span style={{ fontSize: 8, background: 'rgba(250,177,32,0.15)', color: 'var(--accent)', padding: '1px 5px', borderRadius: 4, letterSpacing: '0.1em' }}>KMALU</span>
-                    </span>
-                  ) : (
-                    <Link key={item.to} to={item.to}
-                      onClick={() => { setMenuOpen(false); setPonudbaMobOpen(false) }}
-                      className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
-                      style={{
-                        textDecoration: 'none',
-                        background: location.pathname === item.to ? 'var(--accent)' : 'rgba(255,255,255,0.06)',
-                        color: location.pathname === item.to ? '#000' : 'rgba(255,255,255,0.7)',
-                      }}>
-                      {item.label}
-                    </Link>
-                  )
-                ))}
-              </div>
-            )}
-
             {/* Auth row */}
-            <div className="flex items-center gap-2 pt-3 border-t border-white/10 flex-wrap">
-              <button onClick={toggleLang} className="text-xs border border-white/20 rounded px-2 py-1 text-white/50">
-                {i18n.language === 'sl' ? 'EN' : 'SLO'}
-              </button>
+            <div className="flex items-center gap-3 pt-5 flex-wrap">
               {user ? (
                 <>
                   <Link
                     to={user.role === 'admin' ? '/admin' : user.role === 'staff' ? '/osobje' : '/dashboard'}
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
-                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000' }}>
+                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000', padding: '8px 18px', borderRadius: 8, fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     👤 MOJ PROFIL
                   </Link>
-                  <button onClick={handleLogout} className="text-xs text-white/40 font-condensed">{t('nav.logout')}</button>
+                  <button onClick={handleLogout} style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    {t('nav.logout')}
+                  </button>
                 </>
               ) : (
                 <>
                   <Link to="/prijava" onClick={() => setMenuOpen(false)}
-                    className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
-                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000' }}>
+                    style={{ textDecoration: 'none', background: 'var(--accent)', color: '#000', padding: '8px 18px', borderRadius: 8, fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     PRIJAVI SE
                   </Link>
                   <Link to="/registracija" onClick={() => setMenuOpen(false)}
-                    className="font-condensed font-black text-xs tracking-widest uppercase px-3 py-2 rounded-lg"
-                    style={{ textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--white)' }}>
+                    style={{ textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '8px 18px', borderRadius: 8, fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     REGISTRIRAJ SE
                   </Link>
                 </>
               )}
+              <button onClick={toggleLang} style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '5px 8px', background: 'none', cursor: 'pointer', marginLeft: 'auto' }}>
+                {i18n.language === 'sl' ? 'EN' : 'SLO'}
+              </button>
             </div>
 
           </div>
