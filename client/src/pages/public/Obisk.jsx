@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const DAYS = [
-  { short: 'PETEK',   time: '15:00 – 20:00', highlight: false },
+  { short: 'PETEK',   time: '15:00 – 22:00', highlight: false },
   { short: 'SOBOTA',  time: '10:00 – 21:00', highlight: true, tag: 'NAJVEČ UR' },
   { short: 'NEDELJA', time: '10:00 – 20:00', highlight: false },
 ]
