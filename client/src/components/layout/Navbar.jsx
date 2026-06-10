@@ -231,7 +231,7 @@ export default function Navbar() {
                     borderBottom: '1px solid rgba(255,255,255,0.06)',
                     color: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
                     fontFamily: 'Bebas Neue, sans-serif',
-                    fontSize: 28, letterSpacing: '0.06em',
+                    fontSize: 20, letterSpacing: '0.06em',
                   })}>
                   {({ isActive }) => (
                     <>
@@ -248,7 +248,7 @@ export default function Navbar() {
                   className="w-full flex items-center justify-between"
                   style={{
                     padding: '10px 0', background: 'none', border: 'none', cursor: 'pointer',
-                    fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, letterSpacing: '0.06em',
+                    fontFamily: 'Bebas Neue, sans-serif', fontSize: 20, letterSpacing: '0.06em',
                     color: ponudbaActive || ponudbaMobOpen ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
                   }}>
                   PONUDBA
@@ -295,7 +295,7 @@ export default function Navbar() {
                     borderBottom: '1px solid rgba(255,255,255,0.06)',
                     color: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.85)',
                     fontFamily: 'Bebas Neue, sans-serif',
-                    fontSize: 28, letterSpacing: '0.06em',
+                    fontSize: 20, letterSpacing: '0.06em',
                   })}>
                   {({ isActive }) => (
                     <>
