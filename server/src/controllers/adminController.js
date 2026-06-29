@@ -407,20 +407,22 @@ export async function createAkademijaGroup(req, res) {
 
   if (!name || !program) return res.status(400).json({ error: 'Manjkajo obvezna polja' })
 
+  const intOrNull = v => (v === '' || v == null) ? null : parseInt(v)
   const legacy = day_schedules?.length ? deriveLegacyFields(day_schedules) : {}
-  const ageRange = age_from != null && age_to != null ? `${age_from}–${age_to} let` : (age_range || '')
+  const af = intOrNull(age_from), at = intOrNull(age_to)
+  const ageRange = af != null && at != null ? `${af}–${at} let` : (age_range || '')
 
   const g = await AkademijaGroup.create({
     name, program,
-    age_range: ageRange, age_from, age_to,
+    age_range: ageRange, age_from: af, age_to: at,
     color_hex: color_hex || '#A8C8E8',
     day_schedules: day_schedules || null,
     days: legacy.days || days || [],
     time_start: legacy.time_start || time_start || '00:00',
     time_end: legacy.time_end || time_end || '00:00',
-    trainer_id: trainer_id || null,
-    assistant_trainer_id: assistant_trainer_id || null,
-    sort_order: sort_order || 0,
+    trainer_id: intOrNull(trainer_id),
+    assistant_trainer_id: intOrNull(assistant_trainer_id),
+    sort_order: intOrNull(sort_order) || 0,
     notes: notes || null,
     is_active: is_active !== false,
   })
@@ -438,13 +440,18 @@ export async function updateAkademijaGroup(req, res) {
     const legacy = deriveLegacyFields(day_schedules)
     if (legacy.days) { g.days = legacy.days; g.time_start = legacy.time_start; g.time_end = legacy.time_end }
   }
-  if (age_from !== undefined) g.age_from = age_from
-  if (age_to   !== undefined) g.age_to   = age_to
-  if (age_from != null && age_to != null) g.age_range = `${age_from}–${age_to} let`
+  const intOrNull = v => (v === '' || v == null) ? null : parseInt(v)
+  if (age_from !== undefined) g.age_from = intOrNull(age_from)
+  if (age_to   !== undefined) g.age_to   = intOrNull(age_to)
+  const af = g.age_from, at = g.age_to
+  if (af != null && at != null) g.age_range = `${af}–${at} let`
 
+  const intFields = ['trainer_id', 'assistant_trainer_id', 'sort_order']
   const fields = ['name', 'program', 'age_range', 'color_hex', 'days', 'time_start', 'time_end',
                   'trainer_id', 'assistant_trainer_id', 'sort_order', 'is_active', 'notes']
-  fields.forEach(f => { if (rest[f] !== undefined) g[f] = rest[f] })
+  fields.forEach(f => {
+    if (rest[f] !== undefined) g[f] = intFields.includes(f) ? (intOrNull(rest[f]) ?? (f === 'sort_order' ? 0 : null)) : rest[f]
+  })
 
   await g.save()
   res.json(g)

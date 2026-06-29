@@ -6,7 +6,7 @@ import { sequelize } from './db.js'
 // days / time_start / time_end kept for backward compat
 const AkademijaGroup = sequelize.define('AkademijaGroup', {
   id:                    { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  name:                  { type: DataTypes.STRING(20),  allowNull: false },          // "5.1"
+  name:                  { type: DataTypes.STRING(100), allowNull: false },
   program:               { type: DataTypes.STRING(80),  allowNull: false },          // "Gimnastika"
   age_range:             { type: DataTypes.STRING(30),  allowNull: true },           // legacy: "11–13 let"
   age_from:              { type: DataTypes.INTEGER,     allowNull: true },           // 11
