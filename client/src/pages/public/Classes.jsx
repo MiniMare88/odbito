@@ -94,7 +94,7 @@ export default function Classes() {
                 <div className="font-condensed font-black text-xl uppercase tracking-wide mb-2" style={{ color: 'var(--white)' }}>
                   {ct.name_sl}
                 </div>
-                <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.55)', lineHeight: 1.6, flexGrow: 1, marginBottom: '16px' }}>
+                <p style={{ fontSize: '14px', color: 'rgba(245,245,240,0.7)', lineHeight: 1.6, flexGrow: 1, marginBottom: '16px' }}>
                   {ct.description_sl}
                 </p>
                 {ct.schedules?.length > 0 && (

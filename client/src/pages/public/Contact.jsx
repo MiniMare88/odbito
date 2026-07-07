@@ -225,14 +225,14 @@ export default function Contact() {
                     <div className="font-condensed font-black text-base uppercase tracking-wide" style={{ color: 'var(--white)' }}>040 123 456</div>
                   </div>
                 </a>
-                <a href="mailto:info@odbito.fun" className="card flex items-center gap-4 py-3"
+                <a href="mailto:info@odbito.si" className="card flex items-center gap-4 py-3"
                   style={{ textDecoration: 'none' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(250,177,32,0.3)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
                   <span style={{ fontSize: '22px', flexShrink: 0 }}>✉️</span>
                   <div>
                     <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-0.5" style={{ color: 'var(--gray)' }}>E-mail</div>
-                    <div className="font-condensed font-black text-base tracking-wide" style={{ color: 'var(--white)' }}>info@odbito.fun</div>
+                    <div className="font-condensed font-black text-base tracking-wide" style={{ color: 'var(--white)' }}>info@odbito.si</div>
                   </div>
                 </a>
               </div>

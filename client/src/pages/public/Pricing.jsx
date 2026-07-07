@@ -221,7 +221,7 @@ export default function Pricing() {
           },
           {
             q: 'Ali lahko rezervacijo prekličem ali prestavim?',
-            a: 'Rezervacij ni mogoče preklicati samostojno. V primeru višje sile nas kontaktiraj vsaj 24 ur pred terminom na info@odbito.fun in skupaj najdemo rešitev.',
+            a: 'Rezervacij ni mogoče preklicati samostojno. V primeru višje sile nas kontaktiraj vsaj 24 ur pred terminom na info@odbito.si in skupaj najdemo rešitev.',
           },
           {
             q: 'Koliko vnaprej moram rezervirati?',

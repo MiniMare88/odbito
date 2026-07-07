@@ -97,7 +97,7 @@ export default function About() {
                   <div className="font-condensed font-black text-base uppercase tracking-wide mb-1" style={{ color: 'var(--white)' }}>
                     {eq.name}
                   </div>
-                  <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.55)', lineHeight: 1.5 }}>{eq.desc}</p>
+                  <p style={{ fontSize: '13px', color: 'rgba(245,245,240,0.7)', lineHeight: 1.5 }}>{eq.desc}</p>
                 </div>
               </div>
             ))}

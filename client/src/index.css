@@ -88,7 +88,7 @@ p {
     opacity: 0.4;
   }
   .newsletter-input::placeholder {
-    color: rgba(8, 10, 14, 0.55);
+    color: rgba(8, 10, 14, 0.45);
   }
   .section-label-dark::after {
     background: #080A0E;

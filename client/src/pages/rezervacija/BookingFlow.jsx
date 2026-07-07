@@ -259,10 +259,36 @@ function OrderSummary({ day, slot, visitors, extras }) {
 
 // ── Step indicator ────────────────────────────────────────────────────────────
 
+// Koraki — "Odbita želja" je samodejno opravljen (uporabnik pride z izbiro Open Jump)
+const FLOW_STEPS = ['Odbita želja', 'Obiskovalci', 'Termin', 'Dodatno', 'Potrditev']
+const STEP_INDEX = { visitors: 1, schedule: 2, extras: 3, auth: 4, confirm: 4 }
+
+// Progress: 5 korakov × 20 %. "Odbita želja" je že opravljena → start na 20 %.
+function progressPercent(step, purchased) {
+  if (purchased) return 100
+  const done = STEP_INDEX[step] ?? 1   // koliko korakov je za nami
+  return done * 20
+}
+
+function ProgressMeter({ percent }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-condensed font-black text-xs uppercase tracking-widest" style={{ color: 'var(--gray)' }}>
+          Do zaključka nakupa
+        </span>
+        <span className="font-display" style={{ fontSize: 22, color: 'var(--accent)', lineHeight: 1 }}>{percent}%</span>
+      </div>
+      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--dark2)', border: '1px solid var(--border)' }}>
+        <div className="h-full rounded-full" style={{ width: `${percent}%`, background: 'var(--accent)', transition: 'width 0.45s cubic-bezier(0.4,0,0.2,1)', boxShadow: '0 0 12px rgba(250,177,32,0.4)' }} />
+      </div>
+    </div>
+  )
+}
+
 function StepIndicator({ step }) {
-  const steps = ['Datum', 'Obiskovalci', 'Termin', 'Dodatno', 'Potrditev']
-  const idx = { calendar: 0, visitors: 1, slots: 2, extras: 3, auth: 4, confirm: 4 }
-  const current = idx[step] ?? 0
+  const steps = FLOW_STEPS
+  const current = STEP_INDEX[step] ?? 1
   return (
     <div className="flex items-center gap-1.5 mb-10">
       {steps.map((s, i) => (
@@ -312,12 +338,57 @@ function QtyButton({ value, onChange, min = 0, max = 20 }) {
   )
 }
 
-// ── STEP 1: Calendar ──────────────────────────────────────────────────────────
+// ── STEP 2: Datum + termin (koledar + ure na isti strani) ──────────────────────
 
-function CalendarStep({ onSelectDay }) {
+function ScheduleStep({ day, slot, visitors, onSelectDay, onSelectSlot, onBack, onConfirm }) {
   const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
-  const [weekStart, setWeekStart] = useState(() => getMondayOf(today))
+  const [weekStart, setWeekStart] = useState(() => getMondayOf(day || today))
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
+
+  const durationMin = maxDurationFromTickets(visitors.ticketQty)
+
+  // ── Termini za izbrani dan ──
+  const [slots, setSlots] = useState([])
+  const [slotsLoading, setSlotsLoading] = useState(false)
+  const [slotsError, setSlotsError] = useState('')
+
+  useEffect(() => {
+    if (!day) { setSlots([]); setSlotsError(''); return }
+    setSlotsLoading(true)
+    setSlotsError('')
+    const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`
+    api.get(`/openjump/slots?date=${dateStr}`)
+      .then(r => {
+        if (!r.data.open) { setSlotsError(r.data.reason || 'Park zaprt'); setSlots([]); return }
+        const isToday = isSameDay(day, today)
+        const earliestMin = isToday ? getEarliestStartMin() : 0
+        const mapped = r.data.slots
+          .filter(s => {
+            const [sh, sm] = s.start.split(':').map(Number)
+            const startM = sh * 60 + sm
+            if (startM < earliestMin) return false
+            const endM = startM + durationMin
+            const dowHours = OPEN_HOURS[day.getDay()]
+            if (!dowHours || endM > dowHours.close * 60) return false
+            return true
+          })
+          .map(s => {
+            const [sh, sm] = s.start.split(':').map(Number)
+            const endM = sh * 60 + sm + durationMin
+            const endH = Math.floor(endM / 60), endMm = endM % 60
+            const booked = (s.capacity || 50) - s.available
+            return { start: s.start, end: fmtTime(endH, endMm), booked, available: s.available }
+          })
+          .filter(s => {
+            const [eh, em] = s.end.split(':').map(Number)
+            const dowHours = OPEN_HOURS[day.getDay()]
+            return !dowHours || (eh * 60 + em) <= dowHours.close * 60
+          })
+        setSlots(mapped)
+      })
+      .catch(() => setSlotsError('Napaka pri nalaganju terminov.'))
+      .finally(() => setSlotsLoading(false))
+  }, [day, durationMin])
 
   const weekLabel = (() => {
     const end = addDays(weekStart, 6)
@@ -328,9 +399,18 @@ function CalendarStep({ onSelectDay }) {
 
   return (
     <div>
-      <h2 className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--gray)' }}>Korak 1</h2>
+      <BackBtn onClick={onBack} />
+
+      <div className="flex flex-wrap gap-2 mb-8">
+        <span className="font-condensed text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full"
+          style={{ background: 'rgba(250,177,32,0.1)', border: '1px solid rgba(250,177,32,0.25)', color: 'var(--accent)' }}>
+          👥 {visitors.adults + visitors.kids + visitors.youngKids} oseb · {totalTickets(visitors.ticketQty)} vstopnic
+        </span>
+      </div>
+
+      <h2 className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--gray)' }}>Korak 3</h2>
       <h3 className="font-display leading-none mb-3" style={{ fontSize: 'clamp(32px,5vw,52px)', color: 'var(--white)' }}>
-        IZBERI DAN<span style={{ color: 'var(--accent)' }}>.</span>
+        NAJDI SVOJ TERMIN<span style={{ color: 'var(--accent)' }}>.</span>
       </h3>
       <p className="mb-8" style={{ color: 'var(--gray)', fontSize: '15px' }}>
         Open Jump je na voljo <strong style={{ color: 'var(--white)' }}>Pet 15:00–20:00</strong>,{' '}
@@ -348,37 +428,39 @@ function CalendarStep({ onSelectDay }) {
           style={{ background: 'var(--dark2)', border: '1px solid var(--border)', color: 'var(--white)', cursor: 'pointer' }}>›</button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 mb-8">
-        {weekDays.map((day) => {
-          const dow = day.getDay()
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {weekDays.map((d) => {
+          const dow = d.getDay()
           const isOpen = !!OPEN_HOURS[dow]
-          const isPast = day < today
-          const isToday = isSameDay(day, today)
-          const todaySlotsAvailable = isToday && isOpen ? generateSlots(day, 60).length > 0 : true
+          const isPast = d < today
+          const isToday = isSameDay(d, today)
+          const isSelected = isSameDay(d, day)
+          const todaySlotsAvailable = isToday && isOpen ? generateSlots(d, 60).length > 0 : true
           const clickable = isOpen && !isPast && todaySlotsAvailable
 
           let dotColor = '#22c55e'
           if (isOpen && !isPast && todaySlotsAvailable) {
-            const first = generateSlots(day, 60)[0]
+            const first = generateSlots(d, 60)[0]
             if (first) dotColor = getOccupancyInfo(first.booked).dot
           }
 
           const isPastClosed = (isPast && !isToday) || (isToday && !todaySlotsAvailable)
           const isAvailable = isOpen && !isPast && todaySlotsAvailable
+          const hi = isToday || isSelected
 
           return (
-            <button key={day.toISOString()} disabled={!clickable} onClick={() => clickable && onSelectDay(day)}
+            <button key={d.toISOString()} disabled={!clickable} onClick={() => clickable && onSelectDay(d)}
               style={{
                 padding: '14px 6px', borderRadius: '14px',
-                border: isToday ? '2px solid var(--accent)' : isAvailable ? `2px solid ${dotColor}30` : '2px solid transparent',
-                background: isToday ? 'rgba(250,177,32,0.10)' : isAvailable ? `${dotColor}08` : 'var(--dark2)',
+                border: hi ? '2px solid var(--accent)' : isAvailable ? `2px solid ${dotColor}30` : '2px solid transparent',
+                background: hi ? 'rgba(250,177,32,0.10)' : isAvailable ? `${dotColor}08` : 'var(--dark2)',
                 cursor: clickable ? 'pointer' : 'not-allowed',
                 opacity: isPastClosed ? 0.45 : 1,
                 transition: 'all 0.15s', textAlign: 'center', position: 'relative',
                 filter: isPastClosed ? 'grayscale(0.7)' : 'none',
               }}
-              onMouseEnter={e => { if (clickable) { e.currentTarget.style.borderColor = isToday ? 'var(--accent)' : dotColor; e.currentTarget.style.background = isToday ? 'rgba(250,177,32,0.18)' : `${dotColor}15`; e.currentTarget.style.transform = 'translateY(-2px)' }}}
-              onMouseLeave={e => { if (clickable) { e.currentTarget.style.borderColor = isToday ? 'var(--accent)' : `${dotColor}30`; e.currentTarget.style.background = isToday ? 'rgba(250,177,32,0.10)' : `${dotColor}08`; e.currentTarget.style.transform = 'none' }}}
+              onMouseEnter={e => { if (clickable) { e.currentTarget.style.borderColor = hi ? 'var(--accent)' : dotColor; e.currentTarget.style.background = hi ? 'rgba(250,177,32,0.18)' : `${dotColor}15`; e.currentTarget.style.transform = 'translateY(-2px)' }}}
+              onMouseLeave={e => { if (clickable) { e.currentTarget.style.borderColor = hi ? 'var(--accent)' : `${dotColor}30`; e.currentTarget.style.background = hi ? 'rgba(250,177,32,0.10)' : `${dotColor}08`; e.currentTarget.style.transform = 'none' }}}
             >
               {isToday && (
                 <div className="absolute top-1.5 left-1/2 -translate-x-1/2 font-condensed font-black rounded-full px-1.5"
@@ -388,7 +470,7 @@ function CalendarStep({ onSelectDay }) {
                 {DAYS_SHORT[dow]}
               </div>
               <div className="font-display" style={{ fontSize: '24px', lineHeight: 1, color: isPastClosed ? '#555' : isAvailable ? 'var(--white)' : 'var(--border)' }}>
-                {day.getDate()}
+                {d.getDate()}
               </div>
               <div className="font-condensed mt-2" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.05em', color: isPastClosed ? '#444' : isAvailable ? dotColor : 'var(--border)' }}>
                 {!isOpen ? 'VADBE' : isToday && !todaySlotsAvailable ? 'ZAPRTO' : fmtTime(OPEN_HOURS[dow].open)}
@@ -399,19 +481,100 @@ function CalendarStep({ onSelectDay }) {
         })}
       </div>
 
-      <p className="font-condensed text-xs tracking-widest uppercase text-center" style={{ color: 'var(--border)' }}>
+      <p className="font-condensed text-xs tracking-widest uppercase text-center mb-2" style={{ color: 'var(--border)' }}>
         Pon – Čet so rezervirani za vadbene ure (Odbita Akademija)
       </p>
+
+      {/* ── Termini za izbrani dan ── */}
+      {day && (
+        <div className="mt-8 pt-8" style={{ borderTop: '1px solid var(--border)' }}>
+          <h3 className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--accent)' }}>
+            {DAYS_FULL[day.getDay()]}, {fmtDate(day)}
+          </h3>
+          <h4 className="font-display leading-none mb-6" style={{ fontSize: 'clamp(26px,4vw,40px)', color: 'var(--white)' }}>
+            IZBERI URO<span style={{ color: 'var(--accent)' }}>.</span>
+          </h4>
+
+          <div className="flex flex-wrap items-center gap-4 mb-5">
+            {[['#22c55e','Prosto'],['#eab308','Se polni'],['#f97316','Skoraj polno'],['#ef4444','Zadnja mesta']].map(([c,l]) => (
+              <div key={l} className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full" style={{ background: c }} />
+                <span className="font-condensed text-xs font-bold" style={{ color: 'var(--gray)' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+
+          {slotsLoading && (
+            <div className="py-12 text-center font-condensed tracking-widest animate-pulse" style={{ color: 'var(--gray)' }}>NALAGAM TERMINE...</div>
+          )}
+          {!slotsLoading && slotsError && (
+            <div className="rounded-xl px-5 py-4 mb-4 font-condensed font-bold text-sm" style={{ background: 'rgba(255,61,0,0.08)', border: '1px solid rgba(255,61,0,0.25)', color: '#FF3D00' }}>{slotsError}</div>
+          )}
+          {!slotsLoading && !slotsError && slots.length === 0 && (
+            <div className="py-8 text-center font-condensed text-sm" style={{ color: 'var(--gray)' }}>Za ta dan ni več prostih terminov.</div>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-2">
+            {slots.map((s) => {
+              const info = getOccupancyInfo(s.booked)
+              const isFull = s.available <= 0
+              const isSelected = slot?.start === s.start
+              return (
+                <button key={s.start} disabled={isFull} onClick={() => onSelectSlot(isSelected ? null : s)}
+                  style={{
+                    padding: '16px 12px', borderRadius: '14px',
+                    border: isSelected ? '2px solid var(--accent)' : `1px solid ${info.border}`,
+                    background: isSelected ? 'rgba(250,177,32,0.12)' : info.bg,
+                    cursor: isFull ? 'not-allowed' : 'pointer', opacity: isFull ? 0.35 : 1,
+                    transition: 'all 0.15s', textAlign: 'center', position: 'relative',
+                  }}>
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+                      <span style={{ fontSize: '9px', color: '#000', fontWeight: 900 }}>✓</span>
+                    </div>
+                  )}
+                  <div className="font-display leading-none mb-1"
+                    style={{ fontSize: '26px', color: isSelected ? 'var(--accent)' : isFull ? 'var(--gray)' : 'var(--white)', textDecoration: isFull ? 'line-through' : 'none' }}>
+                    {s.start}
+                  </div>
+                  <div className="font-condensed text-xs mb-2" style={{ color: 'var(--gray)' }}>do {s.end}</div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: isFull ? 'var(--border)' : info.dot }} />
+                    <span className="font-condensed font-bold" style={{ fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: isFull ? 'var(--border)' : isSelected ? 'var(--accent)' : info.color }}>
+                      {isFull ? 'POLNO' : info.short}
+                    </span>
+                  </div>
+                  {!isFull && (
+                    <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                      <div className="h-full rounded-full" style={{ width: `${Math.min((s.booked/CAPACITY)*100,100)}%`, background: info.dot }} />
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Nadaljuj ── */}
+      <button disabled={!day || !slot} onClick={onConfirm}
+        className="w-full font-condensed font-black uppercase tracking-widest rounded-xl py-4 mt-8 transition-all"
+        style={{
+          background: (day && slot) ? 'var(--accent)' : 'var(--dark2)',
+          color: (day && slot) ? 'var(--black)' : 'var(--border)',
+          border: `1px solid ${(day && slot) ? 'var(--accent)' : 'var(--border)'}`,
+          cursor: (day && slot) ? 'pointer' : 'not-allowed', fontSize: '15px', letterSpacing: '0.12em',
+          boxShadow: (day && slot) ? '0 4px 20px rgba(250,177,32,0.25)' : 'none',
+        }}>
+        {!day ? 'IZBERI DAN' : !slot ? 'IZBERI URO' : `NAPREJ → ${fmtDate(day)} · ${slot.start} – ${slot.end}`}
+      </button>
     </div>
   )
 }
 
 // ── STEP 2: Visitors + Tickets ────────────────────────────────────────────────
 
-function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
-  const dow = day.getDay()
-  const hours = OPEN_HOURS[dow]
-
+function VisitorsStep({ onBack, onNext, liveUpdate }) {
   const [adults, setAdults]       = useState(0)
   const [kids, setKids]           = useState(0)
   const [youngKids, setYoungKids] = useState(0)
@@ -431,24 +594,13 @@ function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
 
   return (
     <div>
-      <BackBtn onClick={onBack} />
-
-      <div className="rounded-xl px-5 py-4 mb-8 flex items-center gap-4"
-        style={{ background: 'rgba(250,177,32,0.08)', border: '1px solid rgba(250,177,32,0.2)' }}>
-        <span style={{ fontSize: '22px' }}>📅</span>
-        <div>
-          <div className="font-condensed text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--accent)' }}>Izbrani dan</div>
-          <div className="font-condensed font-black text-base" style={{ color: 'var(--white)' }}>
-            {DAYS_FULL[dow]}, {fmtDate(day)} · {hours.open}:00 – {hours.close}:00
-          </div>
-        </div>
-      </div>
+      {onBack && <BackBtn onClick={onBack} />}
 
       <h2 className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--gray)' }}>Korak 2</h2>
       <h3 className="font-display leading-none mb-2" style={{ fontSize: 'clamp(32px,5vw,52px)', color: 'var(--white)' }}>
-        KOLIKO VAS PRIDE<span style={{ color: 'var(--accent)' }}>?</span>
+        KDO PRIDE NA OBISK<span style={{ color: 'var(--accent)' }}>?</span>
       </h3>
-      <p className="mb-8" style={{ color: 'var(--gray)', fontSize: '14px' }}>na Odbito izkušnjo</p>
+      <p className="mb-8" style={{ color: 'var(--gray)', fontSize: '14px' }}>Enkratni Odbit obisk — izberi obiskovalce in vstopnice.</p>
 
       <div className="flex flex-col gap-3 mb-4">
         {[
@@ -528,147 +680,6 @@ function VisitorsStep({ day, onBack, onNext, liveUpdate }) {
           boxShadow: canContinue ? '0 4px 20px rgba(250,177,32,0.25)' : 'none',
         }}>
         {totalVisitors < 1 ? 'DODAJ OBISKOVALCE' : totalT === 0 ? 'IZBERI VSTOPNICE' : totalT !== totalVisitors ? `VSTOPNIC: ${totalT} / OBISKOVALCEV: ${totalVisitors} — USKLADI` : `NAPREJ → ${totalT} vstopnic${totalT === 1 ? 'a' : totalT < 5 ? 'e' : ''}`}
-      </button>
-    </div>
-  )
-}
-
-// ── STEP 3: Slot grid ─────────────────────────────────────────────────────────
-
-function SlotStep({ day, visitors, onBack, onConfirm }) {
-  const [selectedSlot, setSelectedSlot] = useState(null)
-  const [slots, setSlots] = useState([])
-  const [slotsLoading, setSlotsLoading] = useState(true)
-  const [slotsError, setSlotsError] = useState('')
-  const durationMin = maxDurationFromTickets(visitors.ticketQty)
-  const dow = day.getDay()
-
-  useEffect(() => {
-    setSlotsLoading(true)
-    setSlotsError('')
-    setSelectedSlot(null)
-    const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`
-    api.get(`/openjump/slots?date=${dateStr}`)
-      .then(r => {
-        if (!r.data.open) { setSlotsError(r.data.reason || 'Park zaprt'); setSlots([]); return }
-        const today = new Date(); today.setHours(0,0,0,0)
-        const isToday = isSameDay(day, today)
-        const earliestMin = isToday ? getEarliestStartMin() : 0
-        const mapped = r.data.slots
-          .filter(s => {
-            const [sh, sm] = s.start.split(':').map(Number)
-            const startM = sh * 60 + sm
-            if (startM < earliestMin) return false
-            const endM = startM + durationMin
-            const dowHours = OPEN_HOURS[day.getDay()]
-            if (!dowHours || endM > dowHours.close * 60) return false
-            if (s.available <= 0) return true
-            return true
-          })
-          .map(s => {
-            const [sh, sm] = s.start.split(':').map(Number)
-            const endM = sh * 60 + sm + durationMin
-            const endH = Math.floor(endM / 60), endMm = endM % 60
-            const booked = (s.capacity || 50) - s.available
-            return { start: s.start, end: fmtTime(endH, endMm), booked, available: s.available }
-          })
-          .filter(s => {
-            const [eh, em] = s.end.split(':').map(Number)
-            const dowHours = OPEN_HOURS[day.getDay()]
-            return !dowHours || (eh * 60 + em) <= dowHours.close * 60
-          })
-        setSlots(mapped)
-      })
-      .catch(() => setSlotsError('Napaka pri nalaganju terminov.'))
-      .finally(() => setSlotsLoading(false))
-  }, [day, durationMin])
-
-  return (
-    <div>
-      <BackBtn onClick={onBack} />
-
-      <div className="flex flex-wrap gap-2 mb-8">
-        <span className="font-condensed text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full"
-          style={{ background: 'rgba(250,177,32,0.1)', border: '1px solid rgba(250,177,32,0.25)', color: 'var(--accent)' }}>
-          📅 {DAYS_FULL[dow]}, {fmtDate(day)}
-        </span>
-        <span className="font-condensed text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full"
-          style={{ background: 'rgba(250,177,32,0.1)', border: '1px solid rgba(250,177,32,0.25)', color: 'var(--accent)' }}>
-          👥 {visitors.adults + visitors.kids + visitors.youngKids} oseb · {totalTickets(visitors.ticketQty)} vstopnic
-        </span>
-      </div>
-
-      <h2 className="font-condensed font-black text-sm uppercase tracking-widest mb-1" style={{ color: 'var(--gray)' }}>Korak 3</h2>
-      <h3 className="font-display leading-none mb-8" style={{ fontSize: 'clamp(32px,5vw,52px)', color: 'var(--white)' }}>
-        IZBERI TERMIN<span style={{ color: 'var(--accent)' }}>.</span>
-      </h3>
-
-      <div className="flex flex-wrap items-center gap-4 mb-5">
-        {[['#22c55e','Prosto'],['#eab308','Se polni'],['#f97316','Skoraj polno'],['#ef4444','Zadnja mesta']].map(([c,l]) => (
-          <div key={l} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: c }} />
-            <span className="font-condensed text-xs font-bold" style={{ color: 'var(--gray)' }}>{l}</span>
-          </div>
-        ))}
-      </div>
-
-      {slotsLoading && (
-        <div className="py-12 text-center font-condensed tracking-widest animate-pulse" style={{ color: 'var(--gray)' }}>NALAGAM TERMINE...</div>
-      )}
-      {!slotsLoading && slotsError && (
-        <div className="rounded-xl px-5 py-4 mb-8 font-condensed font-bold text-sm" style={{ background: 'rgba(255,61,0,0.08)', border: '1px solid rgba(255,61,0,0.25)', color: '#FF3D00' }}>{slotsError}</div>
-      )}
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-        {slots.map((slot) => {
-          const info = getOccupancyInfo(slot.booked)
-          const isFull = slot.available <= 0
-          const isSelected = selectedSlot?.start === slot.start
-          return (
-            <button key={slot.start} disabled={isFull} onClick={() => setSelectedSlot(isSelected ? null : slot)}
-              style={{
-                padding: '16px 12px', borderRadius: '14px',
-                border: isSelected ? '2px solid var(--accent)' : `1px solid ${info.border}`,
-                background: isSelected ? 'rgba(250,177,32,0.12)' : info.bg,
-                cursor: isFull ? 'not-allowed' : 'pointer', opacity: isFull ? 0.35 : 1,
-                transition: 'all 0.15s', textAlign: 'center', position: 'relative',
-              }}>
-              {isSelected && (
-                <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'var(--accent)' }}>
-                  <span style={{ fontSize: '9px', color: '#000', fontWeight: 900 }}>✓</span>
-                </div>
-              )}
-              <div className="font-display leading-none mb-1"
-                style={{ fontSize: '26px', color: isSelected ? 'var(--accent)' : isFull ? 'var(--gray)' : 'var(--white)', textDecoration: isFull ? 'line-through' : 'none' }}>
-                {slot.start}
-              </div>
-              <div className="font-condensed text-xs mb-2" style={{ color: 'var(--gray)' }}>do {slot.end}</div>
-              <div className="flex items-center justify-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: isFull ? 'var(--border)' : info.dot }} />
-                <span className="font-condensed font-bold" style={{ fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: isFull ? 'var(--border)' : isSelected ? 'var(--accent)' : info.color }}>
-                  {isFull ? 'POLNO' : info.short}
-                </span>
-              </div>
-              {!isFull && (
-                <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-                  <div className="h-full rounded-full" style={{ width: `${Math.min((slot.booked/CAPACITY)*100,100)}%`, background: info.dot }} />
-                </div>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      <button disabled={!selectedSlot} onClick={() => onConfirm(selectedSlot)}
-        className="w-full font-condensed font-black uppercase tracking-widest rounded-xl py-4 transition-all"
-        style={{
-          background: selectedSlot ? 'var(--accent)' : 'var(--dark2)',
-          color: selectedSlot ? 'var(--black)' : 'var(--border)',
-          border: `1px solid ${selectedSlot ? 'var(--accent)' : 'var(--border)'}`,
-          cursor: selectedSlot ? 'pointer' : 'not-allowed', fontSize: '15px', letterSpacing: '0.12em',
-          boxShadow: selectedSlot ? '0 4px 20px rgba(250,177,32,0.25)' : 'none',
-        }}>
-        {selectedSlot ? `NAPREJ → ${fmtDate(day)} · ${selectedSlot.start} – ${selectedSlot.end}` : 'IZBERI TERMIN'}
       </button>
     </div>
   )
@@ -823,7 +834,7 @@ function AuthGate({ visitors, day, slot, extras, onBack, onContinue }) {
 
 // ── Confirm ───────────────────────────────────────────────────────────────────
 
-function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
+function ConfirmStep({ visitors, day, slot, extras, onBack, onReset, onBooked }) {
   const { user } = useAuth()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
@@ -925,6 +936,7 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
       })
       setBookingCode(data.booking_code)
       setDone(true)
+      onBooked?.()
     } catch (err) {
       setBookError(err.response?.data?.error || 'Rezervacija ni uspela. Prosimo poskusite znova.')
     } finally {
@@ -1173,23 +1185,26 @@ function ConfirmStep({ visitors, day, slot, extras, onBack, onReset }) {
 
 export default function BookingFlow() {
   const { user } = useAuth()
-  const [step, setStep] = useState('calendar')
+  const [step, setStep] = useState('visitors')
   const [selectedDay, setSelectedDay] = useState(null)
   const [selectedVisitors, setSelectedVisitors] = useState(null)
   const [liveVisitors, setLiveVisitors] = useState(null)
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [selectedExtras, setSelectedExtras] = useState(null)
   const [liveExtras, setLiveExtras] = useState(null)
+  const [purchased, setPurchased] = useState(false)
 
   const reset = () => {
-    setStep('calendar')
+    setStep('visitors')
     setSelectedDay(null); setSelectedVisitors(null); setLiveVisitors(null)
     setSelectedSlot(null); setSelectedExtras(null); setLiveExtras(null)
+    setPurchased(false)
   }
 
   useEffect(() => { if (user && step === 'auth') setStep('confirm') }, [user])
 
-  const showSidebar = step !== 'calendar'
+  const showSidebar = step !== 'visitors'
+  const percent = progressPercent(step, purchased)
 
   // For the sidebar, use live state during input, confirmed state otherwise
   const sidebarVisitors = liveVisitors || selectedVisitors
@@ -1206,30 +1221,28 @@ export default function BookingFlow() {
           </h1>
         </div>
 
+        <ProgressMeter percent={percent} />
         <StepIndicator step={step} />
 
         <div className={showSidebar ? 'flex gap-8 items-start' : ''}>
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {step === 'calendar' && (
-              <CalendarStep onSelectDay={(day) => { setSelectedDay(day); setStep('visitors') }} />
-            )}
-
-            {step === 'visitors' && selectedDay && (
+            {step === 'visitors' && (
               <VisitorsStep
-                day={selectedDay}
-                onBack={() => setStep('calendar')}
-                onNext={(v) => { setSelectedVisitors(v); setLiveVisitors(v); setStep('slots') }}
+                onNext={(v) => { setSelectedVisitors(v); setLiveVisitors(v); setStep('schedule') }}
                 liveUpdate={setLiveVisitors}
               />
             )}
 
-            {step === 'slots' && selectedDay && selectedVisitors && (
-              <SlotStep
+            {step === 'schedule' && selectedVisitors && (
+              <ScheduleStep
                 day={selectedDay}
+                slot={selectedSlot}
                 visitors={selectedVisitors}
+                onSelectDay={(d) => { setSelectedDay(d); setSelectedSlot(null) }}
+                onSelectSlot={setSelectedSlot}
                 onBack={() => setStep('visitors')}
-                onConfirm={(slot) => { setSelectedSlot(slot); setStep('extras') }}
+                onConfirm={() => setStep('extras')}
               />
             )}
 
@@ -1238,7 +1251,7 @@ export default function BookingFlow() {
                 day={selectedDay}
                 slot={selectedSlot}
                 visitors={selectedVisitors}
-                onBack={() => setStep('slots')}
+                onBack={() => setStep('schedule')}
                 onNext={(ex) => { setSelectedExtras(ex); setLiveExtras(ex); setStep(user ? 'confirm' : 'auth') }}
                 liveUpdate={setLiveExtras}
               />
@@ -1263,6 +1276,7 @@ export default function BookingFlow() {
                 extras={selectedExtras || {}}
                 onBack={() => setStep('extras')}
                 onReset={reset}
+                onBooked={() => setPurchased(true)}
               />
             )}
           </div>

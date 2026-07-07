@@ -184,7 +184,7 @@ export default function Navbar() {
                   }}
                 >
                   <span>👤</span>
-                  MOJ PROFIL
+                  PRIJAVA
                   <span style={{ fontSize: '10px' }}>{authOpen ? '▲' : '▾'}</span>
                 </button>
 

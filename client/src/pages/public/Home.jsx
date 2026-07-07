@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import pricing from '../../data/pricing.json'
+import api from '../../services/api.js'
 
 const CHARS = 'ABCDEFGHIJKLMNOPRSTUVZX0123456789#@!%&'
 
@@ -66,16 +67,9 @@ const PACKAGES = pricing.openJump.packages
     featured: p.popular || false,
   }))
 
-const ALL_GROUPS = [
-  { id: 1, program: 'Osnove gimnastike', age: '5–7 let',   days: 'Pon & Sre', time: '16:00 – 17:00', color: '#7BB3E8' },
-  { id: 2, program: 'Osnove gimnastike', age: '5–7 let',   days: 'Tor & Čet', time: '16:00 – 17:00', color: '#7BB3E8' },
-  { id: 3, program: 'Osnove gimnastike', age: '8–10 let',  days: 'Pon & Sre', time: '17:00 – 18:00', color: '#7EC87E' },
-  { id: 4, program: 'Osnove gimnastike', age: '8–10 let',  days: 'Tor & Čet', time: '17:00 – 18:00', color: '#7EC87E' },
-  { id: 5, program: 'Osnove gimnastike', age: '8–10 let',  days: 'Pon & Sre', time: '18:00 – 19:30', color: '#E8A87B' },
-  { id: 6, program: 'Napredna gimnastika', age: '10–12 let', days: 'Tor & Čet', time: '18:00 – 19:30', color: '#E0B84E' },
-  { id: 7, program: 'Napredna gimnastika', age: '10–12 let', days: 'Pon & Sre', time: '19:30 – 21:00', color: '#9B8FE0' },
-  { id: 8, program: 'Napredna gimnastika', age: '12–15 let', days: 'Tor & Čet', time: '19:30 – 21:00', color: '#C87B7B' },
-]
+// Zaporedje in oznake dni — usklajeno z /vadbe urnikom
+const AK_DAY_ORDER  = ['pon', 'tor', 'sre', 'cet', 'pet']
+const AK_DAY_LABELS = { pon: 'PON', tor: 'TOR', sre: 'SRE', cet: 'ČET', pet: 'PET' }
 
 const OJ_PACKAGES = pricing.openJump.packages
   .filter(p => p.duration >= 60)
@@ -186,6 +180,15 @@ function ComicBubbles() {
 // ── Odbita Akademija Section ──────────────────────────────────────────
 
 function AkademijaSection() {
+  const [groups, setGroups] = useState([])
+  const [loadState, setLoadState] = useState('loading') // 'loading' | 'ok' | 'error'
+
+  useEffect(() => {
+    api.get('/classes/akademija-groups')
+      .then(({ data }) => { setGroups(Array.isArray(data) ? data : []); setLoadState('ok') })
+      .catch(() => setLoadState('error'))
+  }, [])
+
   return (
     <section className="px-[5%] pt-6 pb-8 lg:pt-10 lg:pb-20" style={{ background: 'var(--dark)' }}>
       <div className="max-w-6xl mx-auto">
@@ -218,29 +221,44 @@ function AkademijaSection() {
           SKUPINE
         </p>
         <div className="mb-8" style={{ border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
-          {/* scrollable on mobile only */}
-          <div className="max-h-[380px] overflow-y-auto sm:max-h-none sm:overflow-visible">
-          {ALL_GROUPS.map((g, i) => {
-            const activeDays = ['Pon','Tor','Sre','Čet','Pet'].filter(d => g.days.includes(d))
-            const dayTime = activeDays.map(d => {
-              const label = d === 'Pon' ? 'PON' : d === 'Tor' ? 'TOR' : d === 'Sre' ? 'SRE' : d === 'Čet' ? 'ČET' : 'PET'
-              return `${label} ${g.time}`
-            }).join(' / ')
+          <div className="max-h-[440px] overflow-y-auto">
+          {loadState === 'loading' && (
+            <div className="px-5 py-8 text-center font-condensed tracking-widest uppercase"
+              style={{ fontSize: 13, color: 'rgba(250,177,32,0.5)', background: 'var(--dark2)' }}>
+              Nalagam skupine…
+            </div>
+          )}
+          {loadState === 'error' && (
+            <div className="px-5 py-8 text-center font-condensed"
+              style={{ fontSize: 13, color: 'rgba(245,245,240,0.4)', background: 'var(--dark2)' }}>
+              Skupin trenutno ni mogoče naložiti.
+            </div>
+          )}
+          {loadState === 'ok' && groups.length === 0 && (
+            <div className="px-5 py-8 text-center font-condensed"
+              style={{ fontSize: 13, color: 'rgba(245,245,240,0.4)', background: 'var(--dark2)' }}>
+              Skupine bodo objavljene kmalu.
+            </div>
+          )}
+          {loadState === 'ok' && groups.map((g, i) => {
+            const color = g.color_hex || '#fab120'
+            const activeDays = AK_DAY_ORDER.filter(d => (g.days || []).includes(d))
+            const time = `${g.time_start} – ${g.time_end}`
 
             return (
-              <div key={g.id}
+              <div key={g.id ?? i}
                 className="flex flex-wrap items-center gap-x-5 gap-y-2 px-5 py-4"
                 style={{
-                  borderBottom: i < ALL_GROUPS.length - 1 ? '1px solid var(--border)' : 'none',
+                  borderBottom: i < groups.length - 1 ? '1px solid var(--border)' : 'none',
                   background: 'var(--dark2)',
                 }}>
 
                 {/* Ime skupine */}
-                <div className="flex items-center gap-2" style={{ minWidth: 90, flexShrink: 0 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: g.color, flexShrink: 0 }} />
+                <div className="flex items-center gap-2" style={{ minWidth: 100, flexShrink: 0 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
                   <span className="font-condensed font-black uppercase tracking-widest"
-                    style={{ fontSize: 11, color: g.color, letterSpacing: '0.12em' }}>
-                    SKUPINA {g.id}
+                    style={{ fontSize: 11, color, letterSpacing: '0.1em' }}>
+                    {g.name}
                   </span>
                 </div>
 
@@ -253,22 +271,19 @@ function AkademijaSection() {
                 {/* Starost */}
                 <div className="font-condensed font-bold"
                   style={{ fontSize: 12, color: 'var(--gray)', minWidth: 60, flexShrink: 0 }}>
-                  {g.age}
+                  {g.age_range}
                 </div>
 
                 {/* Dan + ura */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  {activeDays.map(d => {
-                    const label = d === 'Pon' ? 'PON' : d === 'Tor' ? 'TOR' : d === 'Sre' ? 'SRE' : d === 'Čet' ? 'ČET' : 'PET'
-                    return (
-                      <span key={d} className="font-condensed font-black px-2 py-1 rounded"
-                        style={{ fontSize: 10, background: g.color, color: '#080A0E', letterSpacing: '0.05em' }}>
-                        {label}
-                      </span>
-                    )
-                  })}
+                  {activeDays.map(d => (
+                    <span key={d} className="font-condensed font-black px-2 py-1 rounded"
+                      style={{ fontSize: 10, background: color, color: '#080A0E', letterSpacing: '0.05em' }}>
+                      {AK_DAY_LABELS[d]}
+                    </span>
+                  ))}
                   <span className="font-condensed font-bold" style={{ fontSize: 11, color: 'var(--gray)' }}>
-                    {g.time}
+                    {time}
                   </span>
                 </div>
 
@@ -595,9 +610,9 @@ function NewsletterForm() {
         onChange={e => setEmail(e.target.value)}
         disabled={status === 'loading'}
         className="newsletter-input font-condensed text-sm px-4 py-2 rounded-lg outline-none flex-1 sm:w-56"
-        style={{ background: 'rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.2)', color: '#080A0E', opacity: status === 'loading' ? 0.6 : 1 }}
-        onFocus={e => e.currentTarget.style.background = 'rgba(0,0,0,0.18)'}
-        onBlur={e => e.currentTarget.style.background = 'rgba(0,0,0,0.12)'}
+        style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.25)', color: '#080A0E', opacity: status === 'loading' ? 0.6 : 1, transition: 'border-color 0.18s, box-shadow 0.18s' }}
+        onFocus={e => { e.currentTarget.style.borderColor = '#080A0E'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(8,10,14,0.15)' }}
+        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.25)'; e.currentTarget.style.boxShadow = 'none' }}
       />
       <button
         type="submit"
@@ -878,7 +893,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link to="/rezervacija" className="btn-primary">KUPI KARTO</Link>
+              <Link to="/rezervacija" className="btn-primary">REZERVIRAJ TERMIN</Link>
               <Link to="/vadbe" className="btn-secondary" style={{ whiteSpace: 'nowrap' }}>VPIŠI SE NA TRENING →</Link>
             </div>
           </div>
@@ -905,8 +920,8 @@ export default function Home() {
       })()}
 
       {/* ── IZBERI SVOJO POT ── */}
-      <section className="py-8 lg:py-16" style={{ background: '#0d0f12' }}>
-        <div className="max-w-6xl mx-auto px-[5%]">
+      <section className="px-[5%] py-8 lg:py-16" style={{ background: '#0d0f12' }}>
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <div className="section-label mb-3" style={{ justifyContent: 'center' }}>Kakšne so želje?</div>
             <h2 className="font-display leading-none" style={{ fontSize: 'clamp(28px,4vw,52px)', color: '#fff' }}>
@@ -916,7 +931,7 @@ export default function Home() {
         </div>
 
         {/* Desktop grid */}
-        <div className="hidden md:grid md:grid-cols-3 gap-4 max-w-6xl mx-auto px-[5%]">
+        <div className="hidden md:grid md:grid-cols-3 gap-4 max-w-6xl mx-auto">
             {[
               {
                 icon: (
@@ -1004,7 +1019,7 @@ export default function Home() {
                 </h3>
 
                 {/* Opis */}
-                <p className="font-condensed text-sm flex-1 mb-6" style={{ color: 'rgba(245,245,240,0.55)', lineHeight: 1.65 }}>
+                <p className="font-condensed text-sm flex-1 mb-6" style={{ color: 'rgba(245,245,240,0.7)', lineHeight: 1.65 }}>
                   {card.desc}
                 </p>
 
@@ -1048,7 +1063,7 @@ export default function Home() {
                   <h3 className="font-display leading-none mb-3" style={{ fontSize: '28px', color: '#fff', whiteSpace: 'pre-line' }}>
                     {card.title}
                   </h3>
-                  <p className="font-condensed text-sm flex-1 mb-5" style={{ color: 'rgba(245,245,240,0.55)', lineHeight: 1.65 }}>
+                  <p className="font-condensed text-sm flex-1 mb-5" style={{ color: 'rgba(245,245,240,0.7)', lineHeight: 1.65 }}>
                     {card.desc}
                   </p>
                   <div className="font-condensed font-black text-sm uppercase tracking-widest px-5 py-2.5 rounded-lg text-center"
@@ -1305,7 +1320,7 @@ export default function Home() {
               <div className="flex flex-col gap-3">
                 {[
                   { icon: '📞', label: 'Telefon', value: '040 123 456', href: 'tel:+38640123456', sub: null },
-                  { icon: '✉️', label: 'E-mail',  value: 'info@odbito.fun', href: 'mailto:info@odbito.fun', sub: null },
+                  { icon: '✉️', label: 'E-mail',  value: 'info@odbito.si', href: 'mailto:info@odbito.si', sub: null },
                 ].map(c => (
                   <a key={c.label} href={c.href}
                     className="flex items-center gap-4 p-4 rounded-xl transition-all"

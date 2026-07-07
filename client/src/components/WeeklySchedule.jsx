@@ -69,6 +69,24 @@ function getTimeSlots(dayKey, classGroups) {
   return Object.entries(map)
 }
 
+// Desktop grid: skupine z istim ZAČETKOM prikaži eno ob drugi (tudi če imajo
+// različno trajanje), da se nobena skupina ne skrije za drugo.
+function decimalHours(str) {
+  const [h, m] = str.trim().split(':').map(Number)
+  return h + (m || 0) / 60
+}
+
+function getStartSlots(dayKey, classGroups) {
+  const groups = classGroups[dayKey] || []
+  const map = {}
+  groups.forEach(g => {
+    const start = g.time.split('–')[0].trim()
+    if (!map[start]) map[start] = []
+    map[start].push(g)
+  })
+  return Object.entries(map).sort((a, b) => decimalHours(a[0]) - decimalHours(b[0]))
+}
+
 const HOUR_LABELS = [15, 16, 17, 18, 19, 20, 21]
 
 // ── GroupFilter ───────────────────────────────────────────────────────
@@ -244,24 +262,13 @@ function GroupFilter({ selected, onSelect, onClear, allGroups }) {
 // ── Akademija Grid (Desktop) ──────────────────────────────────────────
 
 function AkademijaGrid({ allGroups, classGroups }) {
-  const [startIdx, setStartIdx]     = useState(0)
   const [hovered, setHovered]       = useState(null)
   const [filteredGroup, setFiltered] = useState(null)
-  const MAX_START = AK_DAYS.length - 3 // = 2
   const navigate = useNavigate()
 
-  // when filter selected, jump to first day where group appears
-  const handleSelect = (g) => {
-    setFiltered(g)
-    if (g.days.length > 0) {
-      const firstDayIdx = AK_DAYS.findIndex(d => g.days.includes(d.key))
-      if (firstDayIdx !== -1) {
-        setStartIdx(Math.min(MAX_START, Math.max(0, firstDayIdx)))
-      }
-    }
-  }
+  const handleSelect = (g) => setFiltered(g)
 
-  const visibleDays = AK_DAYS.slice(startIdx, startIdx + 3)
+  const visibleDays = AK_DAYS  // vseh 5 dni na desktopu
 
   return (
     <div className="hidden lg:block select-none">
@@ -274,64 +281,18 @@ function AkademijaGrid({ allGroups, classGroups }) {
           onClear={() => setFiltered(null)}
           allGroups={allGroups}
         />
-
-        {/* Day range nav inline on same line */}
-        <div className="flex items-center gap-2 pb-0.5 ml-auto">
-          <span className="font-condensed text-xs tracking-widest uppercase" style={{ color: 'rgba(245,245,240,0.25)' }}>
-            Dnevi:
-          </span>
-          {AK_DAYS.map((d, i) => {
-            const isVisible = i >= startIdx && i < startIdx + 3
-            const hasGroup  = filteredGroup ? filteredGroup.days.includes(d.key) : true
-            return (
-              <button
-                key={d.key}
-                onClick={() => setStartIdx(Math.min(MAX_START, Math.max(0, i > MAX_START ? MAX_START : i === 0 ? 0 : i - 1)))}
-                style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontWeight: 900,
-                  fontSize: 12,
-                  letterSpacing: '0.12em',
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  border: isVisible ? '1.5px solid var(--accent)' : '1px solid var(--border)',
-                  background: isVisible ? 'rgba(250,177,32,0.1)' : 'transparent',
-                  color: isVisible ? 'var(--accent)' : hasGroup ? 'rgba(245,245,240,0.4)' : 'rgba(245,245,240,0.15)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                  textDecoration: filteredGroup && !hasGroup ? 'line-through' : 'none',
-                }}
-              >
-                {d.label}
-              </button>
-            )
-          })}
-        </div>
       </div>
 
-      {/* ── Header + arrows ── */}
-      <div className="flex items-center gap-4 mb-3">
-        <button
-          onClick={() => setStartIdx(i => Math.max(0, i - 1))}
-          disabled={startIdx === 0}
-          style={{
-            width: 38, height: 38, borderRadius: '50%', border: '1px solid var(--border)',
-            background: startIdx === 0 ? 'transparent' : 'var(--dark2)',
-            color: startIdx === 0 ? 'rgba(255,255,255,0.12)' : 'var(--white)',
-            cursor: startIdx === 0 ? 'default' : 'pointer',
-            fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900,
-            flexShrink: 0, transition: 'all 0.15s',
-          }}
-        >‹</button>
-
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+      {/* ── Header (5 dni) ── */}
+      <div className="flex items-stretch mb-3" style={{ gap: '6px' }}>
+        <div style={{ width: '46px', flexShrink: 0 }} />
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
           {visibleDays.map(d => {
             const groupHere = filteredGroup ? filteredGroup.days.includes(d.key) : true
             return (
               <div key={d.key} className="text-center py-2 rounded-xl"
                 style={{
-                  fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, letterSpacing: '0.12em',
+                  fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, letterSpacing: '0.1em',
                   color: groupHere ? 'var(--accent)' : 'rgba(245,245,240,0.2)',
                   background: groupHere ? 'rgba(250,177,32,0.07)' : 'rgba(255,255,255,0.02)',
                   border: groupHere ? '1px solid rgba(250,177,32,0.15)' : '1px solid rgba(255,255,255,0.04)',
@@ -345,20 +306,6 @@ function AkademijaGrid({ allGroups, classGroups }) {
             )
           })}
         </div>
-
-        <button
-          onClick={() => setStartIdx(i => Math.min(MAX_START, i + 1))}
-          disabled={startIdx === MAX_START}
-          style={{
-            width: 38, height: 38, borderRadius: '50%', border: '1px solid var(--border)',
-            background: startIdx === MAX_START ? 'transparent' : 'var(--dark2)',
-            color: startIdx === MAX_START ? 'rgba(255,255,255,0.12)' : 'var(--white)',
-            cursor: startIdx === MAX_START ? 'default' : 'pointer',
-            fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 900,
-            flexShrink: 0, transition: 'all 0.15s',
-          }}
-        >›</button>
       </div>
 
       {/* ── Timeline grid ── */}
@@ -378,10 +325,10 @@ function AkademijaGrid({ allGroups, classGroups }) {
           ))}
         </div>
 
-        {/* 3 Day columns */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+        {/* 5 Day columns */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
           {visibleDays.map(day => {
-            const slots = getTimeSlots(day.key, classGroups)
+            const slots = getStartSlots(day.key, classGroups)
             const dayHasGroup = filteredGroup ? filteredGroup.days.includes(day.key) : true
 
             return (
@@ -423,33 +370,40 @@ function AkademijaGrid({ allGroups, classGroups }) {
                 )}
 
                 {/* Time slot blocks */}
-                {slots.map(([timeStr, groups]) => {
-                  const { sh, sm, eh, em } = parseTime(timeStr)
-                  if (sh >= VIEW_END || eh <= VIEW_START) return null
-                  const topPct = Math.max(0, toTopPct(sh, sm))
-                  const botPct = Math.min(100, toTopPct(eh, em))
-                  const hPct   = botPct - topPct
+                {slots.map(([startStr, groups]) => {
+                  const startH = decimalHours(startStr)
+                  if (startH >= VIEW_END) return null
+                  // najkasnejši konec med skupinami z istim začetkom
+                  const maxEndH = Math.min(VIEW_END, Math.max(...groups.map(g => decimalHours(g.time.split('–')[1]))))
+                  const topPct  = Math.max(0, ((startH - VIEW_START) / VIEW_H) * 100)
+                  const hPct    = ((maxEndH - Math.max(startH, VIEW_START)) / VIEW_H) * 100
+                  const span    = maxEndH - startH // za relativno višino posameznega bloka
 
                   return (
-                    <div key={timeStr} style={{
+                    <div key={startStr} style={{
                       position: 'absolute',
                       top: `${topPct}%`, height: `${hPct}%`,
                       left: 5, right: 5,
                       display: 'flex', gap: 3, zIndex: 1,
+                      alignItems: 'flex-start',
                     }}>
                       {groups.map((g, gi) => {
-                        const isHov     = hovered?.dayKey === day.key && hovered?.timeStr === timeStr && hovered?.gi === gi
+                        const isHov     = hovered?.dayKey === day.key && hovered?.timeStr === startStr && hovered?.gi === gi
                         const isMatch   = filteredGroup ? filteredGroup.name === g.name : false
                         const isDimmed  = filteredGroup ? !isMatch : false
+                        const gEndH     = Math.min(VIEW_END, decimalHours(g.time.split('–')[1]))
+                        const blockHPct = span > 0 ? Math.max(18, ((gEndH - startH) / span) * 100) : 100
 
                         return (
                           <div
                             key={gi}
-                            onMouseEnter={() => setHovered({ dayKey: day.key, timeStr, gi })}
+                            onMouseEnter={() => setHovered({ dayKey: day.key, timeStr: startStr, gi })}
                             onMouseLeave={() => setHovered(null)}
                             onClick={() => navigate('/vadbe')}
                             style={{
                               flex: 1,
+                              alignSelf: 'flex-start',
+                              height: `${blockHPct}%`,
                               background: isDimmed ? `${g.color}30` : g.color,
                               borderRadius: 7,
                               padding: '4px 5px',
@@ -470,7 +424,8 @@ function AkademijaGrid({ allGroups, classGroups }) {
                             <div style={{
                               fontFamily: 'Bebas Neue, sans-serif', fontSize: 15, lineHeight: 1,
                               color: isDimmed ? `${g.color}80` : 'rgba(8,10,14,0.9)',
-                              letterSpacing: '0.04em',
+                              letterSpacing: '0.04em', overflow: 'hidden',
+                              whiteSpace: 'nowrap', textOverflow: 'ellipsis',
                             }}>
                               {g.name}
                             </div>
@@ -505,7 +460,7 @@ function AkademijaGrid({ allGroups, classGroups }) {
                                   </div>
                                 )}
                                 <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: 'rgba(245,245,240,0.4)', marginTop: 3 }}>
-                                  {timeStr.replace('–', ' – ')}
+                                  {g.time.replace('–', ' – ')}
                                 </div>
                               </div>
                             )}
