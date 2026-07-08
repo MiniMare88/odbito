@@ -644,9 +644,9 @@ const HOME_DAYS = [
 ]
 
 const HOME_BLOCKS = [
-  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pon','tor','sre','cet'], startH: 15, endH: 21 },
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pon','tor','sre','cet'], startH: 15, endH: 21, link: '/vadbe' },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['pet'],                  startH: 10, endH: 20, link: '/rezervacija' },
-  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pet'],                  startH: 19, endH: 21 },
+  { type: 'akademija', label: 'ODBITA AKADEMIJA', sub: 'Urnik treningov',    color: '#fab120', tc: '#080A0E', days: ['pet'],                  startH: 19, endH: 21, link: '/vadbe' },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['sob'],                  startH: 10, endH: 21, link: '/rezervacija' },
   { type: 'openjump',  label: 'OPEN JUMP',        sub: 'Prosto skakanje', color: '#2563a8', tc: '#F5F5F0', days: ['ned'],                  startH: 10, endH: 20, link: '/rezervacija' },
 ]

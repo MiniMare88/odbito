@@ -400,7 +400,7 @@ export async function getAkademijaGroups(req, res) {
 }
 
 export async function createAkademijaGroup(req, res) {
-  const { name, program, age_from, age_to, color_hex, day_schedules,
+  const { name, program, age_from, age_to, level, color_hex, day_schedules,
           trainer_id, assistant_trainer_id, sort_order, notes, is_active,
           // legacy fallback
           age_range, days, time_start, time_end } = req.body
@@ -415,6 +415,7 @@ export async function createAkademijaGroup(req, res) {
   const g = await AkademijaGroup.create({
     name, program,
     age_range: ageRange, age_from: af, age_to: at,
+    level: ['zacetni', 'nadaljevalni', 'pro'].includes(level) ? level : 'zacetni',
     color_hex: color_hex || '#A8C8E8',
     day_schedules: day_schedules || null,
     days: legacy.days || days || [],
@@ -447,7 +448,7 @@ export async function updateAkademijaGroup(req, res) {
   if (af != null && at != null) g.age_range = `${af}–${at} let`
 
   const intFields = ['trainer_id', 'assistant_trainer_id', 'sort_order']
-  const fields = ['name', 'program', 'age_range', 'color_hex', 'days', 'time_start', 'time_end',
+  const fields = ['name', 'program', 'age_range', 'level', 'color_hex', 'days', 'time_start', 'time_end',
                   'trainer_id', 'assistant_trainer_id', 'sort_order', 'is_active', 'notes']
   fields.forEach(f => {
     if (rest[f] !== undefined) g[f] = intFields.includes(f) ? (intOrNull(rest[f]) ?? (f === 'sort_order' ? 0 : null)) : rest[f]

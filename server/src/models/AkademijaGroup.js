@@ -11,6 +11,7 @@ const AkademijaGroup = sequelize.define('AkademijaGroup', {
   age_range:             { type: DataTypes.STRING(30),  allowNull: true },           // legacy: "11–13 let"
   age_from:              { type: DataTypes.INTEGER,     allowNull: true },           // 11
   age_to:                { type: DataTypes.INTEGER,     allowNull: true },           // 13
+  level:                 { type: DataTypes.STRING(20),  allowNull: false, defaultValue: 'zacetni' }, // 'zacetni' | 'nadaljevalni' | 'pro'
   color_hex:             { type: DataTypes.STRING(7),   allowNull: false, defaultValue: '#A8C8E8' },
   days:                  { type: DataTypes.JSONB,       allowNull: false, defaultValue: [] }, // legacy: ["pon","sre"]
   day_schedules:         { type: DataTypes.JSONB,       allowNull: true },           // [{day,start,end}]

@@ -14,14 +14,40 @@ const AK_DAYS = [
 
 // Convert API group → internal shape used by grid
 function apiToGrid(g) {
+  const nums = (g.age_range || '').match(/\d+/g)?.map(Number) || []
   return {
     name:    g.name,
     time:    `${g.time_start}–${g.time_end}`,
     color:   g.color_hex,
     program: g.program,
     age:     g.age_range || '',
+    ageFrom: g.age_from ?? (nums.length ? nums[0] : null),
+    ageTo:   g.age_to   ?? (nums.length ? (nums[1] ?? nums[0]) : null),
+    level:   g.level || 'zacetni',
     days:    g.days || [],
   }
+}
+
+// ── Level + Age filter config ─────────────────────────────────────────
+const LEVELS = [
+  { key: 'zacetni',      label: 'Začetni' },
+  { key: 'nadaljevalni', label: 'Nadaljevalni' },
+  { key: 'pro',          label: 'Pro' },
+]
+
+// Ali skupina ustreza izbrani starosti (število) ali '18plus'
+function matchesAge(g, age) {
+  if (age == null) return true
+  if (g.ageFrom == null && g.ageTo == null) return true // brez podatka → ne skrivaj
+  if (age === '18plus') return (g.ageTo ?? g.ageFrom) >= 18
+  const from = g.ageFrom ?? g.ageTo
+  const to   = g.ageTo ?? g.ageFrom
+  return from <= age && age <= to
+}
+
+function matchesLevel(g, level) {
+  if (!level) return true
+  return (g.level || 'zacetni') === level
 }
 
 // Build CLASS_GROUPS map from flat API array
@@ -179,9 +205,10 @@ function GroupFilter({ selected, onSelect, onClear, allGroups }) {
       {/* Dropdown */}
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 'auto',
+          width: 'min(33vw, 560px)', minWidth: '100%',
           background: '#1a1d24', border: '1px solid var(--border)',
-          borderRadius: 12, zIndex: 50, maxHeight: 280, overflowY: 'auto',
+          borderRadius: 12, zIndex: 50, maxHeight: 320, overflowY: 'auto',
           boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
         }}>
           {results.length === 0 && (
@@ -208,11 +235,11 @@ function GroupFilter({ selected, onSelect, onClear, allGroups }) {
                 {/* color dot */}
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: g.color, flexShrink: 0 }} />
                 {/* text */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 15, color: isSel ? g.color : 'var(--white)', letterSpacing: '0.06em' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 15, color: isSel ? g.color : 'var(--white)', letterSpacing: '0.06em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     Skupina {g.name}
                   </div>
-                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: 'rgba(245,245,240,0.45)', fontWeight: 600 }}>
+                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: 'rgba(245,245,240,0.45)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {g.program}{g.age ? ` · ${g.age}` : ''}
                   </div>
                 </div>
@@ -259,16 +286,124 @@ function GroupFilter({ selected, onSelect, onClear, allGroups }) {
   )
 }
 
+// ── Age dropdown ──────────────────────────────────────────────────────
+
+const AGE_OPTIONS = [
+  { val: null,      label: 'Vse starosti' },
+  ...Array.from({ length: 15 }, (_, i) => ({ val: i + 4, label: `${i + 4} let` })), // 4–18
+  { val: '18plus',  label: '18+ let' },
+]
+
+function AgeDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const boxRef = useRef(null)
+  useEffect(() => {
+    const h = e => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+  const current = AGE_OPTIONS.find(o => o.val === value) || AGE_OPTIONS[0]
+  const active = value != null
+
+  return (
+    <div ref={boxRef} style={{ position: 'relative', minWidth: 150 }}>
+      <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--gray)' }}>
+        Starost otroka
+      </div>
+      <button type="button" onClick={() => setOpen(o => !o)} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%',
+        background: 'var(--dark2)', border: active ? '1.5px solid var(--accent)' : '1.5px solid var(--border)',
+        borderRadius: 10, padding: '10px 14px', cursor: 'pointer', transition: 'border-color 0.2s',
+        fontFamily: 'Barlow Condensed, sans-serif', fontSize: 15, fontWeight: 600,
+        color: active ? 'var(--accent)' : 'var(--white)',
+      }}>
+        <span>{current.label}</span>
+        <span style={{ fontSize: 11, opacity: 0.6 }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+          background: '#1a1d24', border: '1px solid var(--border)', borderRadius: 12,
+          zIndex: 50, maxHeight: 280, overflowY: 'auto', boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+        }}>
+          {AGE_OPTIONS.map(o => {
+            const isSel = o.val === value
+            return (
+              <button key={String(o.val)} onClick={() => { onChange(o.val); setOpen(false) }} style={{
+                display: 'block', width: '100%', textAlign: 'left', padding: '9px 14px',
+                background: isSel ? 'rgba(250,177,32,0.12)' : 'transparent', border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer',
+                fontFamily: 'Barlow Condensed, sans-serif', fontSize: 14, fontWeight: 600,
+                color: isSel ? 'var(--accent)' : 'var(--white)',
+              }}
+              onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+              onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent' }}>
+                {o.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Level pills ───────────────────────────────────────────────────────
+
+function LevelPills({ value, onChange }) {
+  return (
+    <div>
+      <div className="font-condensed text-xs font-bold tracking-widest uppercase mb-2" style={{ color: 'var(--gray)' }}>
+        Nivo
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button type="button" onClick={() => onChange(null)} style={pillStyle(!value)}>Vse</button>
+        {LEVELS.map(l => (
+          <button key={l.key} type="button" onClick={() => onChange(value === l.key ? null : l.key)} style={pillStyle(value === l.key)}>
+            {l.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function pillStyle(active) {
+  return {
+    padding: '10px 16px', borderRadius: 10,
+    border: active ? '1.5px solid var(--accent)' : '1.5px solid var(--border)',
+    background: active ? 'rgba(250,177,32,0.12)' : 'var(--dark2)',
+    color: active ? 'var(--accent)' : 'var(--gray)',
+    fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 14,
+    letterSpacing: '0.06em', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
+  }
+}
+
 // ── Akademija Grid (Desktop) ──────────────────────────────────────────
 
 function AkademijaGrid({ allGroups, classGroups }) {
   const [hovered, setHovered]       = useState(null)
   const [filteredGroup, setFiltered] = useState(null)
+  const [ageFilter, setAgeFilter]   = useState(null)   // null | number | '18plus'
+  const [levelFilter, setLevelFilter] = useState(null) // null | 'zacetni' | ...
   const navigate = useNavigate()
 
   const handleSelect = (g) => setFiltered(g)
 
   const visibleDays = AK_DAYS  // vseh 5 dni na desktopu
+
+  // Uporabi starostni + nivo filter na skupine
+  const fAllGroups = useMemo(
+    () => allGroups.filter(g => matchesAge(g, ageFilter) && matchesLevel(g, levelFilter)),
+    [allGroups, ageFilter, levelFilter]
+  )
+  const fClassGroups = useMemo(() => buildClassGroups(fAllGroups), [fAllGroups])
+  const activeFilters = ageFilter != null || levelFilter != null
+
+  // Če izbrana skupina po iskalniku ne ustreza filtroma, jo počisti
+  useEffect(() => {
+    if (filteredGroup && !fAllGroups.some(g => g.name === filteredGroup.name)) setFiltered(null)
+  }, [fAllGroups, filteredGroup])
 
   return (
     <div className="hidden lg:block select-none">
@@ -279,9 +414,29 @@ function AkademijaGrid({ allGroups, classGroups }) {
           selected={filteredGroup}
           onSelect={handleSelect}
           onClear={() => setFiltered(null)}
-          allGroups={allGroups}
+          allGroups={fAllGroups}
         />
+        <AgeDropdown value={ageFilter} onChange={setAgeFilter} />
+        <LevelPills value={levelFilter} onChange={setLevelFilter} />
+        {activeFilters && (
+          <button type="button" onClick={() => { setAgeFilter(null); setLevelFilter(null) }} style={{
+            padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)',
+            background: 'transparent', color: 'var(--gray)', cursor: 'pointer',
+            fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap',
+          }}>
+            ✕ Počisti filtre
+          </button>
+        )}
       </div>
+
+      {/* Rezultat filtra */}
+      {activeFilters && (
+        <div className="mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, color: fAllGroups.length ? 'var(--accent)' : '#e07878', letterSpacing: '0.04em' }}>
+          {fAllGroups.length
+            ? `Prikazanih ${fAllGroups.length} skupin, ki ustrezajo izbiri.`
+            : 'Za izbrano starost/nivo ni skupin. Poskusi drugo kombinacijo.'}
+        </div>
+      )}
 
       {/* ── Header (5 dni) ── */}
       <div className="flex items-stretch mb-3" style={{ gap: '6px' }}>
@@ -328,7 +483,7 @@ function AkademijaGrid({ allGroups, classGroups }) {
         {/* 5 Day columns */}
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
           {visibleDays.map(day => {
-            const slots = getStartSlots(day.key, classGroups)
+            const slots = getStartSlots(day.key, fClassGroups)
             const dayHasGroup = filteredGroup ? filteredGroup.days.includes(day.key) : true
 
             return (
@@ -482,7 +637,7 @@ function AkademijaGrid({ allGroups, classGroups }) {
           Legenda programov
         </div>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
-          {[...new Map(allGroups.map(g => [g.program, g])).values()].map(g => (
+          {[...new Map(fAllGroups.map(g => [g.program, g])).values()].map(g => (
             <div key={g.program} className="flex items-center gap-2">
               <div style={{ width: 10, height: 10, borderRadius: 3, background: g.color, flexShrink: 0 }} />
               <span className="font-condensed text-xs" style={{ color: 'var(--gray)' }}>

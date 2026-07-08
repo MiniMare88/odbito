@@ -9,6 +9,12 @@ const DAYS_OPTIONS = [
   { key: 'pet', label: 'PET' },
 ]
 
+const LEVEL_OPTIONS = [
+  { key: 'zacetni',      label: 'Začetni' },
+  { key: 'nadaljevalni', label: 'Nadaljevalni' },
+  { key: 'pro',          label: 'Pro' },
+]
+
 const PRESET_COLORS = [
   '#A8C8E8','#6B9FD4','#5A8FCA','#7BBFB8','#88C47C',
   '#E8A87B','#D47878','#E07878','#C87B7B','#909AAA','#7EC87E',
@@ -18,6 +24,7 @@ const PRESET_COLORS = [
 const EMPTY_FORM = {
   name: '', program: '',
   age_from: '', age_to: '',
+  level: 'zacetni',
   color_hex: '#A8C8E8',
   day_schedules: [],    // [{day:'pon', start:'15:00', end:'16:00'}]
   trainer_id: '', assistant_trainer_id: '',
@@ -36,6 +43,7 @@ function groupToForm(g) {
     program: g.program || '',
     age_from: g.age_from ?? (g.age_range ? g.age_range.match(/\d+/)?.[0] || '' : ''),
     age_to:   g.age_to   ?? (g.age_range ? g.age_range.match(/\d+/g)?.[1] || '' : ''),
+    level: g.level || 'zacetni',
     color_hex: g.color_hex || '#A8C8E8',
     day_schedules: day_schedules || [],
     trainer_id: g.trainer_id || '',
@@ -133,8 +141,8 @@ function GroupForm({ initial, onSave, onCancel, loading, staffUsers }) {
         </div>
       </div>
 
-      {/* Row 2: age from / age to / sort_order */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+      {/* Row 2: age from / age to / level / sort_order */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr 0.8fr', gap: 12 }}>
         <div>
           {lbl('Starost — od (let)')}
           <select value={form.age_from} onChange={e => set('age_from', e.target.value ? Number(e.target.value) : '')}
@@ -149,6 +157,13 @@ function GroupForm({ initial, onSave, onCancel, loading, staffUsers }) {
             style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
             <option value="">–</option>
             {ageOptions.slice(1).map(n => <option key={n} value={n}>{n} let</option>)}
+          </select>
+        </div>
+        <div>
+          {lbl('Nivo')}
+          <select value={form.level || 'zacetni'} onChange={e => set('level', e.target.value)}
+            style={{ ...IS, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+            {LEVEL_OPTIONS.map(l => <option key={l.key} value={l.key}>{l.label}</option>)}
           </select>
         </div>
         <div>
@@ -542,6 +557,15 @@ export default function SkupineTab() {
                     {g.age_range && (
                       <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--gray)', marginLeft: 6 }}>· {g.age_range}</span>
                     )}
+                    <span style={{
+                      marginLeft: 8, fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700,
+                      fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '1px 7px', borderRadius: 5,
+                      background: 'rgba(250,177,32,0.12)', border: '1px solid rgba(250,177,32,0.3)',
+                      color: 'var(--accent)',
+                    }}>
+                      {LEVEL_OPTIONS.find(l => l.key === (g.level || 'zacetni'))?.label}
+                    </span>
                   </div>
                   {g.notes && (
                     <div style={{ fontFamily: 'Barlow, sans-serif', fontSize: 11, color: 'rgba(245,245,240,0.35)', marginTop: 1 }}>

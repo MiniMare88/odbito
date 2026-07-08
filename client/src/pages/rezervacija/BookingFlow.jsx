@@ -131,6 +131,19 @@ function BackBtn({ onClick }) {
   )
 }
 
+// Gumb "Naprej" — enak izgled kot BackBtn
+function NextBtn({ onClick }) {
+  return (
+    <button onClick={onClick}
+      className="font-condensed font-black text-sm uppercase tracking-widest mb-6 flex items-center gap-2 px-4 py-2 rounded-xl"
+      style={{ color: 'var(--white)', background: 'var(--dark2)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--white)' }}>
+      Naprej →
+    </button>
+  )
+}
+
 // ── Order Summary sidebar ─────────────────────────────────────────────────────
 
 function OrderSummary({ day, slot, visitors, extras }) {
@@ -399,7 +412,10 @@ function ScheduleStep({ day, slot, visitors, onSelectDay, onSelectSlot, onBack, 
 
   return (
     <div>
-      <BackBtn onClick={onBack} />
+      <div className="flex items-center justify-between gap-3">
+        <BackBtn onClick={onBack} />
+        {day && slot && <NextBtn onClick={onConfirm} />}
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-8">
         <span className="font-condensed text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full"
@@ -566,7 +582,15 @@ function ScheduleStep({ day, slot, visitors, onSelectDay, onSelectSlot, onBack, 
           cursor: (day && slot) ? 'pointer' : 'not-allowed', fontSize: '15px', letterSpacing: '0.12em',
           boxShadow: (day && slot) ? '0 4px 20px rgba(250,177,32,0.25)' : 'none',
         }}>
-        {!day ? 'IZBERI DAN' : !slot ? 'IZBERI URO' : `NAPREJ → ${fmtDate(day)} · ${slot.start} – ${slot.end}`}
+        {!day ? 'IZBERI DAN' : !slot ? 'IZBERI URO' : (
+          <span className="flex items-center justify-center flex-wrap gap-x-3 gap-y-1">
+            <span>NAPREJ</span>
+            <span style={{ opacity: 0.55 }}>→</span>
+            <span style={{ color: '#fff' }}>{fmtDate(day)}</span>
+            <span style={{ opacity: 0.55 }}>→</span>
+            <span>{slot.start} – {slot.end}</span>
+          </span>
+        )}
       </button>
     </div>
   )
@@ -1202,6 +1226,9 @@ export default function BookingFlow() {
   }
 
   useEffect(() => { if (user && step === 'auth') setStep('confirm') }, [user])
+
+  // Ob vsakem koraku skoči na vrh strani (da ni treba scrollati gor)
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }) }, [step])
 
   const showSidebar = step !== 'visitors'
   const percent = progressPercent(step, purchased)
