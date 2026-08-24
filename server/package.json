@@ -10,9 +10,12 @@
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo:all",
     "db:seed": "sequelize-cli db:seed:all",
-    "db:reset": "npm run db:migrate:undo && npm run db:migrate && npm run db:seed"
+    "db:reset": "npm run db:migrate:undo && npm run db:migrate && npm run db:seed",
+    "composio:connect": "node scripts/composioConnect.js",
+    "composio:call": "node scripts/composioFirstCall.js"
   },
   "dependencies": {
+    "@composio/core": "^0.17.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
