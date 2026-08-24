@@ -19,35 +19,35 @@ export function getComposioClient() {
 }
 
 /**
- * Get an existing Composio-managed GitHub auth config, or create one.
- * Composio-managed auth uses Composio's own OAuth app, so no GitHub
- * OAuth app registration is needed to get started.
+ * Get an existing Composio-managed auth config for a toolkit (e.g. 'github',
+ * 'gmail', 'slack'), or create one. Composio-managed auth uses Composio's
+ * own OAuth app, so no app registration is needed on our side to get started.
  */
-export async function getOrCreateGithubAuthConfig() {
+export async function getOrCreateAuthConfig(toolkitSlug) {
   const composio = getComposioClient()
 
   const existing = await composio.authConfigs.list({
-    toolkit: 'github',
+    toolkit: toolkitSlug,
     isComposioManaged: true,
   })
   if (existing.items.length > 0) {
     return existing.items[0]
   }
 
-  return composio.authConfigs.create('github', {
+  return composio.authConfigs.create(toolkitSlug, {
     type: 'use_composio_managed_auth',
-    name: 'Odbito - GitHub (Composio managed)',
+    name: `Odbito - ${toolkitSlug} (Composio managed)`,
   })
 }
 
 /**
- * Start a GitHub connection for a user. Returns a redirect URL the user
- * must open to approve the OAuth connection, plus the connected account id
- * to pass to waitForGithubConnection().
+ * Start a connection for a user against a given toolkit. Returns a redirect
+ * URL the user must open to approve the OAuth connection, plus the connected
+ * account id to pass to waitForConnection().
  */
-export async function connectGithub(userId) {
+export async function connectToolkit(userId, toolkitSlug) {
   const composio = getComposioClient()
-  const authConfig = await getOrCreateGithubAuthConfig()
+  const authConfig = await getOrCreateAuthConfig(toolkitSlug)
 
   const connectionRequest = await composio.connectedAccounts.link(userId, authConfig.id)
 
@@ -60,50 +60,52 @@ export async function connectGithub(userId) {
 /**
  * Poll until a connected account becomes ACTIVE (or throw on failure/timeout).
  */
-export async function waitForGithubConnection(connectedAccountId, timeoutMs = 120_000) {
+export async function waitForConnection(connectedAccountId, timeoutMs = 120_000) {
   const composio = getComposioClient()
   return composio.connectedAccounts.waitForConnection(connectedAccountId, timeoutMs)
 }
 
 /**
- * Look up real GitHub tool slugs by search term instead of hardcoding one -
- * Composio's toolkit catalog changes independently of this SDK version, so
+ * Look up real tool slugs for a toolkit by search term instead of hardcoding
+ * one - Composio's catalog changes independently of this SDK version, so
  * discovering the slug live is more reliable than guessing it.
  */
-export async function findGithubTools(search, limit = 3) {
+export async function findTools(toolkitSlug, search, limit = 5) {
   const composio = getComposioClient()
-  const tools = await composio.tools.getRawComposioTools({
-    toolkits: ['github'],
+  return composio.tools.getRawComposioTools({
+    toolkits: [toolkitSlug],
     search,
     limit,
   })
-  return tools
 }
 
-const FIRST_CALL_TOOL_SLUG = 'GITHUB_GET_THE_AUTHENTICATED_USER'
-
 /**
- * The actual "real tool call": fetch the authenticated GitHub user profile
- * for whichever account this Composio userId has connected. Verifies the
- * slug still exists in the live catalog rather than trusting the constant
- * blindly, since Composio's toolkits evolve independently of this SDK.
+ * Execute a tool by exact slug for a connected user. Verifies the slug still
+ * exists in the live catalog rather than trusting a hardcoded constant blindly.
  */
-export async function callFirstGithubTool(userId) {
+export async function callTool(toolSlug, userId, args = {}) {
   const composio = getComposioClient()
-  const [tool] = await composio.tools.getRawComposioTools({
-    tools: [FIRST_CALL_TOOL_SLUG],
-  })
+  const [tool] = await composio.tools.getRawComposioTools({ tools: [toolSlug] })
   if (!tool) {
-    throw new Error(`Tool ${FIRST_CALL_TOOL_SLUG} not found in the Composio catalog`)
+    throw new Error(`Tool ${toolSlug} not found in the Composio catalog`)
   }
 
   const result = await composio.tools.execute(tool.slug, {
     userId,
-    arguments: {},
+    arguments: args,
     // Manual (non-agentic) execution requires pinning a toolkit version;
     // "latest" always resolves at call time so this stays safe to skip.
     dangerouslySkipVersionCheck: true,
   })
 
   return { slug: tool.slug, result }
+}
+
+export const FIRST_CALL_TOOL_SLUG = 'GITHUB_GET_THE_AUTHENTICATED_USER'
+
+/**
+ * The GitHub demo call used in scripts/composioFirstCall.js.
+ */
+export async function callFirstGithubTool(userId) {
+  return callTool(FIRST_CALL_TOOL_SLUG, userId)
 }
