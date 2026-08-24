@@ -80,20 +80,29 @@ export async function findGithubTools(search, limit = 3) {
   return tools
 }
 
+const FIRST_CALL_TOOL_SLUG = 'GITHUB_GET_THE_AUTHENTICATED_USER'
+
 /**
- * The actual "real tool call": look up a read-only "who am I" GitHub tool
- * and execute it for whichever account this Composio userId has connected.
+ * The actual "real tool call": fetch the authenticated GitHub user profile
+ * for whichever account this Composio userId has connected. Verifies the
+ * slug still exists in the live catalog rather than trusting the constant
+ * blindly, since Composio's toolkits evolve independently of this SDK.
  */
 export async function callFirstGithubTool(userId) {
-  const [tool] = await findGithubTools('get the authenticated user', 1)
+  const composio = getComposioClient()
+  const [tool] = await composio.tools.getRawComposioTools({
+    tools: [FIRST_CALL_TOOL_SLUG],
+  })
   if (!tool) {
-    throw new Error('Could not find a matching GitHub tool in the Composio catalog')
+    throw new Error(`Tool ${FIRST_CALL_TOOL_SLUG} not found in the Composio catalog`)
   }
 
-  const composio = getComposioClient()
   const result = await composio.tools.execute(tool.slug, {
     userId,
     arguments: {},
+    // Manual (non-agentic) execution requires pinning a toolkit version;
+    // "latest" always resolves at call time so this stays safe to skip.
+    dangerouslySkipVersionCheck: true,
   })
 
   return { slug: tool.slug, result }
